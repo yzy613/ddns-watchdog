@@ -1,0 +1,31 @@
+language: go
+
+go:
+  - 1.14.x
+  # 使用最新 Go 源码运行，但是测试时间会大大延长
+  #- master
+
+os:
+  - linux
+  
+# 每次Git提交后触发
+#script:
+
+# 发布前触发
+before_deploy:
+  - chmod +x ./build.sh && ./build.sh
+
+# 发布触发
+deploy:
+  provider: releases
+  token:
+    secure: ${TOKEN}
+  # 官方说要把 skip_cleanup 替换成 cleanup
+  skip_cleanup: true
+  cleanup: false
+  file:
+    - linux_amd64.tar.gz
+    - windows_amd64.tar.gz
+  on:
+    tags: true
+    all_branches: true
