@@ -19,6 +19,7 @@ before_deploy:
 # 发布触发
 deploy:
   provider: releases
+  edge: true
   token: ${TOKEN}
   cleanup: false
   file:
