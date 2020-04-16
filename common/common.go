@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -35,4 +36,29 @@ func MarshalAndSave(content interface{}, filePath string) error {
 		return err
 	}
 	return nil
+}
+
+func Struct2Map(src interface{}) map[string]interface{} {
+	dst := make(map[string]interface{})
+	// 原始复制
+	/*key := reflect.TypeOf(src)
+	value := reflect.ValueOf(src)
+	for i := 0; i < key.NumField(); i++ {
+		if value.Field(i).Interface() == "" {
+			continue
+		}
+		dst[key.Field(i).Name] = value.Field(i).Interface()
+	}
+	return dst*/
+
+	// 以 json 格式复制
+	tmpJson, getErr := json.Marshal(src)
+	if getErr != nil {
+		fmt.Println(getErr)
+	}
+	getErr = json.Unmarshal(tmpJson, &dst)
+	if getErr != nil {
+		fmt.Println(getErr)
+	}
+	return dst
 }

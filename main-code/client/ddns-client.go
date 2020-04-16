@@ -5,6 +5,7 @@ import (
 	"ddns/common"
 	"flag"
 	"fmt"
+	"io/ioutil"
 )
 
 var forcibly = flag.Bool("f", false, "强制刷新 DNS 解析记录")
@@ -36,17 +37,28 @@ func main() {
 		}
 		if conf.EnableDdns {
 			if conf.DNSPod {
-				dps := common.DNSPodSecret{}
-				getErr = common.LoadAndUnmarshal("conf/dnspod.json", &dps)
+				dpc:= client.DNSPodConf{}
+				getErr = common.LoadAndUnmarshal("conf/dnspod.json", &dpc)
 				if getErr != nil {
 					fmt.Println(getErr)
 				}
-				if dps.SecretId == "" || dps.SecretKey == "" {
-					fmt.Println("请打开配置文件 dnspod.json 填入你的 SecretId 或 SecretKey")
-					common.MarshalAndSave(dps, "conf/dnspod.json")
+				if dpc.Id == "" || dpc.Token == "" {
+					fmt.Println("请打开配置文件 dnspod.json 填入你的 Id 或 Token")
+					getErr = common.MarshalAndSave(dpc, "conf/dnspod.json")
+					if getErr != nil {
+						fmt.Println(getErr)
+					}
 					return
 				}
-				client.DNSPod(dps)
+				DPContent, getErr := client.DNSPod(dpc, ipAddr)
+				if getErr != nil {
+					fmt.Println(getErr)
+				}
+				//getErr = common.MarshalAndSave(DPContent, "conf/post.json")
+				getErr = ioutil.WriteFile("conf/recv.json", DPContent, 0666)
+				if getErr != nil {
+					fmt.Println(getErr)
+				}
 			}
 		}
 	} else {

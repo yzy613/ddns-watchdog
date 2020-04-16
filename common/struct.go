@@ -14,8 +14,3 @@ type ClientConf struct {
 	EnableDdns bool   `json:"enable_ddns"`
 	DNSPod     bool   `json:"dnspod"`
 }
-
-type DNSPodSecret struct {
-	SecretId  string `json:"secret_id"`
-	SecretKey string `json:"secret_key"`
-}
