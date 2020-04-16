@@ -5,7 +5,7 @@
 DDNS 的服务端和客户端
 
 ## 客户端 用法
-- 直接运行
+- `./ddns-client` 直接运行
 
 - `./ddns-client -f` 强制刷新 DNS 解析记录
 
