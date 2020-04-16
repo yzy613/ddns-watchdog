@@ -1,11 +1,17 @@
-# DDNS
-![](https://travis-ci.org/yzy613/ddns.svg?branch=master)
+# 动态域名解析
+![](https://travis-ci.com/yzy613/ddns.svg?branch=master)
 
-[README](https://github.com/yzy613/ddns/blob/master/README.md) | [中文文档](https://github.com/yzy613/ddns/blob/master/README_zh.md)
 
-ddns server and client
+DDNS 的服务端和客户端
 
-## Usage
-- `Run directly`
+## 客户端 用法
+- `直接运行`
 
-- `with systemd`
+- `./ddns-client -f` 强制刷新 DNS 解析记录
+
+- `加入计划任务定时执行`
+
+## 服务端 用法
+- `./ddns-server -install` 安装服务
+
+- 用 `systemctl start ddns-server` 启动

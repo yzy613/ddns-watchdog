@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-var forcibly = flag.Bool("f", false, "强制刷新 DNS 解析")
+var forcibly = flag.Bool("f", false, "强制刷新 DNS 解析记录")
 
 func main() {
 	flag.Parse()
