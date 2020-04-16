@@ -9,7 +9,8 @@ os:
   - linux
   
 # 每次Git提交后触发
-#script:
+script:
+  - chmod +x ./build.sh && ./build.sh
 
 # 发布前触发
 before_deploy:
@@ -18,10 +19,7 @@ before_deploy:
 # 发布触发
 deploy:
   provider: releases
-  token:
-    secure: ${TOKEN}
-  # 官方说要把 skip_cleanup 替换成 cleanup
-  skip_cleanup: true
+  token: ${TOKEN}
   cleanup: false
   file:
     - linux_amd64_server.tar.gz
