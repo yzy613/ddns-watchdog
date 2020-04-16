@@ -1,80 +1,79 @@
 package main
 
 import (
+	"ddns/common"
+	"ddns/server"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
-	"strings"
-	"runtime"
 )
 
-type ipInfoFormat struct {
-	Ip string `json:"ip"`
-}
+var (
+	installMode   = flag.Bool("install", false, "安装到系统")
+	uninstallMode = flag.Bool("uninstall", false, "卸载服务")
+)
 
-type confFormat struct {
-	Port string `json:"port"`
+func beforeStart() {
+	flag.Parse()
+	if *installMode == true {
+		server.Install()
+		return
+	}
+	if *uninstallMode == true {
+		server.Uninstall()
+		return
+	}
 }
 
 func main() {
+	beforeStart()
+
 	// 加载配置
-	var (
-		confSrc []byte
-		getErr error
-	)
-	if runtime.GOOS == "windows" {
-		confSrc, getErr = ioutil.ReadFile("./conf/server.json")
+	var getErr error
+	conf := common.ServerConf{}
+	if server.IsWindows() == true {
+		getErr = common.LoadAndUnmarshal("./conf/server.json", &conf)
 	} else {
-		confSrc, getErr = ioutil.ReadFile("/opt/ddns/conf/server.json")
+		getErr = common.LoadAndUnmarshal(server.ConfPath+"server.json", &conf)
 	}
 	if getErr != nil {
 		fmt.Println(getErr)
 	}
-	conf := confFormat{}
-	getErr = json.Unmarshal(confSrc, &conf)
+	if conf.Port == "" {
+		conf.Port = ":10032"
+	}
+	if server.IsWindows() == true {
+		getErr = common.MarshalAndSave(conf, "./conf/server.json")
+	} else {
+		getErr = common.MarshalAndSave(conf, server.ConfPath+"server.json")
+	}
 	if getErr != nil {
 		fmt.Println(getErr)
 	}
 
 	// 处理请求
 	ddnsServerHandler := func(w http.ResponseWriter, req *http.Request) {
-		// 获取IP(:port)
-		var ipFinal string
-		ipFinal = req.Header.Get("X-Real-IP")
-		if ipFinal == "" {
-			ipFinal = req.Header.Get("X-Forwarded-For")
-		}
-		if ipFinal == "" {
-			ipSrc := req.RemoteAddr
-			// 对ip:port切片
-			if req.RemoteAddr[0] == '[' {
-				// IPv6
-				ipFinal = strings.Split(ipSrc, "]:")[0]
-				ipFinal = fmt.Sprint(ipFinal, "]")
-			} else {
-				// IPv4
-				ipFinal = strings.Split(req.RemoteAddr, ":")[0]
-			}
-		}
-
 		// 编码为 json 并发送
-		ipInfo := ipInfoFormat{Ip: ipFinal}
-		figJson, getErr := json.Marshal(ipInfo)
+		ipInfo := common.IpInfoFormat{Ip: server.GetIP(req)}
+		sendJson, getErr := json.Marshal(ipInfo)
 		if getErr != nil {
 			fmt.Println(getErr)
 		}
-		io.WriteString(w, string(figJson))
+		_, getErr = io.WriteString(w, string(sendJson))
+		if getErr != nil {
+			fmt.Println(getErr)
+		}
 	}
 
 	// 路径绑定处理变量
 	http.HandleFunc("/", ddnsServerHandler)
 
 	// 启动监听
-	if conf.Port == "" {
-		conf.Port = ":10032"
-	}
 	fmt.Println("Work on ", conf.Port)
-	http.ListenAndServe(conf.Port, nil)
+	getErr = http.ListenAndServe(conf.Port, nil)
+	if getErr != nil {
+		fmt.Println(getErr)
+	}
 }
