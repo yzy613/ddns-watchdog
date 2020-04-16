@@ -9,7 +9,7 @@ DDNS 的服务端和客户端
 
 - `./ddns-client -f` 强制刷新 DNS 解析记录
 
-- `加入计划任务定时执行`
+- 加入计划任务定时执行
 
 ## 服务端 用法
 - `./ddns-server -install` 安装服务
