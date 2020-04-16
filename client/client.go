@@ -3,23 +3,11 @@ package client
 import (
 	"ddns/common"
 	"encoding/json"
-	tcommon "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
-	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 	"io/ioutil"
 	"net/http"
 )
 
 func DNSPod(dps common.DNSPodSecret) {
-	credential := tcommon.NewCredential(dps.SecretId, dps.SecretKey)
-
-	cpf := profile.NewClientProfile()
-	cpf.HttpProfile.ReqMethod = "GET"
-	cpf.HttpProfile.ReqTimeout = 5
-	cpf.SignMethod = "HmacSHA1"
-
-	if credential == nil {
-		return
-	}
 }
 
 func GetOwnIP(webAddr string) (ipAddr string, err error) {
