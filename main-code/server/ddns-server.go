@@ -13,26 +13,27 @@ import (
 var (
 	installMode   = flag.Bool("install", false, "安装到系统")
 	uninstallMode = flag.Bool("uninstall", false, "卸载服务")
+	version = flag.Bool("version", false, "查看当前版本")
 )
 
-func beforeStart() {
+func main() {
 	flag.Parse()
-	if *installMode == true {
+	switch {
+	case *installMode:
 		server.Install()
 		return
-	}
-	if *uninstallMode == true {
+	case *uninstallMode:
 		server.Uninstall()
 		return
 	}
-}
-
-func main() {
-	beforeStart()
 
 	// 加载配置
-	var getErr error
-	conf := common.ServerConf{}
+	conf := server.ServerConf{}
+	getErr := common.IsDirExistAndCreate("./conf")
+	if getErr != nil {
+		fmt.Println(getErr)
+		return
+	}
 	if server.IsWindows() == true {
 		getErr = common.LoadAndUnmarshal("./conf/server.json", &conf)
 	} else {
@@ -43,21 +44,29 @@ func main() {
 	}
 	if conf.Port == "" {
 		conf.Port = ":10032"
+		conf.IsRoot = false
+		conf.RootServerAddr = "https://yzyweb.cn/ddns"
+		if server.IsWindows() == true {
+			getErr = common.MarshalAndSave(conf, "./conf/server.json")
+		} else {
+			getErr = common.MarshalAndSave(conf, server.ConfPath+"server.json")
+		}
+		if getErr != nil {
+			fmt.Println(getErr)
+		}
 	}
-	if server.IsWindows() == true {
-		getErr = common.MarshalAndSave(conf, "./conf/server.json")
-	} else {
-		getErr = common.MarshalAndSave(conf, server.ConfPath+"server.json")
-	}
-	if getErr != nil {
-		fmt.Println(getErr)
+	if *version {
+		server.CheckLatestVersion(conf)
+		return
 	}
 
-	// 处理请求
+
 	ddnsServerHandler := func(w http.ResponseWriter, req *http.Request) {
-		// 编码为 json 并发送
-		ipInfo := common.IpInfoFormat{Ip: server.GetIP(req)}
-		sendJson, getErr := json.Marshal(ipInfo)
+		info := common.PublicInfo{
+			IP:            server.GetClientIP(req),
+			LatestVersion: server.GetLatestVersion(conf),
+		}
+		sendJson, getErr := json.Marshal(info)
 		if getErr != nil {
 			fmt.Println(getErr)
 		}

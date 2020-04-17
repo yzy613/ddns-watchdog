@@ -1,16 +1,6 @@
 package common
 
-type IpInfoFormat struct {
-	Ip string `json:"ip"`
-}
-
-type ServerConf struct {
-	Port string `json:"port"`
-}
-
-type ClientConf struct {
-	WebAddr    string `json:"web_addr"`
-	LastIP     string `json:"last_ip"`
-	EnableDdns bool   `json:"enable_ddns"`
-	DNSPod     bool   `json:"dnspod"`
+type PublicInfo struct {
+	IP            string `json:"ip"`
+	LatestVersion string `json:"latest_version"`
 }

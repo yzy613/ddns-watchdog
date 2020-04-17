@@ -7,9 +7,20 @@ import (
 	"os"
 )
 
+func IsDirExistAndCreate(dirPath string) (err error) {
+	_, err = os.Stat(dirPath)
+	if err != nil || !os.IsExist(err) {
+		err = os.MkdirAll(dirPath, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+	return
+}
+
 func LoadAndUnmarshal(filePath string, dst interface{}) error {
 	_, getErr := os.Stat(filePath)
-	if getErr != nil {
+	if getErr != nil || os.IsExist(getErr) {
 		_, getErr = os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0664)
 		if getErr != nil {
 			return getErr
@@ -31,7 +42,7 @@ func MarshalAndSave(content interface{}, filePath string) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filePath, jsonContent, 0664)
+	err = ioutil.WriteFile(filePath, jsonContent, 0666)
 	if err != nil {
 		return err
 	}
