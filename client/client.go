@@ -1,70 +1,69 @@
 package client
 
 import (
-	"bytes"
 	"ddns/common"
 	"encoding/json"
+	simplejson "github.com/bitly/go-simplejson"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
-func PublicParameterInit(dps DNSPodConf) (pp PublicParameter) {
-	pp = PublicParameter{
-		LoginToken:   dps.Id + "," + dps.Token,
-		Format:       "json",
-		Lang:         "cn",
-		ErrorOnEmpty: "no",
-	}
+func PublicRequestInit(dpc DNSPodConf) (pp string) {
+	pp = "login_token=" + dpc.Id + "," + dpc.Token +
+		"&format=" + "json" +
+		"&lang=" + "cn" +
+		"&error_on_empty=" + "no"
 	return
 }
 
-func RecordListInit(dpc DNSPodConf) (ri RecordList) {
-	ri = RecordList{
-		Domain:    dpc.Domain,
-		SubDomain: dpc.SubDomain,
-	}
+func RecordListInit(dpc DNSPodConf) (ri string) {
+	ri = "domain=" + dpc.Domain +
+		"&sub_domain=" + dpc.SubDomain
 	return
 }
 
-func RecordModifyInit(dpc DNSPodConf, ipAddr string) (rm RecordModify) {
-	rm = RecordModify{
-		Domain:     dpc.Domain,
-		RecordId:   dpc.RecordId,
-		RecordType: "A",
-		RecordLine: "默认",
-		Value:      ipAddr,
-	}
+func RecordDdnsInit(dpc DNSPodConf, ipAddr string) (rm string) {
+	rm = "domain=" + dpc.Domain +
+		"&record_id=" + "0" +
+		"&sub_domain=" + dpc.SubDomain +
+		"&record_line=" + "默认" +
+		"&record_line_id=" + "" +
+		"&value=" + ipAddr
 	return
 }
 
-func DNSPod(dpc DNSPodConf, ipAddr string) ([]byte, error) {
-	postContent := common.Struct2Map(PublicParameterInit(dpc))
-	tmpMap := common.Struct2Map(RecordListInit(dpc))
-	for key, value := range tmpMap {
-		postContent[key] = value
-	}
-/*
-	stringContent := ""
-	for key, value := range postContent {
-		stringContent += fmt.Sprint()
-	}
-*/
-	// 查询解析记录列表
-	postJson, err := json.Marshal(postContent)
+func Postman(url, src string) (dst []byte, err error) {
+	httpClient := &http.Client{}
+	req, err := http.NewRequest("POST", url, strings.NewReader(src))
 	if err != nil {
 		return nil, err
 	}
-	res, err := http.Post("https://dnsapi.cn/Record.List", "application/json;charset=utf-8", bytes.NewReader(postJson))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("User-Agent", "ddns/0.0.1-beta ()")
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
 	defer res.Body.Close()
+	dst, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
-	recvJson, err := ioutil.ReadAll(res.Body)
+	return
+}
+
+func DNSPod(dpc DNSPodConf, ipAddr string) error {
+	postContent := PublicRequestInit(dpc)
+	postContent = postContent + "&" + RecordListInit(dpc)
+	recvJson, err := Postman("https://dnsapi.cn/Record.List", postContent)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	// 发送新的解析
-	return recvJson, nil
+	jsonObj, err := simplejson.NewJson(recvJson)
+	// undone
+	jsonObj.Get("status")
+	return nil
 }
 
 func GetOwnIP(webAddr string) (ipAddr string, err error) {
