@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	installMode   = flag.Bool("install", false, "安装到系统")
+	installMode   = flag.Bool("install", false, "安装服务")
 	uninstallMode = flag.Bool("uninstall", false, "卸载服务")
-	version = flag.Bool("version", false, "查看当前版本")
+	version       = flag.Bool("version", false, "查看当前版本")
 )
 
 func main() {
@@ -41,11 +41,20 @@ func main() {
 	}
 	if getErr != nil {
 		fmt.Println(getErr)
+		// 这里不能 return
 	}
+
+	saveMark := false
 	if conf.Port == "" {
 		conf.Port = ":10032"
+		saveMark = true
+	}
+	if conf.RootServerAddr == "" {
 		conf.IsRoot = false
 		conf.RootServerAddr = "https://yzyweb.cn/ddns"
+		saveMark = true
+	}
+	if saveMark {
 		if server.IsWindows() == true {
 			getErr = common.MarshalAndSave(conf, "./conf/server.json")
 		} else {
@@ -53,6 +62,7 @@ func main() {
 		}
 		if getErr != nil {
 			fmt.Println(getErr)
+			return
 		}
 	}
 	if *version {
@@ -60,19 +70,20 @@ func main() {
 		return
 	}
 
-
 	ddnsServerHandler := func(w http.ResponseWriter, req *http.Request) {
 		info := common.PublicInfo{
-			IP:            server.GetClientIP(req),
-			LatestVersion: server.GetLatestVersion(conf),
+			IP:      server.GetClientIP(req),
+			Version: server.GetLatestVersion(conf),
 		}
 		sendJson, getErr := json.Marshal(info)
 		if getErr != nil {
 			fmt.Println(getErr)
+			return
 		}
 		_, getErr = io.WriteString(w, string(sendJson))
 		if getErr != nil {
 			fmt.Println(getErr)
+			return
 		}
 	}
 
@@ -84,5 +95,6 @@ func main() {
 	getErr = http.ListenAndServe(conf.Port, nil)
 	if getErr != nil {
 		fmt.Println(getErr)
+		return
 	}
 }

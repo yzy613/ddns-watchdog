@@ -13,80 +13,43 @@ import (
 )
 
 var (
-	WorkPath     = "/opt/ddns/"
-	ConfPath     = WorkPath + "conf/"
-	LocalVersion = "0.1.0"
+	WorkPath = "/opt/ddns/"
+	ConfPath = WorkPath + "conf/"
 )
-
-func CompareVersionString(remoteVersion string, localVersion string) bool {
-	for {
-		rv := strings.Split(remoteVersion, ".")
-		lv := strings.Split(localVersion, ".")
-		if rv[0] == "" || lv[0] == "" {
-			break
-		}
-		if rv[0] > lv[0] {
-			return true
-		}
-		remoteVersion = rv[1]
-		localVersion = lv[1]
-	}
-	return false
-}
 
 func GetLatestVersion(conf ServerConf) string {
 	if !conf.IsRoot {
 		res, getErr := http.Get(conf.RootServerAddr)
 		if getErr != nil {
-			return LocalVersion
+			return common.LocalVersion
 		}
+		defer res.Body.Close()
 		recvJson, getErr := ioutil.ReadAll(res.Body)
 		if getErr != nil {
-			return LocalVersion
+			return common.LocalVersion
 		}
 		recv := common.PublicInfo{}
 		getErr = json.Unmarshal(recvJson, &recv)
 		if getErr != nil {
-			return LocalVersion
+			return common.LocalVersion
 		}
-		if CompareVersionString(recv.LatestVersion, LocalVersion) {
-			return recv.LatestVersion
-		} else {
-			return LocalVersion
-		}
+		return recv.Version
 	}
-	return LocalVersion
+	return common.LocalVersion
 }
 
 func CheckLatestVersion(conf ServerConf) {
 	if !conf.IsRoot {
-		res, getErr := http.Get(conf.RootServerAddr)
-		if getErr != nil {
-			fmt.Println(getErr)
-			fmt.Println("当前版本 ", LocalVersion)
-			return
-		}
-		recvJson, getErr := ioutil.ReadAll(res.Body)
-		if getErr != nil {
-			fmt.Println(getErr)
-			fmt.Println("当前版本 ", LocalVersion)
-			return
-		}
-		recv := common.PublicInfo{}
-		getErr = json.Unmarshal(recvJson, &recv)
-		if getErr != nil {
-			fmt.Println(getErr)
-			fmt.Println("当前版本 ", LocalVersion)
-			return
-		}
-		fmt.Println("当前版本 ", LocalVersion)
-		fmt.Println("最新版本 ", recv.LatestVersion)
-		if CompareVersionString(recv.LatestVersion, LocalVersion) {
+		LatestVersion := GetLatestVersion(conf)
+		fmt.Println("当前版本 ", common.LocalVersion)
+		fmt.Println("最新版本 ", LatestVersion)
+		if common.CompareVersionString(LatestVersion, common.LocalVersion) {
 			fmt.Println("\n发现新版本，请前往 https://github.com/yzy613/ddns/releases 下载")
 		}
+	} else {
+		fmt.Println("本机是根服务器")
+		fmt.Println("当前版本 ", common.LocalVersion)
 	}
-	fmt.Println("本机是根服务器")
-	fmt.Println("当前版本 ", LocalVersion)
 }
 
 func GetClientIP(req *http.Request) (ipAddr string) {
@@ -95,8 +58,8 @@ func GetClientIP(req *http.Request) (ipAddr string) {
 		ipAddr = req.Header.Get("X-Forwarded-For")
 	}
 	if ipAddr == "" {
-		// 对ip:port切片
-		if req.RemoteAddr[0] == '[' {
+		// 把 port 从 ip:port 分离
+		if strings.Contains(req.RemoteAddr, "[") {
 			// IPv6
 			ipAddr = strings.Split(req.RemoteAddr, "]:")[0]
 			ipAddr = ipAddr + "]"
@@ -104,6 +67,15 @@ func GetClientIP(req *http.Request) (ipAddr string) {
 			// IPv4
 			ipAddr = strings.Split(req.RemoteAddr, ":")[0]
 		}
+	}
+
+	// IPv6 转格式 和 ::解压
+	switch {
+	case strings.Contains(ipAddr, "["):
+		ipAddr = strings.Split(ipAddr[1:], "]")[0]
+		ipAddr = common.DecodeIPv6(ipAddr)
+	case strings.Contains(ipAddr, ":"):
+		ipAddr = common.DecodeIPv6(ipAddr)
 	}
 	return
 }

@@ -1,6 +1,6 @@
 package common
 
 type PublicInfo struct {
-	IP            string `json:"ip"`
-	LatestVersion string `json:"latest_version"`
+	IP      string `json:"ip"`
+	Version string `json:"latest_version"`
 }

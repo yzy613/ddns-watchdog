@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
+
+const LocalVersion = "0.1.0"
 
 func IsDirExistAndCreate(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)
@@ -72,4 +75,47 @@ func Struct2Map(src interface{}) map[string]interface{} {
 		fmt.Println(getErr)
 	}
 	return dst
+}
+
+func CompareVersionString(remoteVersion string, localVersion string) bool {
+	rv := strings.Split(remoteVersion, ".")
+	lv := strings.Split(localVersion, ".")
+	if len(rv) <= len(lv) {
+		for key, value := range rv {
+			if value > lv[key] {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func DecodeIPv6(srcIP string) (dstIP string) {
+	if strings.Contains(srcIP, "::") {
+		split := strings.Split(srcIP, "::")
+		decode := ""
+		switch {
+		case srcIP == "::":
+			dstIP = "0:0:0:0:0:0:0:0"
+		case split[0] == "" && split[1] != "":
+			for i := 0; i < 8-len(strings.Split(split[1], ":")); i++ {
+				decode = "0:" + decode
+			}
+			dstIP = decode + split[1]
+		case split[0] != "" && split[1] == "":
+			for i := 0; i < 8-len(strings.Split(split[0], ":")); i++ {
+				decode = decode + ":0"
+			}
+			dstIP = split[0] + decode
+		default:
+			for i := 0; i < 8-len(strings.Split(split[0], ":"))-len(strings.Split(split[1], ":")); i++ {
+				decode = decode + ":0"
+			}
+			decode = decode + ":"
+			dstIP = split[0] + decode + split[1]
+		}
+	} else {
+		dstIP = srcIP
+	}
+	return
 }

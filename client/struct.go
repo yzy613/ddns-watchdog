@@ -13,7 +13,7 @@ type DNSPodConf struct {
 	Token        string `json:"token"`
 	Domain       string `json:"domain"`
 	SubDomain    string `json:"sub_domain"`
-	RecordType   string `json:"record_type"`
 	RecordId     string `json:"record_id"`
+	RecordType   string `json:"record_type"`
 	RecordLineId string `json:"record_line_id"`
 }

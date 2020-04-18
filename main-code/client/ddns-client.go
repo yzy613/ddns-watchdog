@@ -7,7 +7,11 @@ import (
 	"fmt"
 )
 
-var forcibly = flag.Bool("f", false, "强制刷新 DNS 解析记录")
+var (
+	forcibly = flag.Bool("f", false, "强制检查 DNS 解析记录")
+	moreTips = flag.Bool("mt", false, "显示更多的提示")
+	version  = flag.Bool("version", false, "查看当前版本")
+)
 
 func main() {
 	flag.Parse()
@@ -21,16 +25,34 @@ func main() {
 	}
 	getErr = common.LoadAndUnmarshal("./conf/client.json", &conf)
 	if getErr != nil {
-		if conf.WebAddr == "" {
-			conf.WebAddr = "https://yzyweb.cn/ddns"
-		}
-		if conf.LatestIP == "" {
-			conf.LatestIP = "0.0.0.0"
-		}
-		common.MarshalAndSave(conf, "./conf/client.json")
 		fmt.Println(getErr)
-		fmt.Println("如果显示错误为 unexpected end of JSON input\n请打开客户端配置文件 client.json 填写信息")
+		// 这里不能 return
+	}
+
+	saveMark := false
+	if conf.WebAddr == "" {
+		conf.WebAddr = "https://yzyweb.cn/ddns"
+		saveMark = true
+	}
+	if conf.LatestIP == "" {
+		conf.LatestIP = "0.0.0.0"
+		saveMark = true
+	}
+	if saveMark {
+		getErr = common.MarshalAndSave(conf, "./conf/client.json")
+		if getErr != nil {
+			fmt.Println(getErr)
+		}
+		fmt.Println("请打开客户端配置文件 client.json 启用需要使用的服务\n并重新启动")
+		// 需要用户手动设置
 		return
+	}
+	if *version {
+		client.CheckLatestVersion(conf)
+		return
+	}
+	if !conf.EnableDdns {
+		fmt.Println("请打开客户端配置文件 client.json 启用需要使用的服务\n并重新启动")
 	}
 
 	// 对比上一次的 IP
@@ -40,6 +62,7 @@ func main() {
 	ipAddr, isIPv6, getErr := client.GetOwnIP(conf.WebAddr)
 	if getErr != nil {
 		fmt.Println(getErr)
+		return
 	}
 	if ipAddr != conf.LatestIP || *forcibly {
 		conf.LatestIP = ipAddr
@@ -48,40 +71,21 @@ func main() {
 		getErr = common.MarshalAndSave(conf, "./conf/client.json")
 		if getErr != nil {
 			fmt.Println(getErr)
+			return
 		}
 		if conf.EnableDdns {
 			if conf.DNSPod {
-				DNSPod(ipAddr)
+				getErr = client.DNSPod(ipAddr)
+				if getErr != nil {
+					fmt.Println(getErr)
+					return
+				}
 			}
 		}
-	} /* else {
-		fmt.Println("你的公网 IP 没有变化")
-	}*/
-}
-
-func DNSPod(ipAddr string) {
-	dpc := client.DNSPodConf{}
-	getErr := common.LoadAndUnmarshal("./conf/dnspod.json", &dpc)
-	if getErr != nil {
-		fmt.Println(getErr)
-		fmt.Println("如果显示错误为 unexpected end of JSON input\n请打开配置文件 dnspod.json 填入你的 Id 和 Token")
-		return
-	}
-	if dpc.Id == "" || dpc.Token == "" {
-		fmt.Println("请打开配置文件 dnspod.json 填入你的 Id 和 Token")
-		getErr = common.MarshalAndSave(dpc, "./conf/dnspod.json")
-		if getErr != nil {
-			fmt.Println(getErr)
-		}
-		return
-	}
-	if ipAddr[0] == '[' {
-		dpc.RecordType = "AAAA"
 	} else {
-		dpc.RecordType = "A"
-	}
-	getErr = client.DNSPod(&dpc, ipAddr)
-	if getErr != nil {
-		fmt.Println(getErr)
+		if *moreTips {
+			fmt.Println("因为最新 IP 和当前文件记录的 IP 相同，所以跳过检查解析记录\n" +
+				"若需要强制检查 DNS 解析记录，请添加启动参数 -f")
+		}
 	}
 }

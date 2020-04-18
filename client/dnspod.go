@@ -2,40 +2,12 @@ package client
 
 import (
 	"ddns/common"
-	"encoding/json"
 	"errors"
 	simplejson "github.com/bitly/go-simplejson"
 	"io/ioutil"
 	"net/http"
 	"strings"
 )
-
-func GetOwnIP(webAddr string) (ipAddr string, isIPv6 bool, err error) {
-	if webAddr == "" {
-		webAddr = "https://yzyweb.cn/ddns"
-	}
-	res, err := http.Get(webAddr)
-	defer res.Body.Close()
-	if err != nil {
-		return
-	}
-	recvJson, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return
-	}
-	var ipInfo common.PublicInfo
-	err = json.Unmarshal(recvJson, &ipInfo)
-	if err != nil {
-		return
-	}
-	ipAddr = ipInfo.IP
-	if ipAddr[0] == '[' {
-		isIPv6 = true
-	} else {
-		isIPv6 = false
-	}
-	return
-}
 
 func PublicRequestInit(dpc DNSPodConf) (pp string) {
 	pp = "login_token=" + dpc.Id + "," + dpc.Token +
@@ -82,14 +54,32 @@ func Postman(url, src string) (dst []byte, err error) {
 	return
 }
 
-func DNSPod(dpc *DNSPodConf, ipAddr string) (err error) {
-	recordId, recordIP, lineId, err := GetParseRecordId(*dpc)
+func DNSPod(ipAddr string) (err error) {
+	dpc := DNSPodConf{}
+	err = common.LoadAndUnmarshal("./conf/dnspod.json", &dpc)
+	if err != nil {
+		err = common.MarshalAndSave(dpc, "./conf/dnspod.json")
+		err = errors.New("请打开配置文件 dnspod.json 填入你的 id, token, domain, sub_domain\n并重新启动")
+		return
+	}
+	if dpc.Id == "" || dpc.Token == "" || dpc.Domain == "" || dpc.SubDomain == "" {
+		err = errors.New("请打开配置文件 dnspod.json 填入你的 id, token, domain, sub_domain\n并重新启动")
+		return
+	}
+
+	recordId, recordType, recordIP, lineId, err := GetParseRecordId(dpc)
 	if err != nil {
 		return
 	}
-	if recordId != dpc.RecordId || lineId != dpc.RecordLineId {
+	if ipAddr[0] == '[' {
+		recordType = "AAAA"
+	} else {
+		recordType = "A"
+	}
+	if recordId != dpc.RecordId || recordType != dpc.RecordType || lineId != dpc.RecordLineId {
 		dpc.RecordId = recordId
 		dpc.RecordLineId = lineId
+		dpc.RecordType = recordType
 		err = common.MarshalAndSave(dpc, "./conf/dnspod.json")
 		if err != nil {
 			return
@@ -99,7 +89,7 @@ func DNSPod(dpc *DNSPodConf, ipAddr string) (err error) {
 		err = errors.New("域名解析记录上的 IP 和当前公网 IP 一致")
 		return
 	}
-	err = UpdateParseRecord(*dpc, ipAddr)
+	err = UpdateParseRecord(dpc, ipAddr)
 	if err != nil {
 		return
 	}
@@ -115,7 +105,7 @@ func CheckStatus(jsonObj *simplejson.Json) (err error) {
 	return
 }
 
-func GetParseRecordId(dpc DNSPodConf) (recordId string, recordIP string, lineId string, err error) {
+func GetParseRecordId(dpc DNSPodConf) (recordId, recordType, recordIP, lineId string, err error) {
 	postContent := PublicRequestInit(dpc)
 	postContent = postContent + "&" + RecordListInit(dpc)
 	recvJson, err := Postman("https://dnsapi.cn/Record.List", postContent)
@@ -139,6 +129,7 @@ func GetParseRecordId(dpc DNSPodConf) (recordId string, recordIP string, lineId 
 		element := value.(map[string]interface{})
 		if element["name"] == dpc.SubDomain {
 			recordId = element["id"].(string)
+			recordType = element["type"].(string)
 			recordIP = element["value"].(string)
 			lineId = element["line_id"].(string)
 			break
