@@ -41,7 +41,7 @@ func Postman(url, src string) (dst []byte, err error) {
 	}
 	defer req.Body.Close()
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("User-Agent", "ddns-client/0.1.0 ()")
+	req.Header.Set("User-Agent", "ddns-client/"+common.LocalVersion+" ()")
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
