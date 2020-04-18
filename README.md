@@ -28,7 +28,7 @@
 
 - 如果没有 `./conf/dnspod.json` 配置文件，请注意是否在 `./conf/client.json` 启用 `dnspod`
 
-#### 万网（阿里云解析）
+#### 阿里云（万网）
 - 将在以后的不久支持
 
 ## 服务端 用途
@@ -42,3 +42,8 @@
 - `./ddns-server -uninstall` 卸载服务
 
 - `./ddns-server -version` 查看当前版本
+
+## 文档资源
+- DNSPod API (https://www.dnspod.cn/docs/index.html)
+
+- Aliyun SDK (https://help.aliyun.com/product/29697.html)
