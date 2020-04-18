@@ -49,7 +49,7 @@ func main() {
 		conf.Port = ":10032"
 		saveMark = true
 	}
-	if conf.RootServerAddr == "" {
+	if conf.RootServerAddr == "" && conf.IsRoot == false {
 		conf.IsRoot = false
 		conf.RootServerAddr = "https://yzyweb.cn/ddns"
 		saveMark = true

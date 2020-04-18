@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const LocalVersion = "0.1.0"
+const LocalVersion = "0.1.1"
 
 func IsDirExistAndCreate(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)
