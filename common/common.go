@@ -8,7 +8,10 @@ import (
 	"strings"
 )
 
-const LocalVersion = "0.1.1"
+const (
+	LocalVersion = "0.1.2"
+	RootServer = "https://yzyweb.cn/ddns"
+)
 
 func IsDirExistAndCreate(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)

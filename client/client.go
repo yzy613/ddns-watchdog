@@ -11,7 +11,7 @@ import (
 
 func GetOwnIP(webAddr string) (ipAddr string, isIPv6 bool, err error) {
 	if webAddr == "" {
-		webAddr = "https://yzyweb.cn/ddns"
+		webAddr = common.RootServer
 	}
 	res, err := http.Get(webAddr)
 	if err != nil {

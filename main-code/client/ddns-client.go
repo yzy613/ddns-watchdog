@@ -31,11 +31,12 @@ func main() {
 
 	saveMark := false
 	if conf.WebAddr == "" {
-		conf.WebAddr = "https://yzyweb.cn/ddns"
+		conf.WebAddr = common.RootServer
 		saveMark = true
 	}
 	if conf.LatestIP == "" {
-		conf.LatestIP = "0.0.0.0"
+		conf.LatestIP = "0:0:0:0:0:0:0:0"
+		conf.IsIPv6 = true
 		saveMark = true
 	}
 	if saveMark {
@@ -43,22 +44,21 @@ func main() {
 		if getErr != nil {
 			fmt.Println(getErr)
 		}
-		fmt.Println("请打开客户端配置文件 client.json 启用需要使用的服务\n并重新启动")
-		// 需要用户手动设置
-		return
+		if !conf.EnableDdns {
+			fmt.Println("请打开客户端配置文件 client.json 启用需要使用的服务并重新启动")
+			// 需要用户手动设置
+			return
+		}
 	}
 	if *version {
 		client.CheckLatestVersion(conf)
 		return
 	}
 	if !conf.EnableDdns {
-		fmt.Println("请打开客户端配置文件 client.json 启用需要使用的服务\n并重新启动")
+		fmt.Println("请打开客户端配置文件 client.json 启用需要使用的服务并重新启动")
 	}
 
 	// 对比上一次的 IP
-	if conf.WebAddr == "" {
-		conf.WebAddr = "https://yzyweb.cn/ddns"
-	}
 	ipAddr, isIPv6, getErr := client.GetOwnIP(conf.WebAddr)
 	if getErr != nil {
 		fmt.Println(getErr)
@@ -75,6 +75,9 @@ func main() {
 		}
 		if conf.EnableDdns {
 			if conf.DNSPod {
+				if *moreTips {
+					fmt.Println("-= Response From DNSPod =-")
+				}
 				getErr = client.DNSPod(ipAddr)
 				if getErr != nil {
 					fmt.Println(getErr)
