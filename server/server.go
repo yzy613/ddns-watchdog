@@ -128,37 +128,6 @@ func Install() {
 			}
 		}
 
-		srcFile, getErr = os.Open("./conf/server.json")
-		if getErr != nil {
-			fmt.Println(getErr)
-			return
-		}
-		getErr = os.MkdirAll(ConfPath, 0755)
-		if getErr != nil {
-			fmt.Println(getErr)
-		}
-		dstFile, getErr = os.OpenFile(ConfPath+"server.json", os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
-		if getErr != nil {
-			fmt.Println(getErr)
-			return
-		}
-		for {
-			n, getErr := srcFile.Read(buf)
-			if getErr != nil {
-				if getErr == io.EOF {
-					break
-				} else {
-					fmt.Println(getErr)
-					return
-				}
-			}
-			n, getErr = dstFile.Write(buf[:n])
-			if getErr != nil {
-				fmt.Println(getErr)
-				return
-			}
-		}
-
 		// 注册系统服务
 		getErr = ioutil.WriteFile("/etc/systemd/system/ddns-server.service", serviceContent, 0664)
 		if getErr != nil {
