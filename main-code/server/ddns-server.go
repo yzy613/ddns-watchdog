@@ -29,7 +29,12 @@ func main() {
 
 	// 加载配置
 	conf := server.ServerConf{}
-	getErr := common.IsDirExistAndCreate("./conf")
+	var getErr error
+	if server.IsWindows() == true {
+		getErr = common.IsDirExistAndCreate("./conf/")
+	} else {
+		getErr = common.IsDirExistAndCreate(server.ConfPath)
+	}
 	if getErr != nil {
 		fmt.Println(getErr)
 		return

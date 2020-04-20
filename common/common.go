@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -10,7 +11,7 @@ import (
 
 const (
 	LocalVersion = "0.1.2"
-	RootServer = "https://yzyweb.cn/ddns"
+	RootServer   = "https://yzyweb.cn/ddns"
 )
 
 func IsDirExistAndCreate(dirPath string) (err error) {
@@ -24,33 +25,83 @@ func IsDirExistAndCreate(dirPath string) (err error) {
 	return
 }
 
-func LoadAndUnmarshal(filePath string, dst interface{}) error {
-	_, getErr := os.Stat(filePath)
-	if getErr != nil || os.IsExist(getErr) {
-		_, getErr = os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0664)
-		if getErr != nil {
-			return getErr
+func CopyFile(srcPath, dstPath string) (err error) {
+	srcFile, err := os.Open(srcPath)
+	if err != nil {
+		return
+	}
+	defer srcFile.Close()
+	dirSplit := strings.Split(dstPath, "/")
+	dirPath := ""
+	if dirPathLen := len(dirSplit); dirPathLen > 1 {
+		switch dirSplit[0] {
+		case ".":
+			dirSplit = dirSplit[1:]
+			dirPath = "./"
+		case "":
+			dirSplit = dirSplit[1:]
+			dirPath = "/"
+		}
+		if dirPathLen := len(dirSplit); dirPathLen > 1 {
+			for i := 0; i < dirPathLen-1; i++ {
+				dirPath = dirPath + dirSplit[i] + "/"
+			}
+			err = os.MkdirAll(dirPath, 0777)
+			if err != nil {
+				return
+			}
 		}
 	}
-	jsonContent, getErr := ioutil.ReadFile(filePath)
-	if getErr != nil {
-		return getErr
+	dstFile, err := os.OpenFile(dstPath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0744)
+	if err != nil {
+		return
 	}
-	getErr = json.Unmarshal(jsonContent, &dst)
-	if getErr != nil {
-		return getErr
+	defer dstFile.Close()
+	buf := make([]byte, 1024)
+	for {
+		n, err := srcFile.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				return err
+			}
+		}
+		n, err = dstFile.Write(buf[:n])
+		if err != nil {
+			return err
+		}
+	}
+	return
+}
+
+func LoadAndUnmarshal(filePath string, dst interface{}) error {
+	_, err := os.Stat(filePath)
+	if err != nil || os.IsExist(err) {
+		_, err = os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0664)
+		if err != nil {
+			return err
+		}
+	}
+	jsonContent, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(jsonContent, &dst)
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-func MarshalAndSave(content interface{}, filePath string) error {
+func MarshalAndSave(content interface{}, filePath string) (err error) {
 	jsonContent, err := json.Marshal(content)
 	if err != nil {
-		return err
+		return
 	}
 	err = ioutil.WriteFile(filePath, jsonContent, 0666)
 	if err != nil {
-		return err
+		return
 	}
 	return nil
 }

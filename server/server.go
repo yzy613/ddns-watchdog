@@ -4,7 +4,6 @@ import (
 	"ddns/common"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -94,38 +93,10 @@ func Install() {
 		fmt.Println("Windows 暂不支持安装到系统")
 	} else {
 		// 复制文件到工作目录
-		srcFile, getErr := os.Open("./ddns-server")
+		getErr := common.CopyFile("./ddns-server", WorkPath+"ddns-server")
 		if getErr != nil {
 			fmt.Println(getErr)
 			return
-		}
-		defer srcFile.Close()
-		getErr = os.MkdirAll(WorkPath, 0755)
-		if getErr != nil {
-			fmt.Println(getErr)
-		}
-		dstFile, getErr := os.OpenFile(WorkPath+"ddns-server", os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0744)
-		if getErr != nil {
-			fmt.Println(getErr)
-			return
-		}
-		defer dstFile.Close()
-		buf := make([]byte, 1024)
-		for {
-			n, getErr := srcFile.Read(buf)
-			if getErr != nil {
-				if getErr == io.EOF {
-					break
-				} else {
-					fmt.Println(getErr)
-					return
-				}
-			}
-			n, getErr = dstFile.Write(buf[:n])
-			if getErr != nil {
-				fmt.Println(getErr)
-				return
-			}
 		}
 
 		// 注册系统服务
@@ -148,5 +119,6 @@ func Uninstall() {
 			return
 		}
 		fmt.Println("卸载服务成功")
+		fmt.Println("\n若要完全删除，请移步到 /opt/ddns 进行完全删除")
 	}
 }
