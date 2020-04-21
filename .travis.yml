@@ -1,13 +1,15 @@
 language: go
 
+os:
+  - linux
+
+dist: "xenial"
+
 go:
   - 1.14.x
   # 使用最新 Go 源码运行，但是测试时间会大大延长
   #- master
 
-os:
-  - linux
-  
 # 每次 Git 提交后触发
 script:
   - chmod +x ./build.sh && ./build.sh
