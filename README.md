@@ -1,9 +1,8 @@
 # 动态域名解析
-![language](https://img.shields.io/badge/language-Go-00acd7)
+[![language](https://img.shields.io/badge/language-Go-00acd7)](https://golang.org)
 ![build](https://travis-ci.com/yzy613/ddns.svg?branch=master)
 [![release](https://img.shields.io/github/v/release/yzy613/ddns)](https://github.com/yzy613/ddns/releases)
-![downloads](https://img.shields.io/github/downloads/yzy613/ddns/total)
-
+[![downloads](https://img.shields.io/github/downloads/yzy613/ddns/total)](https://github.com/yzy613/ddns/releases)
 
 基于 Go 的 DDNS 客户端和服务端
 
