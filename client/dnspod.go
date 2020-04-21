@@ -9,51 +9,6 @@ import (
 	"strings"
 )
 
-func PublicRequestInit(dpc DNSPodConf) (pp string) {
-	pp = "login_token=" + dpc.Id + "," + dpc.Token +
-		"&format=" + "json" +
-		"&lang=" + "cn" +
-		"&error_on_empty=" + "no"
-	return
-}
-
-func RecordListInit(dpc DNSPodConf) (ri string) {
-	ri = "domain=" + dpc.Domain +
-		"&sub_domain=" + dpc.SubDomain
-	return
-}
-
-func RecordModifyInit(dpc DNSPodConf, ipAddr string) (rm string) {
-	rm = "domain=" + dpc.Domain +
-		"&record_id=" + dpc.RecordId +
-		"&sub_domain=" + dpc.SubDomain +
-		"&record_type=" + dpc.RecordType +
-		"&record_line_id=" + dpc.RecordLineId +
-		"&value=" + ipAddr
-	return
-}
-
-func Postman(url, src string) (dst []byte, err error) {
-	httpClient := &http.Client{}
-	req, err := http.NewRequest("POST", url, strings.NewReader(src))
-	if err != nil {
-		return nil, err
-	}
-	defer req.Body.Close()
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("User-Agent", "ddns-client/"+common.LocalVersion+" ()")
-	res, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	dst, err = ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return
-}
-
 func DNSPod(ipAddr string) (err error) {
 	dpc := DNSPodConf{}
 	err = common.LoadAndUnmarshal("./conf/dnspod.json", &dpc)
@@ -67,36 +22,35 @@ func DNSPod(ipAddr string) (err error) {
 		return
 	}
 
-	recordId, recordType, recordIP, lineId, err := GetParseRecordId(dpc)
+	recordId, recordType, recordIP, lineId, err := getParseRecordIdFromDNSPod(dpc)
 	if err != nil {
 		return
 	}
-	if ipAddr[0] == '[' {
+	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
 	} else {
 		recordType = "A"
 	}
 	if recordId != dpc.RecordId || recordType != dpc.RecordType || lineId != dpc.RecordLineId {
 		dpc.RecordId = recordId
-		dpc.RecordLineId = lineId
 		dpc.RecordType = recordType
+		dpc.RecordLineId = lineId
 		err = common.MarshalAndSave(dpc, "./conf/dnspod.json")
 		if err != nil {
 			return
 		}
 	}
 	if recordIP == ipAddr {
-		err = errors.New("域名解析记录上的 IP 和当前公网 IP 一致")
 		return
 	}
-	err = UpdateParseRecord(dpc, ipAddr)
+	err = updateParseRecordToDNSPod(dpc, ipAddr)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func CheckStatus(jsonObj *simplejson.Json) (err error) {
+func checkDNSPodStatus(jsonObj *simplejson.Json) (err error) {
 	statusCode := jsonObj.Get("status").Get("code").MustString()
 	if statusCode != "1" {
 		err = errors.New("DNSPod return " + statusCode + "\n" + jsonObj.Get("status").Get("message").MustString())
@@ -105,18 +59,19 @@ func CheckStatus(jsonObj *simplejson.Json) (err error) {
 	return
 }
 
-func GetParseRecordId(dpc DNSPodConf) (recordId, recordType, recordIP, lineId string, err error) {
-	postContent := PublicRequestInit(dpc)
-	postContent = postContent + "&" + RecordListInit(dpc)
-	recvJson, err := Postman("https://dnsapi.cn/Record.List", postContent)
+func getParseRecordIdFromDNSPod(dpc DNSPodConf) (recordId, recordType, recordIP, lineId string, err error) {
+	postContent := publicRequestInit(dpc)
+	postContent = postContent + "&" + recordListInit(dpc)
+	recvJson, err := postman("https://dnsapi.cn/Record.List", postContent)
 	if err != nil {
 		return
 	}
+
 	jsonObj, err := simplejson.NewJson(recvJson)
 	if err != nil {
 		return
 	}
-	err = CheckStatus(jsonObj)
+	err = checkDNSPodStatus(jsonObj)
 	if err != nil {
 		return
 	}
@@ -138,20 +93,66 @@ func GetParseRecordId(dpc DNSPodConf) (recordId, recordType, recordIP, lineId st
 	return
 }
 
-func UpdateParseRecord(dpc DNSPodConf, ipAddr string) (err error) {
-	postContent := PublicRequestInit(dpc)
-	postContent = postContent + "&" + RecordModifyInit(dpc, ipAddr)
-	recvJson, err := Postman("https://dnsapi.cn/Record.Modify", postContent)
+func updateParseRecordToDNSPod(dpc DNSPodConf, ipAddr string) (err error) {
+	postContent := publicRequestInit(dpc)
+	postContent = postContent + "&" + recordModifyInit(dpc, ipAddr)
+	recvJson, err := postman("https://dnsapi.cn/Record.Modify", postContent)
 	if err != nil {
 		return
 	}
+
 	jsonObj, err := simplejson.NewJson(recvJson)
 	if err != nil {
 		return
 	}
-	err = CheckStatus(jsonObj)
+	err = checkDNSPodStatus(jsonObj)
 	if err != nil {
 		return
 	}
+	return
+}
+
+func postman(url, src string) (dst []byte, err error) {
+	httpClient := &http.Client{}
+	req, err := http.NewRequest("POST", url, strings.NewReader(src))
+	if err != nil {
+		return nil, err
+	}
+	defer req.Body.Close()
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("User-Agent", "ddns-client/"+common.LocalVersion+" ()")
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	dst, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func publicRequestInit(dpc DNSPodConf) (pp string) {
+	pp = "login_token=" + dpc.Id + "," + dpc.Token +
+		"&format=" + "json" +
+		"&lang=" + "cn" +
+		"&error_on_empty=" + "no"
+	return
+}
+
+func recordListInit(dpc DNSPodConf) (ri string) {
+	ri = "domain=" + dpc.Domain +
+		"&sub_domain=" + dpc.SubDomain
+	return
+}
+
+func recordModifyInit(dpc DNSPodConf, ipAddr string) (rm string) {
+	rm = "domain=" + dpc.Domain +
+		"&record_id=" + dpc.RecordId +
+		"&sub_domain=" + dpc.SubDomain +
+		"&record_type=" + dpc.RecordType +
+		"&record_line_id=" + dpc.RecordLineId +
+		"&value=" + ipAddr
 	return
 }

@@ -33,7 +33,9 @@
 - 如果没有 `./conf/dnspod.json` 配置文件，请注意是否在 `./conf/client.json` 启用 `dnspod`
 
 #### 阿里云（万网）
-- 将在以后的不久支持
+- 请打开配置文件 `./conf/aliyun.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
+
+- 如果没有 `./conf/aliyun.json` 配置文件，请注意是否在 `./conf/client.json` 启用 `aliyun`
 
 ## 服务端 用途
 - 返回 Json 格式的客户端 IP（支持 IPv6）
@@ -50,4 +52,4 @@
 ## 文档资源
 - DNSPod API (https://www.dnspod.cn/docs/index.html)
 
-- Aliyun SDK (https://help.aliyun.com/product/29697.html)
+- Aliyun SDK [GitHub](https://github.com/aliyun/alibaba-cloud-sdk-go) or (https://help.aliyun.com/product/29697.html)

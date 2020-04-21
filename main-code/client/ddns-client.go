@@ -67,7 +67,6 @@ func main() {
 	if ipAddr != conf.LatestIP || *forcibly {
 		conf.LatestIP = ipAddr
 		conf.IsIPv6 = isIPv6
-		fmt.Println("你的公网 IP: ", ipAddr)
 		getErr = common.MarshalAndSave(conf, "./conf/client.json")
 		if getErr != nil {
 			fmt.Println(getErr)
@@ -79,6 +78,16 @@ func main() {
 					fmt.Println("-= Response From DNSPod =-")
 				}
 				getErr = client.DNSPod(ipAddr)
+				if getErr != nil {
+					fmt.Println(getErr)
+					return
+				}
+			}
+			if conf.Aliyun {
+				if *moreTips {
+					fmt.Println("-= Response From Aliyun =-")
+				}
+				getErr = client.Aliyun(ipAddr)
 				if getErr != nil {
 					fmt.Println(getErr)
 					return
