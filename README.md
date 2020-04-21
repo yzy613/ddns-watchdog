@@ -25,7 +25,7 @@
 
 - 如果程序无提示直接结束，请添加 `-mt` 启动参数以显示更多的提示
 
-- 默认选择的是 IPv4，若需 IPv6，请在 `./conf/client.json` 修改 `web_addr` 为 `http://www.51rom.cc:10032` （请注意！这是暂时解决方案，不保证以后可用）
+- 默认选择的是 IPv4，若需 IPv6，请在 `./conf/client.json` 修改 `web_addr` 为 `https://yzyweb.cn/ddns6`
 
 #### DNSPod
 - 请打开配置文件 `./conf/dnspod.json` 填入你的 `id, token, domain, sub_domain` 并重新启动
