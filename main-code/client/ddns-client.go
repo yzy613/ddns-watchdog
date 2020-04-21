@@ -73,26 +73,21 @@ func main() {
 			return
 		}
 		if conf.EnableDdns {
+			waitDNSPod := make(chan bool)
+			waitAliyun := make(chan bool)
 			if conf.DNSPod {
 				if *moreTips {
 					fmt.Println("-= Response From DNSPod =-")
 				}
-				getErr = client.DNSPod(ipAddr)
-				if getErr != nil {
-					fmt.Println(getErr)
-					return
-				}
+				go startDNSPod(ipAddr, waitDNSPod)
 			}
 			if conf.Aliyun {
 				if *moreTips {
 					fmt.Println("-= Response From Aliyun =-")
 				}
-				getErr = client.Aliyun(ipAddr)
-				if getErr != nil {
-					fmt.Println(getErr)
-					return
-				}
+				go startAliyun(ipAddr, waitAliyun)
 			}
+			_, _ = <-waitDNSPod, <-waitAliyun
 		}
 	} else {
 		if *moreTips {
@@ -100,4 +95,20 @@ func main() {
 				"若需要强制检查 DNS 解析记录，请添加启动参数 -f")
 		}
 	}
+}
+
+func startDNSPod(ipAddr string, done chan bool) {
+	getErr := client.DNSPod(ipAddr)
+	if getErr != nil {
+		fmt.Println(getErr)
+	}
+	done <- true
+}
+
+func startAliyun(ipAddr string, done chan bool) {
+	getErr := client.Aliyun(ipAddr)
+	if getErr != nil {
+		fmt.Println(getErr)
+	}
+	done <- true
 }

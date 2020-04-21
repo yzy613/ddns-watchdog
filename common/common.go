@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LocalVersion = "0.2.0"
+	LocalVersion = "0.2.1"
 	RootServer   = "https://yzyweb.cn/ddns"
 )
 

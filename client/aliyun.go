@@ -12,11 +12,11 @@ func Aliyun(ipAddr string) (err error) {
 	err = common.LoadAndUnmarshal("./conf/aliyun.json", &ayc)
 	if err != nil {
 		err = common.MarshalAndSave(ayc, "./conf/aliyun.json")
-		err = errors.New("请打开配置文件 ./conf/aliyun.json 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
+		err = errors.New("请打开配置文件 ./conf/aliyun.json 填入你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
 		return
 	}
 	if ayc.AccessKeyId == "" || ayc.AccessKeySecret == "" || ayc.Domain == "" || ayc.SubDomain == "" {
-		err = errors.New("请打开配置文件 ./conf/aliyun.json 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
+		err = errors.New("请打开配置文件 ./conf/aliyun.json 填入你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
 		return
 	}
 
