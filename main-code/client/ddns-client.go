@@ -87,7 +87,14 @@ func main() {
 				}
 				go startAliyun(ipAddr, waitAliyun)
 			}
-			_, _ = <-waitDNSPod, <-waitAliyun
+			switch {
+			case conf.DNSPod && conf.Aliyun:
+				_, _ = <-waitDNSPod, <-waitAliyun
+			case conf.DNSPod:
+				_ = <-waitDNSPod
+			case conf.Aliyun:
+				_ = <-waitAliyun
+			}
 		}
 	} else {
 		if *moreTips {
