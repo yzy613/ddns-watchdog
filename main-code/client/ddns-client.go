@@ -91,9 +91,9 @@ func main() {
 			case conf.DNSPod && conf.Aliyun:
 				_, _ = <-waitDNSPod, <-waitAliyun
 			case conf.DNSPod:
-				_ = <-waitDNSPod
+				<-waitDNSPod
 			case conf.Aliyun:
-				_ = <-waitAliyun
+				<-waitAliyun
 			}
 		}
 	} else {
