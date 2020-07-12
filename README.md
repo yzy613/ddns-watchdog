@@ -46,7 +46,7 @@
 
 - 如果程序无提示结束且域名解析更新成功，那么程序工作正常，可以添加至计划任务定时执行
 
-- Crond 命令 `*/10 * * * * cd /opt/ddns/ && ./ddns-client` 这里举例的位置是 `/opt/ddns/` 请根据自己的情况更改
+- Cron 命令 `*/10 * * * * cd /opt/ddns/ && ./ddns-client` 这里举例的位置是 `/opt/ddns/` 请根据自己的情况更改
 
 - Enjoy it!
 
