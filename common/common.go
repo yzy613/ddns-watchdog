@@ -131,7 +131,7 @@ func Struct2Map(src interface{}) map[string]interface{} {
 	return dst
 }
 
-func CompareVersionString(remoteVersion string, localVersion string) bool {
+func CompareVersionString(remoteVersion, localVersion string) bool {
 	rv := strings.Split(remoteVersion, ".")
 	lv := strings.Split(localVersion, ".")
 	if len(rv) <= len(lv) {
