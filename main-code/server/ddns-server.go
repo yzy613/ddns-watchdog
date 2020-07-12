@@ -30,7 +30,7 @@ func main() {
 	// 加载配置
 	conf := server.ServerConf{}
 	var getErr error
-	if server.IsWindows() == true {
+	if server.IsWindows() {
 		getErr = common.IsDirExistAndCreate("./conf/")
 	} else {
 		getErr = common.IsDirExistAndCreate(server.ConfPath)
@@ -39,7 +39,7 @@ func main() {
 		fmt.Println(getErr)
 		return
 	}
-	if server.IsWindows() == true {
+	if server.IsWindows() {
 		getErr = common.LoadAndUnmarshal("./conf/server.json", &conf)
 	} else {
 		getErr = common.LoadAndUnmarshal(server.ConfPath+"server.json", &conf)
@@ -54,13 +54,13 @@ func main() {
 		conf.Port = ":10032"
 		saveMark = true
 	}
-	if conf.RootServerAddr == "" && conf.IsRoot == false {
+	if conf.RootServerAddr == "" && !conf.IsRoot {
 		conf.IsRoot = false
 		conf.RootServerAddr = "https://yzyweb.cn/ddns"
 		saveMark = true
 	}
 	if saveMark {
-		if server.IsWindows() == true {
+		if server.IsWindows() {
 			getErr = common.MarshalAndSave(conf, "./conf/server.json")
 		} else {
 			getErr = common.MarshalAndSave(conf, server.ConfPath+"server.json")
