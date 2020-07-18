@@ -64,8 +64,13 @@
 
 - 如果没有 `./conf/aliyun.json` 配置文件，请注意是否在 `./conf/client.json` 启用 `aliyun`
 
+<<<<<<< HEAD
 #### 没有找到你的域名解析服务商？
 - 请在 [Issues](https://github.com/yzy613/ddns/issues) 提出请求或者 pr (感激不尽)
+=======
+#### 没有找到你的域名服务商？
+- 请在 [issues](https://github.com/yzy613/ddns/issues) 提出请求或者 pr 做出贡献 (感激不尽)
+>>>>>>> 20b117de9dc29780f649445797af00ecdc7c2bb7
 
 ## 服务端 (一般情况下，不使用。请略过)
 - 返回 Json 格式的客户端 IP（支持 IPv6）
