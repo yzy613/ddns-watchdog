@@ -3,3 +3,4 @@ conf
 conf.d
 *.gz
 *.7z
+*.exe

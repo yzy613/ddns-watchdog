@@ -63,3 +63,24 @@ func CheckLatestVersion(conf ClientConf) {
 		fmt.Println("\n发现新版本，请前往 https://github.com/yzy613/ddns/releases 下载")
 	}
 }
+
+func postman(url, src string) (dst []byte, err error) {
+	httpClient := &http.Client{}
+	req, err := http.NewRequest("POST", url, strings.NewReader(src))
+	if err != nil {
+		return nil, err
+	}
+	defer req.Body.Close()
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("User-Agent", "ddns-client/"+common.LocalVersion+" ()")
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	dst, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	return
+}

@@ -20,7 +20,7 @@ func Aliyun(ipAddr string) (err error) {
 		return
 	}
 
-	recordId, recordType, recordIP, err := getParseRecordIdFromAliyun(ayc)
+	recordId, recordType, recordIP, err := ayc.GetParseRecordId()
 	if err != nil {
 		return
 	}
@@ -40,14 +40,14 @@ func Aliyun(ipAddr string) (err error) {
 	if recordIP == ipAddr {
 		return
 	}
-	err = updateParseRecordToAliyun(ayc, ipAddr)
+	err = ayc.UpdateParseRecord(ipAddr)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func getParseRecordIdFromAliyun(ayc AliyunConf) (recordId, recordType, recordIP string, err error) {
+func (ayc AliyunConf) GetParseRecordId() (recordId, recordType, recordIP string, err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
 
 	request := alidns.CreateDescribeDomainRecordsRequest()
@@ -74,7 +74,7 @@ func getParseRecordIdFromAliyun(ayc AliyunConf) (recordId, recordType, recordIP 
 	return
 }
 
-func updateParseRecordToAliyun(ayc AliyunConf, ipAddr string) (err error) {
+func (ayc AliyunConf) UpdateParseRecord(ipAddr string) (err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
 
 	request := alidns.CreateUpdateDomainRecordRequest()

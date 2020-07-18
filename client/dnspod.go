@@ -4,8 +4,6 @@ import (
 	"ddns/common"
 	"errors"
 	simplejson "github.com/bitly/go-simplejson"
-	"io/ioutil"
-	"net/http"
 	"strings"
 )
 
@@ -22,7 +20,7 @@ func DNSPod(ipAddr string) (err error) {
 		return
 	}
 
-	recordId, recordType, recordIP, lineId, err := getParseRecordIdFromDNSPod(dpc)
+	recordId, recordType, recordIP, lineId, err := dpc.GetParseRecordId()
 	if err != nil {
 		return
 	}
@@ -43,14 +41,14 @@ func DNSPod(ipAddr string) (err error) {
 	if recordIP == ipAddr {
 		return
 	}
-	err = updateParseRecordToDNSPod(dpc, ipAddr)
+	err = dpc.UpdateParseRecord(ipAddr)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func checkDNSPodStatus(jsonObj *simplejson.Json) (err error) {
+func (dpc DNSPodConf) CheckDNSPodStatus(jsonObj *simplejson.Json) (err error) {
 	statusCode := jsonObj.Get("status").Get("code").MustString()
 	if statusCode != "1" {
 		err = errors.New("DNSPod return " + statusCode + "\n" + jsonObj.Get("status").Get("message").MustString())
@@ -59,9 +57,9 @@ func checkDNSPodStatus(jsonObj *simplejson.Json) (err error) {
 	return
 }
 
-func getParseRecordIdFromDNSPod(dpc DNSPodConf) (recordId, recordType, recordIP, lineId string, err error) {
-	postContent := publicRequestInit(dpc)
-	postContent = postContent + "&" + recordListInit(dpc)
+func (dpc DNSPodConf) GetParseRecordId() (recordId, recordType, recordIP, lineId string, err error) {
+	postContent := dpc.PublicRequestInit()
+	postContent = postContent + "&" + dpc.RecordListInit()
 	recvJson, err := postman("https://dnsapi.cn/Record.List", postContent)
 	if err != nil {
 		return
@@ -71,7 +69,7 @@ func getParseRecordIdFromDNSPod(dpc DNSPodConf) (recordId, recordType, recordIP,
 	if err != nil {
 		return
 	}
-	err = checkDNSPodStatus(jsonObj)
+	err = dpc.CheckDNSPodStatus(jsonObj)
 	if err != nil {
 		return
 	}
@@ -93,9 +91,9 @@ func getParseRecordIdFromDNSPod(dpc DNSPodConf) (recordId, recordType, recordIP,
 	return
 }
 
-func updateParseRecordToDNSPod(dpc DNSPodConf, ipAddr string) (err error) {
-	postContent := publicRequestInit(dpc)
-	postContent = postContent + "&" + recordModifyInit(dpc, ipAddr)
+func (dpc DNSPodConf) UpdateParseRecord(ipAddr string) (err error) {
+	postContent := dpc.PublicRequestInit()
+	postContent = postContent + "&" + dpc.RecordModifyInit(ipAddr)
 	recvJson, err := postman("https://dnsapi.cn/Record.Modify", postContent)
 	if err != nil {
 		return
@@ -105,35 +103,14 @@ func updateParseRecordToDNSPod(dpc DNSPodConf, ipAddr string) (err error) {
 	if err != nil {
 		return
 	}
-	err = checkDNSPodStatus(jsonObj)
+	err = dpc.CheckDNSPodStatus(jsonObj)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func postman(url, src string) (dst []byte, err error) {
-	httpClient := &http.Client{}
-	req, err := http.NewRequest("POST", url, strings.NewReader(src))
-	if err != nil {
-		return nil, err
-	}
-	defer req.Body.Close()
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("User-Agent", "ddns-client/"+common.LocalVersion+" ()")
-	res, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	dst, err = ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return
-}
-
-func publicRequestInit(dpc DNSPodConf) (pp string) {
+func (dpc DNSPodConf) PublicRequestInit() (pp string) {
 	pp = "login_token=" + dpc.Id + "," + dpc.Token +
 		"&format=" + "json" +
 		"&lang=" + "cn" +
@@ -141,13 +118,13 @@ func publicRequestInit(dpc DNSPodConf) (pp string) {
 	return
 }
 
-func recordListInit(dpc DNSPodConf) (ri string) {
+func (dpc DNSPodConf) RecordListInit() (ri string) {
 	ri = "domain=" + dpc.Domain +
 		"&sub_domain=" + dpc.SubDomain
 	return
 }
 
-func recordModifyInit(dpc DNSPodConf, ipAddr string) (rm string) {
+func (dpc DNSPodConf) RecordModifyInit(ipAddr string) (rm string) {
 	rm = "domain=" + dpc.Domain +
 		"&record_id=" + dpc.RecordId +
 		"&sub_domain=" + dpc.SubDomain +
