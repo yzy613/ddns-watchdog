@@ -12,6 +12,9 @@ func DNSPod(ipAddr string) (err error) {
 	err = common.LoadAndUnmarshal("./conf/dnspod.json", &dpc)
 	if err != nil {
 		err = common.MarshalAndSave(dpc, "./conf/dnspod.json")
+		if err != nil {
+			return
+		}
 		err = errors.New("请打开配置文件 ./conf/dnspod.json 填入你的 id, token, domain, sub_domain 并重新启动")
 		return
 	}
