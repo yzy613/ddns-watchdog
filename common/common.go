@@ -17,7 +17,7 @@ const (
 func IsDirExistAndCreate(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)
 	if err != nil || !os.IsExist(err) {
-		err = os.MkdirAll(dirPath, os.ModePerm)
+		err = os.MkdirAll(dirPath, 0750)
 		if err != nil {
 			return err
 		}
