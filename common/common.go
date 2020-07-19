@@ -67,7 +67,7 @@ func CopyFile(srcPath, dstPath string) (err error) {
 				return err
 			}
 		}
-		n, err = dstFile.Write(buf[:n])
+		_, err = dstFile.Write(buf[:n])
 		if err != nil {
 			return err
 		}

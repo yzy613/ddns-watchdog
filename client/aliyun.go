@@ -23,10 +23,11 @@ func Aliyun(ipAddr string) (err error) {
 		return
 	}
 
-	recordId, recordType, recordIP, err := ayc.GetParseRecordId()
+	recordId, _, recordIP, err := ayc.GetParseRecordId()
 	if err != nil {
 		return
 	}
+	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
 	} else {
@@ -52,6 +53,9 @@ func Aliyun(ipAddr string) (err error) {
 
 func (ayc AliyunConf) GetParseRecordId() (recordId, recordType, recordIP string, err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
+	if err != nil {
+		return
+	}
 
 	request := alidns.CreateDescribeDomainRecordsRequest()
 	request.Scheme = "https"
@@ -79,6 +83,9 @@ func (ayc AliyunConf) GetParseRecordId() (recordId, recordType, recordIP string,
 
 func (ayc AliyunConf) UpdateParseRecord(ipAddr string) (err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
+	if err != nil {
+		return
+	}
 
 	request := alidns.CreateUpdateDomainRecordRequest()
 	request.Scheme = "https"

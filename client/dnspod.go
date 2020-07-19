@@ -23,10 +23,11 @@ func DNSPod(ipAddr string) (err error) {
 		return
 	}
 
-	recordId, recordType, recordIP, lineId, err := dpc.GetParseRecordId()
+	recordId, _, recordIP, lineId, err := dpc.GetParseRecordId()
 	if err != nil {
 		return
 	}
+	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
 	} else {
