@@ -44,6 +44,7 @@ func Aliyun(ipAddr string) (err error) {
 	if recordIP == ipAddr {
 		return
 	}
+	
 	err = ayc.UpdateParseRecord(ipAddr)
 	if err != nil {
 		return
