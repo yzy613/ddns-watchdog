@@ -64,7 +64,8 @@ func main() {
 		fmt.Println(getErr)
 		return
 	}
-	if ipAddr != conf.LatestIP || *forcibly {
+	switch {
+	case ipAddr != conf.LatestIP || *forcibly:
 		conf.LatestIP = ipAddr
 		conf.IsIPv6 = isIPv6
 		getErr = common.MarshalAndSave(conf, "./conf/client.json")
@@ -96,11 +97,9 @@ func main() {
 				<-waitAliyun
 			}
 		}
-	} else {
-		if *moreTips {
-			fmt.Println("因为最新 IP 和当前本地记录的 IP 相同，所以跳过检查解析记录\n" +
-				"若需要强制检查 DNS 解析记录，请添加启动参数 -f")
-		}
+	case *moreTips:
+		fmt.Println("因为最新 IP 和当前本地记录的 IP 相同，所以跳过检查解析记录\n" +
+			"若需要强制检查 DNS 解析记录，请添加启动参数 -f")
 	}
 }
 
