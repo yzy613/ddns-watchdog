@@ -52,7 +52,7 @@ func CopyFile(srcPath, dstPath string) (err error) {
 			}
 		}
 	}
-	dstFile, err := os.OpenFile(dstPath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0744)
+	dstFile, err := os.OpenFile(dstPath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
 		return
 	}
@@ -78,7 +78,7 @@ func CopyFile(srcPath, dstPath string) (err error) {
 func LoadAndUnmarshal(filePath string, dst interface{}) error {
 	_, err := os.Stat(filePath)
 	if err != nil || os.IsExist(err) {
-		_, err = os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0664)
+		_, err = os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0600)
 		if err != nil {
 			return err
 		}
@@ -99,7 +99,7 @@ func MarshalAndSave(content interface{}, filePath string) (err error) {
 	if err != nil {
 		return
 	}
-	err = ioutil.WriteFile(filePath, jsonContent, 0666)
+	err = ioutil.WriteFile(filePath, jsonContent, 0600)
 	if err != nil {
 		return
 	}
