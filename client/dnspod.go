@@ -19,7 +19,7 @@ func DNSPod(ipAddr string) (err error) {
 		return
 	}
 	if dpc.Id == "" || dpc.Token == "" || dpc.Domain == "" || dpc.SubDomain == "" {
-		err = errors.New("请打开配置文件 ./conf/dnspod.json 填入你的 id, token, domain, sub_domain 并重新启动")
+		err = errors.New("请打开配置文件 ./conf/dnspod.json 核对你的 id, token, domain, sub_domain 并重新启动")
 		return
 	}
 

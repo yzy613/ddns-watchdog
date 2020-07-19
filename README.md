@@ -33,7 +33,7 @@
 
 - `./ddns-client -f` 强制检查 DNS 解析记录
 
-- `./ddns-client -version` 查看当前版本
+- `./ddns-client -version` 查看当前版本并检查更新
 
 ### 第一次使用？
 - 不要忘记程序需要执行权限 `chmod 774 ddns-client`

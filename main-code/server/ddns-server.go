@@ -13,7 +13,7 @@ import (
 var (
 	installMode   = flag.Bool("install", false, "安装服务")
 	uninstallMode = flag.Bool("uninstall", false, "卸载服务")
-	version       = flag.Bool("version", false, "查看当前版本")
+	version       = flag.Bool("version", false, "查看当前版本并检查更新")
 )
 
 func main() {

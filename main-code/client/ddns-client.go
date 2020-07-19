@@ -10,7 +10,7 @@ import (
 var (
 	forcibly = flag.Bool("f", false, "强制检查 DNS 解析记录")
 	moreTips = flag.Bool("mt", false, "显示更多的提示")
-	version  = flag.Bool("version", false, "查看当前版本")
+	version  = flag.Bool("version", false, "查看当前版本并检查更新")
 )
 
 func main() {
@@ -98,24 +98,24 @@ func main() {
 		}
 	} else {
 		if *moreTips {
-			fmt.Println("因为最新 IP 和当前文件记录的 IP 相同，所以跳过检查解析记录\n" +
+			fmt.Println("因为最新 IP 和当前本地记录的 IP 相同，所以跳过检查解析记录\n" +
 				"若需要强制检查 DNS 解析记录，请添加启动参数 -f")
 		}
 	}
 }
 
 func startDNSPod(ipAddr string, done chan bool) {
-	getErr := client.DNSPod(ipAddr)
-	if getErr != nil {
-		fmt.Println(getErr)
+	err := client.DNSPod(ipAddr)
+	if err != nil {
+		fmt.Println(err)
 	}
 	done <- true
 }
 
 func startAliyun(ipAddr string, done chan bool) {
-	getErr := client.Aliyun(ipAddr)
-	if getErr != nil {
-		fmt.Println(getErr)
+	err := client.Aliyun(ipAddr)
+	if err != nil {
+		fmt.Println(err)
 	}
 	done <- true
 }

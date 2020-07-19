@@ -2,7 +2,6 @@ package common
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -12,6 +11,7 @@ import (
 const (
 	LocalVersion = "0.2.3"
 	RootServer   = "https://yzyweb.cn/ddns"
+	ProjectAddr  = "https://github.com/yzy613/ddns/releases"
 )
 
 func IsDirExistAndCreate(dirPath string) (err error) {
@@ -106,31 +106,6 @@ func MarshalAndSave(content interface{}, filePath string) (err error) {
 	return nil
 }
 
-func Struct2Map(src interface{}) map[string]interface{} {
-	dst := make(map[string]interface{})
-	// 原始复制
-	/*key := reflect.TypeOf(src)
-	value := reflect.ValueOf(src)
-	for i := 0; i < key.NumField(); i++ {
-		if value.Field(i).Interface() == "" {
-			continue
-		}
-		dst[key.Field(i).Name] = value.Field(i).Interface()
-	}
-	return dst*/
-
-	// 以 json 格式复制
-	tmpJson, getErr := json.Marshal(src)
-	if getErr != nil {
-		fmt.Println(getErr)
-	}
-	getErr = json.Unmarshal(tmpJson, &dst)
-	if getErr != nil {
-		fmt.Println(getErr)
-	}
-	return dst
-}
-
 func CompareVersionString(remoteVersion, localVersion string) bool {
 	rv := strings.Split(remoteVersion, ".")
 	lv := strings.Split(localVersion, ".")
@@ -146,27 +121,27 @@ func CompareVersionString(remoteVersion, localVersion string) bool {
 
 func DecodeIPv6(srcIP string) (dstIP string) {
 	if strings.Contains(srcIP, "::") {
-		split := strings.Split(srcIP, "::")
+		splitArr := strings.Split(srcIP, "::")
 		decode := ""
 		switch {
 		case srcIP == "::":
 			dstIP = "0:0:0:0:0:0:0:0"
-		case split[0] == "" && split[1] != "":
-			for i := 0; i < 8-len(strings.Split(split[1], ":")); i++ {
+		case splitArr[0] == "" && splitArr[1] != "":
+			for i := 0; i < 8-len(strings.Split(splitArr[1], ":")); i++ {
 				decode = "0:" + decode
 			}
-			dstIP = decode + split[1]
-		case split[0] != "" && split[1] == "":
-			for i := 0; i < 8-len(strings.Split(split[0], ":")); i++ {
+			dstIP = decode + splitArr[1]
+		case splitArr[0] != "" && splitArr[1] == "":
+			for i := 0; i < 8-len(strings.Split(splitArr[0], ":")); i++ {
 				decode = decode + ":0"
 			}
-			dstIP = split[0] + decode
+			dstIP = splitArr[0] + decode
 		default:
-			for i := 0; i < 8-len(strings.Split(split[0], ":"))-len(strings.Split(split[1], ":")); i++ {
+			for i := 0; i < 8-len(strings.Split(splitArr[0], ":"))-len(strings.Split(splitArr[1], ":")); i++ {
 				decode = decode + ":0"
 			}
 			decode = decode + ":"
-			dstIP = split[0] + decode + split[1]
+			dstIP = splitArr[0] + decode + splitArr[1]
 		}
 	} else {
 		dstIP = srcIP

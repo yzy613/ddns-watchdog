@@ -38,19 +38,22 @@ func GetOwnIP(webAddr string) (ipAddr string, isIPv6 bool, err error) {
 }
 
 func GetLatestVersion(conf ClientConf) string {
-	res, getErr := http.Get(conf.WebAddr)
-	if getErr != nil {
-		return common.LocalVersion
+	res, err := http.Get(conf.WebAddr)
+	if err != nil {
+		return "N/A (请检查网络连接)"
 	}
 	defer res.Body.Close()
-	recvJson, getErr := ioutil.ReadAll(res.Body)
-	if getErr != nil {
-		return common.LocalVersion
+	recvJson, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return "N/A (数据包错误)"
 	}
 	recv := common.PublicInfo{}
-	getErr = json.Unmarshal(recvJson, &recv)
-	if getErr != nil {
-		return common.LocalVersion
+	err = json.Unmarshal(recvJson, &recv)
+	if err != nil {
+		return "N/A (数据包错误)"
+	}
+	if recv.Version == "" {
+		return "N/A (没有获取到版本信息)"
 	}
 	return recv.Version
 }
@@ -59,8 +62,11 @@ func CheckLatestVersion(conf ClientConf) {
 	LatestVersion := GetLatestVersion(conf)
 	fmt.Println("当前版本 ", common.LocalVersion)
 	fmt.Println("最新版本 ", LatestVersion)
-	if common.CompareVersionString(LatestVersion, common.LocalVersion) {
-		fmt.Println("\n发现新版本，请前往 https://github.com/yzy613/ddns/releases 下载")
+	switch {
+	case strings.Contains(LatestVersion, "N/A"):
+		fmt.Println("\n需要手动检查更新，请前往 " + common.ProjectAddr + " 查看")
+	case common.CompareVersionString(LatestVersion, common.LocalVersion):
+		fmt.Println("\n发现新版本，请前往 " + common.ProjectAddr + " 下载")
 	}
 }
 

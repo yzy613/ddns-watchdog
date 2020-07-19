@@ -19,7 +19,7 @@ func Aliyun(ipAddr string) (err error) {
 		return
 	}
 	if ayc.AccessKeyId == "" || ayc.AccessKeySecret == "" || ayc.Domain == "" || ayc.SubDomain == "" {
-		err = errors.New("请打开配置文件 ./conf/aliyun.json 填入你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
+		err = errors.New("请打开配置文件 ./conf/aliyun.json 核对你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
 		return
 	}
 
