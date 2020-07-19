@@ -71,14 +71,14 @@ func main() {
 		}
 	}
 	if *version {
-		server.CheckLatestVersion(conf)
+		conf.CheckLatestVersion()
 		return
 	}
 
 	ddnsServerHandler := func(w http.ResponseWriter, req *http.Request) {
 		info := common.PublicInfo{
 			IP:      server.GetClientIP(req),
-			Version: server.GetLatestVersion(conf),
+			Version: conf.GetLatestVersion(),
 		}
 		sendJson, getErr := json.Marshal(info)
 		if getErr != nil {

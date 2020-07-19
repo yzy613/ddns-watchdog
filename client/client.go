@@ -37,7 +37,7 @@ func GetOwnIP(webAddr string) (ipAddr string, isIPv6 bool, err error) {
 	return
 }
 
-func GetLatestVersion(conf ClientConf) string {
+func (conf ClientConf) GetLatestVersion() string {
 	res, err := http.Get(conf.WebAddr)
 	if err != nil {
 		return "N/A (请检查网络连接)"
@@ -58,8 +58,8 @@ func GetLatestVersion(conf ClientConf) string {
 	return recv.Version
 }
 
-func CheckLatestVersion(conf ClientConf) {
-	LatestVersion := GetLatestVersion(conf)
+func (conf ClientConf) CheckLatestVersion() {
+	LatestVersion := conf.GetLatestVersion()
 	fmt.Println("当前版本 ", common.LocalVersion)
 	fmt.Println("最新版本 ", LatestVersion)
 	switch {

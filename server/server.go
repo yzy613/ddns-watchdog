@@ -16,34 +16,40 @@ var (
 	ConfPath = WorkPath + "conf/"
 )
 
-func GetLatestVersion(conf ServerConf) string {
+func (conf ServerConf) GetLatestVersion() string {
 	if !conf.IsRoot {
-		res, getErr := http.Get(conf.RootServerAddr)
-		if getErr != nil {
-			return common.LocalVersion
+		res, err := http.Get(conf.RootServerAddr)
+		if err != nil {
+			return "N/A (请检查网络连接)"
 		}
 		defer res.Body.Close()
-		recvJson, getErr := ioutil.ReadAll(res.Body)
-		if getErr != nil {
-			return common.LocalVersion
+		recvJson, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return "N/A (数据包错误)"
 		}
 		recv := common.PublicInfo{}
-		getErr = json.Unmarshal(recvJson, &recv)
-		if getErr != nil {
-			return common.LocalVersion
+		err = json.Unmarshal(recvJson, &recv)
+		if err != nil {
+			return "N/A (数据包错误)"
+		}
+		if recv.Version == "" {
+			return "N/A (没有获取到版本信息)"
 		}
 		return recv.Version
 	}
 	return common.LocalVersion
 }
 
-func CheckLatestVersion(conf ServerConf) {
+func (conf ServerConf) CheckLatestVersion() {
 	if !conf.IsRoot {
-		LatestVersion := GetLatestVersion(conf)
+		LatestVersion := conf.GetLatestVersion()
 		fmt.Println("当前版本 ", common.LocalVersion)
 		fmt.Println("最新版本 ", LatestVersion)
-		if common.CompareVersionString(LatestVersion, common.LocalVersion) {
-			fmt.Println("\n发现新版本，请前往 https://github.com/yzy613/ddns/releases 下载")
+		switch {
+		case strings.Contains(LatestVersion, "N/A"):
+			fmt.Println("\n需要手动检查更新，请前往 " + common.ProjectAddr + " 查看")
+		case common.CompareVersionString(LatestVersion, common.LocalVersion):
+			fmt.Println("\n发现新版本，请前往 " + common.ProjectAddr + " 下载")
 		}
 	} else {
 		fmt.Println("本机是根服务器")
@@ -113,9 +119,9 @@ func Uninstall() {
 	if IsWindows() {
 		fmt.Println("Windows 暂不支持安装到系统")
 	} else {
-		getErr := os.Remove("/etc/systemd/system/ddns-server.service")
-		if getErr != nil {
-			fmt.Println(getErr)
+		err := os.Remove("/etc/systemd/system/ddns-server.service")
+		if err != nil {
+			fmt.Println(err)
 			return
 		}
 		fmt.Println("卸载服务成功")

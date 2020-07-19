@@ -51,7 +51,7 @@ func main() {
 		}
 	}
 	if *version {
-		client.CheckLatestVersion(conf)
+		conf.CheckLatestVersion()
 		return
 	}
 	if !conf.EnableDdns {
