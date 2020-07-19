@@ -46,7 +46,7 @@ func CopyFile(srcPath, dstPath string) (err error) {
 			for i := 0; i < dirPathLen-1; i++ {
 				dirPath = dirPath + dirSplit[i] + "/"
 			}
-			err = os.MkdirAll(dirPath, 0777)
+			err = os.MkdirAll(dirPath, 0750)
 			if err != nil {
 				return
 			}
