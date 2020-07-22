@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func GetOwnIP(webAddr string) (ipAddr string, isIPv6 bool, err error) {
+func GetOwnIP(webAddr string) (acquiredIP string, isIPv6 bool, err error) {
 	if webAddr == "" {
 		webAddr = common.RootServer
 	}
@@ -27,9 +27,9 @@ func GetOwnIP(webAddr string) (ipAddr string, isIPv6 bool, err error) {
 	if err != nil {
 		return
 	}
-	ipAddr = ipInfo.IP
+	acquiredIP = ipInfo.IP
 	// 判断 IP 类型
-	if strings.Contains(ipAddr, ":") {
+	if strings.Contains(acquiredIP, ":") {
 		isIPv6 = true
 	} else {
 		isIPv6 = false

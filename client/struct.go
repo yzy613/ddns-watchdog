@@ -1,12 +1,15 @@
 package client
 
+type Service struct {
+	DNSPod bool `json:"dnspod"`
+	Aliyun bool `json:"aliyun"`
+}
+
 type ClientConf struct {
-	WebAddr    string `json:"web_addr"`
-	LatestIP   string `json:"latest_ip"`
-	IsIPv6     bool   `json:"is_ipv6"`
-	EnableDdns bool   `json:"enable_ddns"`
-	DNSPod     bool   `json:"dnspod"`
-	Aliyun     bool   `json:"aliyun"`
+	WebAddr  string  `json:"web_addr"`
+	LatestIP string  `json:"latest_ip"`
+	IsIPv6   bool    `json:"is_ipv6"`
+	Services Service `json:"services"`
 }
 
 type DNSPodConf struct {

@@ -42,9 +42,10 @@ func Aliyun(ipAddr string) (err error) {
 		}
 	}
 	if recordIP == ipAddr {
+		err = errors.New("服务商记录的 IP 和当前获取的 IP 一致")
 		return
 	}
-	
+
 	err = ayc.UpdateParseRecord(ipAddr)
 	if err != nil {
 		return

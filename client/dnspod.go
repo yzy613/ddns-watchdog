@@ -43,6 +43,7 @@ func DNSPod(ipAddr string) (err error) {
 		}
 	}
 	if recordIP == ipAddr {
+		err = errors.New("服务商记录的 IP 和当前获取的 IP 一致")
 		return
 	}
 
@@ -53,7 +54,7 @@ func DNSPod(ipAddr string) (err error) {
 	return
 }
 
-func (dpc DNSPodConf) CheckDNSPodStatus(jsonObj *simplejson.Json) (err error) {
+func (dpc DNSPodConf) CheckRespondStatus(jsonObj *simplejson.Json) (err error) {
 	statusCode := jsonObj.Get("status").Get("code").MustString()
 	if statusCode != "1" {
 		err = errors.New("DNSPod return " + statusCode + "\n" + jsonObj.Get("status").Get("message").MustString())
@@ -74,7 +75,7 @@ func (dpc DNSPodConf) GetParseRecordId() (recordId, recordType, recordIP, lineId
 	if err != nil {
 		return
 	}
-	err = dpc.CheckDNSPodStatus(jsonObj)
+	err = dpc.CheckRespondStatus(jsonObj)
 	if err != nil {
 		return
 	}
@@ -108,7 +109,7 @@ func (dpc DNSPodConf) UpdateParseRecord(ipAddr string) (err error) {
 	if err != nil {
 		return
 	}
-	err = dpc.CheckDNSPodStatus(jsonObj)
+	err = dpc.CheckRespondStatus(jsonObj)
 	if err != nil {
 		return
 	}
