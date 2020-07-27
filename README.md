@@ -73,13 +73,13 @@
 ### 服务端 用法
 - `./ddns-server -install` 安装服务
 
-- 使用 `systemctl start ddns-server` 启动
+- `systemctl start ddns-server` 启动服务
 
 - `./ddns-server -uninstall` 卸载服务
 
 - `./ddns-server -version` 查看当前版本
 
 ## 文档资源
-- DNSPod API (https://www.dnspod.cn/docs/index.html)
+> DNSPod API (https://www.dnspod.cn/docs/index.html)
 
-- Aliyun SDK [GitHub](https://github.com/aliyun/alibaba-cloud-sdk-go) or (https://help.aliyun.com/product/29697.html)
+> Aliyun SDK [GitHub](https://github.com/aliyun/alibaba-cloud-sdk-go) or (https://help.aliyun.com/product/29697.html)

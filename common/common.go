@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	LocalVersion = "0.2.3"
+	LocalVersion = "0.2.4"
 	RootServer   = "https://yzyweb.cn/ddns"
 	ProjectAddr  = "https://github.com/yzy613/ddns/releases"
 )
