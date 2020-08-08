@@ -48,7 +48,7 @@
 
 - 按照 [支持的服务商](https://github.com/yzy613/ddns#%E6%94%AF%E6%8C%81%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%95%86) 进行配置
 
-- 若需使用网卡的 IP 地址，请在 `./conf/client.json` 修改 `enable_network_card` 为 `true` 并运行一次程序自动获取网卡信息，选择一个网卡填入 `./conf/client.json` 的 `network_card`
+- 若需使用网卡的 IP 地址，请在 `./conf/client.json` 修改 `enable_network_card` 为 `true` 并运行一次程序自动获取网卡信息，从 `./conf/network_card.json` 里面选择一个网卡填入 `./conf/client.json` 的 `network_card`
 
 - 若需配置多个 IP 的 ddns，可以结合 `-conf_path string` 启动参数配置多种配置文件（可搭配 `-init` 启动参数初始化配置文件）
 
@@ -75,7 +75,7 @@
 #### 没有找到你的域名解析服务商？
 - 请在 [Issues](https://github.com/yzy613/ddns/issues) 提出请求或者 pr (感激不尽)
 
-## 服务端 (一般情况下，不使用。请略过)
+## 服务端 (普通用户不会用到。请略过)
 - 返回 Json 格式的客户端 IP（支持 IPv6）
 
 ### 服务端 用法
