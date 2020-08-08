@@ -61,7 +61,7 @@ func main() {
 		log.Fatal("请打开客户端配置文件 " + client.ConfPath + "/client.json 启用需要使用的服务并重新启动")
 	}
 
-	// 对比上一次的 IP
+	// 获取 IP
 	acquiredIP, isIPv6, err := client.GetOwnIP(conf.APIUrl, conf.EnableNetworkCard, conf.NetworkCard)
 	if err != nil {
 		log.Fatal(err)
