@@ -9,10 +9,12 @@ import (
 
 func DNSPod(ipAddr string) (err error) {
 	dpc := DNSPodConf{}
+	// 获取配置
 	err = common.LoadAndUnmarshal(ConfPath+"/dnspod.json", &dpc)
 	if err != nil {
 		return
 	}
+
 	if dpc.Id == "" || dpc.Token == "" || dpc.Domain == "" || dpc.SubDomain == "" {
 		err = errors.New("请打开配置文件 " + ConfPath + "/dnspod.json 核对你的 id, token, domain, sub_domain 并重新启动")
 		return

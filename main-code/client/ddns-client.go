@@ -17,6 +17,7 @@ var (
 
 func main() {
 	flag.Parse()
+	// 加载自定义配置文件路径
 	if *confPath != "" {
 		client.ConfPath = *confPath
 	}
@@ -51,13 +52,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// 检查版本
 	if *version {
 		conf.CheckLatestVersion()
 		return
 	}
 
+	// 检查启用 ddns
 	if !conf.Services.DNSPod && !conf.Services.Aliyun {
-		// 需要用户手动设置
 		log.Fatal("请打开客户端配置文件 " + client.ConfPath + "/client.json 启用需要使用的服务并重新启动")
 	}
 

@@ -27,6 +27,7 @@ func NetworkCardRespond() (map[string]string, error) {
 			return nil, err
 		}
 		for _, addrAndMask := range ipAddr {
+			// 分离 IP 和子网掩码
 			addr := strings.Split(addrAndMask.String(), "/")[0]
 			if strings.Contains(addr, ":") {
 				addr = common.DecodeIPv6(addr)
@@ -41,6 +42,7 @@ func NetworkCardRespond() (map[string]string, error) {
 
 func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquiredIP string, isIPv6 bool, err error) {
 	if enableNetworkCard {
+		// 网卡获取
 		if networkCard == "" {
 			ncr, getErr := NetworkCardRespond()
 			err = getErr
@@ -53,6 +55,7 @@ func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquir
 			}
 			err = errors.New("请打开 " + ConfPath + "/network_card.json 选择一个网卡填入 " +
 				ConfPath + "/client.json 的 \"network_card\"")
+			return
 		} else {
 			ncr, getErr := NetworkCardRespond()
 			err = getErr
@@ -66,6 +69,7 @@ func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquir
 			}
 		}
 	} else {
+		// 远程获取
 		if apiUrl == "" {
 			apiUrl = common.RootServer
 		}
