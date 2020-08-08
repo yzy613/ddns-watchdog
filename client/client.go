@@ -3,31 +3,90 @@ package client
 import (
 	"ddns/common"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
 )
 
-func GetOwnIP(webAddr string) (acquiredIP string, isIPv6 bool, err error) {
-	if webAddr == "" {
-		webAddr = common.RootServer
-	}
-	res, err := http.Get(webAddr)
+var ConfPath = common.GetRunningPath() + "/conf"
+
+func NetworkCardRespond() (map[string]string, error) {
+	networkCardInfo := make(map[string]string)
+
+	interfaces, err := net.Interfaces()
 	if err != nil {
-		return
+		return nil, err
 	}
-	defer res.Body.Close()
-	recvJson, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return
+
+	for _, i := range interfaces {
+		ipAddr, err := i.Addrs()
+		if err != nil {
+			return nil, err
+		}
+		for _, addrAndMask := range ipAddr {
+			addr := strings.Split(addrAndMask.String(), "/")[0]
+			if strings.Contains(addr, ":") {
+				addr = common.DecodeIPv6(addr)
+				networkCardInfo[i.Name+" IPv6"] = addr
+			} else {
+				networkCardInfo[i.Name+" IPv4"] = addr
+			}
+		}
 	}
-	var ipInfo common.PublicInfo
-	err = json.Unmarshal(recvJson, &ipInfo)
-	if err != nil {
-		return
+	return networkCardInfo, nil
+}
+
+func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquiredIP string, isIPv6 bool, err error) {
+	if enableNetworkCard {
+		if networkCard == "" {
+			ncr, getErr := NetworkCardRespond()
+			err = getErr
+			if err != nil {
+				return
+			}
+			err = common.MarshalAndSave(ncr, ConfPath+"/network_card.json")
+			if err != nil {
+				return
+			}
+			err = errors.New("请打开 " + ConfPath + "/network_card.json 选择一个网卡填入 " +
+				ConfPath + "/client.json 的 \"network_card\"")
+		} else {
+			ncr, getErr := NetworkCardRespond()
+			err = getErr
+			if err != nil {
+				return
+			}
+			acquiredIP = ncr[networkCard]
+			if acquiredIP == "" {
+				err = errors.New("选择了不存在的网卡")
+				return
+			}
+		}
+	} else {
+		if apiUrl == "" {
+			apiUrl = common.RootServer
+		}
+		res, getErr := http.Get(apiUrl)
+		err = getErr
+		if err != nil {
+			return
+		}
+		defer res.Body.Close()
+		recvJson, getErr := ioutil.ReadAll(res.Body)
+		err = getErr
+		if err != nil {
+			return
+		}
+		var ipInfo common.PublicInfo
+		err = json.Unmarshal(recvJson, &ipInfo)
+		if err != nil {
+			return
+		}
+		acquiredIP = ipInfo.IP
 	}
-	acquiredIP = ipInfo.IP
 	// 判断 IP 类型
 	if strings.Contains(acquiredIP, ":") {
 		isIPv6 = true
@@ -38,7 +97,7 @@ func GetOwnIP(webAddr string) (acquiredIP string, isIPv6 bool, err error) {
 }
 
 func (conf ClientConf) GetLatestVersion() string {
-	res, err := http.Get(conf.WebAddr)
+	res, err := http.Get(conf.APIUrl)
 	if err != nil {
 		return "N/A (请检查网络连接)"
 	}

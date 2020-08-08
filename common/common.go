@@ -5,14 +5,21 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
 const (
-	LocalVersion = "0.2.4"
+	LocalVersion = "0.3.0"
 	RootServer   = "https://yzyweb.cn/ddns"
 	ProjectAddr  = "https://github.com/yzy613/ddns/releases"
 )
+
+func GetRunningPath() (path string) {
+	path, _ = filepath.Abs(filepath.Dir(os.Args[0]))
+	return strings.Replace(path, "\\", "/", -1)
+}
+
 
 func IsDirExistAndCreate(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)
@@ -95,6 +102,10 @@ func LoadAndUnmarshal(filePath string, dst interface{}) error {
 }
 
 func MarshalAndSave(content interface{}, filePath string) (err error) {
+	err = IsDirExistAndCreate(filepath.Dir(filePath))
+	if err != nil {
+		return
+	}
 	jsonContent, err := json.Marshal(content)
 	if err != nil {
 		return

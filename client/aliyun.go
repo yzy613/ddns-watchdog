@@ -9,17 +9,12 @@ import (
 
 func Aliyun(ipAddr string) (err error) {
 	ayc := AliyunConf{}
-	err = common.LoadAndUnmarshal("./conf/aliyun.json", &ayc)
+	err = common.LoadAndUnmarshal(ConfPath+"/aliyun.json", &ayc)
 	if err != nil {
-		err = common.MarshalAndSave(ayc, "./conf/aliyun.json")
-		if err != nil {
-			return
-		}
-		err = errors.New("请打开配置文件 ./conf/aliyun.json 填入你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
 		return
 	}
 	if ayc.AccessKeyId == "" || ayc.AccessKeySecret == "" || ayc.Domain == "" || ayc.SubDomain == "" {
-		err = errors.New("请打开配置文件 ./conf/aliyun.json 核对你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
+		err = errors.New("请打开配置文件 " + ConfPath + "/aliyun.json 核对你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
 		return
 	}
 
@@ -36,13 +31,13 @@ func Aliyun(ipAddr string) (err error) {
 	if recordId != ayc.RecordId || recordType != ayc.RecordType {
 		ayc.RecordId = recordId
 		ayc.RecordType = recordType
-		err = common.MarshalAndSave(ayc, "./conf/aliyun.json")
+		err = common.MarshalAndSave(ayc, ConfPath+"/aliyun.json")
 		if err != nil {
 			return
 		}
 	}
 	if recordIP == ipAddr {
-		err = errors.New("服务商记录的 IP 和当前获取的 IP 一致")
+		err = errors.New("阿里云记录的 IP 和当前获取的 IP 一致")
 		return
 	}
 

@@ -9,17 +9,12 @@ import (
 
 func DNSPod(ipAddr string) (err error) {
 	dpc := DNSPodConf{}
-	err = common.LoadAndUnmarshal("./conf/dnspod.json", &dpc)
+	err = common.LoadAndUnmarshal(ConfPath+"/dnspod.json", &dpc)
 	if err != nil {
-		err = common.MarshalAndSave(dpc, "./conf/dnspod.json")
-		if err != nil {
-			return
-		}
-		err = errors.New("请打开配置文件 ./conf/dnspod.json 填入你的 id, token, domain, sub_domain 并重新启动")
 		return
 	}
 	if dpc.Id == "" || dpc.Token == "" || dpc.Domain == "" || dpc.SubDomain == "" {
-		err = errors.New("请打开配置文件 ./conf/dnspod.json 核对你的 id, token, domain, sub_domain 并重新启动")
+		err = errors.New("请打开配置文件 " + ConfPath + "/dnspod.json 核对你的 id, token, domain, sub_domain 并重新启动")
 		return
 	}
 
@@ -37,13 +32,13 @@ func DNSPod(ipAddr string) (err error) {
 		dpc.RecordId = recordId
 		dpc.RecordType = recordType
 		dpc.RecordLineId = lineId
-		err = common.MarshalAndSave(dpc, "./conf/dnspod.json")
+		err = common.MarshalAndSave(dpc, ConfPath+"/dnspod.json")
 		if err != nil {
 			return
 		}
 	}
 	if recordIP == ipAddr {
-		err = errors.New("服务商记录的 IP 和当前获取的 IP 一致")
+		err = errors.New("DNSPod 记录的 IP 和当前获取的 IP 一致")
 		return
 	}
 

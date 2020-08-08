@@ -5,8 +5,8 @@ import (
 	"ddns/server"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -36,8 +36,7 @@ func main() {
 		getErr = common.IsDirExistAndCreate(server.ConfPath)
 	}
 	if getErr != nil {
-		fmt.Println(getErr)
-		return
+		log.Fatal(getErr)
 	}
 	if server.IsWindows() {
 		getErr = common.LoadAndUnmarshal("./conf/server.json", &conf)
@@ -45,7 +44,7 @@ func main() {
 		getErr = common.LoadAndUnmarshal(server.ConfPath+"server.json", &conf)
 	}
 	if getErr != nil {
-		fmt.Println(getErr)
+		log.Println(getErr)
 		// 这里不能 return
 	}
 
@@ -66,8 +65,7 @@ func main() {
 			getErr = common.MarshalAndSave(conf, server.ConfPath+"server.json")
 		}
 		if getErr != nil {
-			fmt.Println(getErr)
-			return
+			log.Fatal(getErr)
 		}
 	}
 	if *version {
@@ -82,13 +80,11 @@ func main() {
 		}
 		sendJson, getErr := json.Marshal(info)
 		if getErr != nil {
-			fmt.Println(getErr)
-			return
+			log.Fatal(getErr)
 		}
 		_, getErr = io.WriteString(w, string(sendJson))
 		if getErr != nil {
-			fmt.Println(getErr)
-			return
+			log.Fatal(getErr)
 		}
 	}
 
@@ -96,10 +92,9 @@ func main() {
 	http.HandleFunc("/", ddnsServerHandler)
 
 	// 启动监听
-	fmt.Println("Work on ", conf.Port)
+	log.Println("Work on ", conf.Port)
 	getErr = http.ListenAndServe(conf.Port, nil)
 	if getErr != nil {
-		fmt.Println(getErr)
-		return
+		log.Fatal(getErr)
 	}
 }

@@ -6,10 +6,12 @@ type Service struct {
 }
 
 type ClientConf struct {
-	WebAddr  string  `json:"web_addr"`
-	LatestIP string  `json:"latest_ip"`
-	IsIPv6   bool    `json:"is_ipv6"`
-	Services Service `json:"services"`
+	APIUrl            string  `json:"api_url"`
+	LatestIP          string  `json:"latest_ip"`
+	IsIPv6            bool    `json:"is_ipv6"`
+	EnableNetworkCard bool    `json:"enable_network_card"`
+	NetworkCard       string  `json:"network_card"`
+	Services          Service `json:"services"`
 }
 
 type DNSPodConf struct {
