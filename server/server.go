@@ -123,6 +123,6 @@ func Uninstall() {
 			log.Fatal(err)
 		}
 		log.Println("卸载服务成功")
-		log.Println("\n若要完全删除，请移步到 /opt/ddns 进行完全删除")
+		log.Println("\n若要完全删除，请移步到 " + WorkPath + " 进行完全删除")
 	}
 }

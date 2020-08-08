@@ -17,9 +17,8 @@ const (
 
 func GetRunningPath() (path string) {
 	path, _ = filepath.Abs(filepath.Dir(os.Args[0]))
-	return strings.Replace(path, "\\", "/", -1)
+	return strings.ReplaceAll(path, "\\", "/")
 }
-
 
 func IsDirExistAndCreate(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)
