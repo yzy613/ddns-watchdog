@@ -96,3 +96,5 @@
 > DNSPod API (https://www.dnspod.cn/docs/index.html)
 
 > Aliyun SDK [GitHub](https://github.com/aliyun/alibaba-cloud-sdk-go) or (https://help.aliyun.com/product/29697.html)
+
+> Cloudflare API (https://api.cloudflare.com/#dns-records-for-a-zone-properties)
