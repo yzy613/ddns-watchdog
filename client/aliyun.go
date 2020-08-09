@@ -19,29 +19,23 @@ func Aliyun(ipAddr string) (err error) {
 		err = errors.New("请打开配置文件 " + ConfPath + "/aliyun.json 核对你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
 		return
 	}
-
+	// 获取解析记录
 	recordId, recordIP, err := ayc.GetParseRecord()
 	if err != nil {
 		return
 	}
+	ayc.RecordId = recordId
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
 	} else {
 		recordType = "A"
 	}
-	if recordId != ayc.RecordId {
-		ayc.RecordId = recordId
-		err = common.MarshalAndSave(ayc, ConfPath+"/aliyun.json")
-		if err != nil {
-			return
-		}
-	}
 	if recordIP == ipAddr {
 		err = errors.New("阿里云记录的 IP 和当前获取的 IP 一致")
 		return
 	}
-
+	// 更新解析记录
 	err = ayc.UpdateParseRecord(ipAddr, recordType)
 	if err != nil {
 		return
@@ -73,7 +67,7 @@ func (ayc AliyunConf) GetParseRecord() (recordId, recordIP string, err error) {
 		}
 	}
 	if recordId == "" || recordIP == "" {
-		err = errors.New("解析记录不存在")
+		err = errors.New("阿里云: "+ayc.SubDomain + "." + ayc.Domain + " 解析记录不存在")
 	}
 	return
 }

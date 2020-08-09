@@ -14,7 +14,7 @@
 [![release](https://img.shields.io/github/v/release/yzy613/ddns)](https://github.com/yzy613/ddns/releases)
 [![downloads](https://img.shields.io/github/downloads/yzy613/ddns/total)](https://github.com/yzy613/ddns/releases)
 
-开箱即用的 Dynamic DNS 客户端，现已支持 DNSPod 阿里云，支持网卡 IP
+开箱即用的 Dynamic DNS 客户端，现已支持 DNSPod 阿里云 Cloudflare，支持网卡 IP
 
 ## 准备工作
 - 拥有（动态）公网 IPv6 地址或（动态）公网 IPv4 地址
@@ -71,6 +71,11 @@
 - 请打开配置文件 `./conf/aliyun.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
 
 - 如果没有生效，请注意是否在 `./conf/client.json` 启用 `aliyun`
+
+### Cloudflare
+- 请打开配置文件 `./conf/cloudflare.json` 填入你的 `email, api_key, zone_id, domain` 并重新启动
+
+- 如果没有生效，请注意是否在 `./conf/client.json` 启用 `cloudflare`
 
 #### 没有找到你的域名解析服务商？
 - 请在 [Issues](https://github.com/yzy613/ddns/issues) 提出请求或者 pr (感激不尽)

@@ -22,29 +22,23 @@ func Cloudflare(ipAddr string) (err error) {
 		err = errors.New("请打开配置文件 " + ConfPath + "/cloudflare.json 核对你的 email, api_key, zone_id, domain 并重新启动")
 		return
 	}
-
+	// 获取解析记录
 	domainID, recordIP, err := cfc.GetParseRecord()
 	if err != nil {
 		return
 	}
+	cfc.DomainID = domainID
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
 	} else {
 		recordType = "A"
 	}
-	if domainID != cfc.DomainID {
-		cfc.DomainID = domainID
-		err = common.MarshalAndSave(cfc, ConfPath+"/cloudflare.json")
-		if err != nil {
-			return
-		}
-	}
 	if recordIP == ipAddr {
 		err = errors.New("Cloudflare 记录的 IP 和当前获取的 IP 一致")
 		return
 	}
-
+	// 更新解析记录
 	err = cfc.UpdateParseRecord(ipAddr, recordType)
 	if err != nil {
 		return
@@ -76,9 +70,13 @@ func (cfc CloudflareConf) GetParseRecord() (domainID, recordIP string, err error
 	if err != nil {
 		return
 	}
+	if getErr := jsonObj.Get("error").MustString(); getErr != "" {
+		err = errors.New(getErr)
+		return
+	}
 	records, err := jsonObj.Get("result").Array()
 	if len(records) == 0 {
-		err = errors.New("解析记录不存在")
+		err = errors.New("Cloudflare: " + cfc.Domain + " 解析记录不存在")
 		return
 	}
 	for _, value := range records {
@@ -100,7 +98,6 @@ func (cfc CloudflareConf) UpdateParseRecord(ipAddr string, recordType string) (e
 		Name:    cfc.Domain,
 		Content: ipAddr,
 		Ttl:     1,
-		Proxied: false,
 	}
 	reqJson, err := json.Marshal(reqData)
 	req, err := http.NewRequest("PUT", url, strings.NewReader(string(reqJson)))
@@ -127,6 +124,22 @@ func (cfc CloudflareConf) UpdateParseRecord(ipAddr string, recordType string) (e
 	}
 	if getErr := jsonObj.Get("error").MustString(); getErr != "" {
 		err = errors.New(getErr)
+		return
+	}
+	if !jsonObj.Get("success").MustBool() {
+		errorsMsg := ""
+		errorsArr, getErr := jsonObj.Get("errors").Array()
+		if getErr != nil {
+			err = getErr
+			return
+		}
+		for _, value := range errorsArr {
+			element := value.(map[string]interface{})
+			errCode := element["code"].(json.Number)
+			errMsg := element["message"].(string)
+			errorsMsg = errorsMsg + "Cloudflare: " + errCode.String() + ": " + errMsg + "\n"
+		}
+		err = errors.New(errorsMsg)
 		return
 	}
 	return

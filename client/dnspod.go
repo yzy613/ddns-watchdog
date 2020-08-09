@@ -21,30 +21,24 @@ func DNSPod(ipAddr string) (err error) {
 		err = errors.New("请打开配置文件 " + ConfPath + "/dnspod.json 核对你的 id, token, domain, sub_domain 并重新启动")
 		return
 	}
-
+	// 获取解析记录
 	recordId, recordIP, lineId, err := dpc.GetParseRecord()
 	if err != nil {
 		return
 	}
+	dpc.RecordId = recordId
+	dpc.RecordLineId = lineId
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
 	} else {
 		recordType = "A"
 	}
-	if recordId != dpc.RecordId || lineId != dpc.RecordLineId {
-		dpc.RecordId = recordId
-		dpc.RecordLineId = lineId
-		err = common.MarshalAndSave(dpc, ConfPath+"/dnspod.json")
-		if err != nil {
-			return
-		}
-	}
 	if recordIP == ipAddr {
 		err = errors.New("DNSPod 记录的 IP 和当前获取的 IP 一致")
 		return
 	}
-
+	// 更新解析记录
 	err = dpc.UpdateParseRecord(ipAddr, recordType)
 	if err != nil {
 		return
@@ -55,7 +49,7 @@ func DNSPod(ipAddr string) (err error) {
 func (dpc DNSPodConf) CheckRespondStatus(jsonObj *simplejson.Json) (err error) {
 	statusCode := jsonObj.Get("status").Get("code").MustString()
 	if statusCode != "1" {
-		err = errors.New("DNSPod return " + statusCode + "\n" + jsonObj.Get("status").Get("message").MustString())
+		err = errors.New("DNSPod: " + statusCode + ": " + jsonObj.Get("status").Get("message").MustString())
 		return
 	}
 	return
@@ -79,7 +73,7 @@ func (dpc DNSPodConf) GetParseRecord() (recordId, recordIP, lineId string, err e
 	}
 	records, err := jsonObj.Get("records").Array()
 	if len(records) == 0 {
-		err = errors.New("解析记录不存在")
+		err = errors.New("DNSPod: " + dpc.SubDomain + "." + dpc.Domain + " 解析记录不存在")
 		return
 	}
 	for _, value := range records {
