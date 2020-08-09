@@ -1,6 +1,5 @@
 .idea
-conf
-conf.d
+conf*
 *.gz
 *.7z
 *.exe

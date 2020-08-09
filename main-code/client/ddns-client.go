@@ -25,7 +25,7 @@ func main() {
 	// 初始化配置
 	if *initOption {
 		conf := client.ClientConf{}
-		conf.APIUrl = common.RootServer
+		conf.APIUrl = common.DefaultAPIServer
 		conf.LatestIP = "0:0:0:0:0:0:0:0"
 		conf.IsIPv6 = true
 		err := common.MarshalAndSave(conf, client.ConfPath+"/client.json")

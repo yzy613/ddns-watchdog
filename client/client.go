@@ -71,7 +71,7 @@ func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquir
 	} else {
 		// 远程获取
 		if apiUrl == "" {
-			apiUrl = common.RootServer
+			apiUrl = common.DefaultAPIServer
 		}
 		res, getErr := http.Get(apiUrl)
 		err = getErr
@@ -127,8 +127,8 @@ func (conf ClientConf) CheckLatestVersion() {
 	fmt.Println("最新版本 ", LatestVersion)
 	switch {
 	case strings.Contains(LatestVersion, "N/A"):
-		fmt.Println("\n需要手动检查更新，请前往 " + common.ProjectAddr + " 查看")
+		fmt.Println("\n需要手动检查更新，请前往 " + common.ProjectUrl + " 查看")
 	case common.CompareVersionString(LatestVersion, common.LocalVersion):
-		fmt.Println("\n发现新版本，请前往 " + common.ProjectAddr + " 下载")
+		fmt.Println("\n发现新版本，请前往 " + common.ProjectUrl + " 下载")
 	}
 }

@@ -48,9 +48,9 @@ func (conf ServerConf) CheckLatestVersion() {
 		fmt.Println("最新版本 ", LatestVersion)
 		switch {
 		case strings.Contains(LatestVersion, "N/A"):
-			fmt.Println("\n需要手动检查更新，请前往 " + common.ProjectAddr + " 查看")
+			fmt.Println("\n需要手动检查更新，请前往 " + common.ProjectUrl + " 查看")
 		case common.CompareVersionString(LatestVersion, common.LocalVersion):
-			fmt.Println("\n发现新版本，请前往 " + common.ProjectAddr + " 下载")
+			fmt.Println("\n发现新版本，请前往 " + common.ProjectUrl + " 下载")
 		}
 	} else {
 		fmt.Println("本机是根服务器")

@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	LocalVersion = "0.4.0"
-	RootServer   = "https://yzyweb.cn/ddns"
-	ProjectAddr  = "https://github.com/yzy613/ddns/releases"
+	LocalVersion     = "0.4.0"
+	DefaultAPIServer = "https://yzyweb.cn/ddns"
+	ProjectUrl       = "https://github.com/yzy613/ddns/releases"
 )
 
 func GetRunningPath() (path string) {
