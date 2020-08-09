@@ -20,7 +20,7 @@ func Aliyun(ipAddr string) (err error) {
 		return
 	}
 
-	recordId, _, recordIP, err := ayc.GetParseRecordId()
+	recordId, recordIP, err := ayc.GetParseRecord()
 	if err != nil {
 		return
 	}
@@ -30,9 +30,8 @@ func Aliyun(ipAddr string) (err error) {
 	} else {
 		recordType = "A"
 	}
-	if recordId != ayc.RecordId || recordType != ayc.RecordType {
+	if recordId != ayc.RecordId {
 		ayc.RecordId = recordId
-		ayc.RecordType = recordType
 		err = common.MarshalAndSave(ayc, ConfPath+"/aliyun.json")
 		if err != nil {
 			return
@@ -43,14 +42,14 @@ func Aliyun(ipAddr string) (err error) {
 		return
 	}
 
-	err = ayc.UpdateParseRecord(ipAddr)
+	err = ayc.UpdateParseRecord(ipAddr, recordType)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func (ayc AliyunConf) GetParseRecordId() (recordId, recordType, recordIP string, err error) {
+func (ayc AliyunConf) GetParseRecord() (recordId, recordIP string, err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
 	if err != nil {
 		return
@@ -69,18 +68,17 @@ func (ayc AliyunConf) GetParseRecordId() (recordId, recordType, recordIP string,
 	for i := range response.DomainRecords.Record {
 		if response.DomainRecords.Record[i].RR == ayc.SubDomain {
 			recordId = response.DomainRecords.Record[i].RecordId
-			recordType = response.DomainRecords.Record[i].Type
 			recordIP = response.DomainRecords.Record[i].Value
 			break
 		}
 	}
-	if recordId == "" || recordType == "" || recordIP == "" {
+	if recordId == "" || recordIP == "" {
 		err = errors.New("解析记录不存在")
 	}
 	return
 }
 
-func (ayc AliyunConf) UpdateParseRecord(ipAddr string) (err error) {
+func (ayc AliyunConf) UpdateParseRecord(ipAddr string, recordType string) (err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
 	if err != nil {
 		return
@@ -91,7 +89,7 @@ func (ayc AliyunConf) UpdateParseRecord(ipAddr string) (err error) {
 
 	request.RecordId = ayc.RecordId
 	request.RR = ayc.SubDomain
-	request.Type = ayc.RecordType
+	request.Type = recordType
 	request.Value = ipAddr
 
 	_, err = client.UpdateDomainRecord(request)

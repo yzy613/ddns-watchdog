@@ -42,6 +42,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		cfc := client.CloudflareConf{}
+		err = common.MarshalAndSave(cfc, client.ConfPath+"/cloudflare.json")
+		if err != nil {
+			log.Fatal(err)
+		}
 		return
 	}
 
@@ -59,7 +64,7 @@ func main() {
 	}
 
 	// 检查启用 ddns
-	if !conf.Services.DNSPod && !conf.Services.Aliyun {
+	if !conf.Services.DNSPod && !conf.Services.Aliyun && !conf.Services.Cloudflare {
 		log.Fatal("请打开客户端配置文件 " + client.ConfPath + "/client.json 启用需要使用的服务并重新启动")
 	}
 
@@ -81,19 +86,24 @@ func main() {
 		}
 		waitDNSPod := make(chan bool)
 		waitAliyun := make(chan bool)
+		waitCloudflare := make(chan bool)
 		if conf.Services.DNSPod {
 			go startDNSPod(acquiredIP, waitDNSPod)
 		}
 		if conf.Services.Aliyun {
 			go startAliyun(acquiredIP, waitAliyun)
 		}
-		switch {
-		case conf.Services.DNSPod && conf.Services.Aliyun:
-			_, _ = <-waitDNSPod, <-waitAliyun
-		case conf.Services.DNSPod:
+		if conf.Services.Cloudflare {
+			go startCloudflare(acquiredIP, waitCloudflare)
+		}
+		if conf.Services.DNSPod {
 			<-waitDNSPod
-		case conf.Services.Aliyun:
+		}
+		if conf.Services.Aliyun {
 			<-waitAliyun
+		}
+		if conf.Services.Cloudflare {
+			<-waitCloudflare
 		}
 	case *moreTips:
 		log.Println("因为获取的 IP 和当前本地记录的 IP 相同，所以跳过检查解析记录\n" +
@@ -113,6 +123,14 @@ func startAliyun(ipAddr string, done chan bool) {
 	err := client.Aliyun(ipAddr)
 	if err != nil {
 		log.Println(err)
+	}
+	done <- true
+}
+
+func startCloudflare(ipAddr string, done chan bool) {
+	err := client.Cloudflare(ipAddr)
+	if err != nil {
+		log.Fatal(err)
 	}
 	done <- true
 }

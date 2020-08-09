@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LocalVersion = "0.3.0"
+	LocalVersion = "0.4.0"
 	RootServer   = "https://yzyweb.cn/ddns"
 	ProjectAddr  = "https://github.com/yzy613/ddns/releases"
 )
@@ -81,6 +81,7 @@ func CopyFile(srcPath, dstPath string) (err error) {
 	return
 }
 
+// dst 参数要加 & 才能修改原变量
 func LoadAndUnmarshal(filePath string, dst interface{}) error {
 	_, err := os.Stat(filePath)
 	if err != nil || os.IsExist(err) {
