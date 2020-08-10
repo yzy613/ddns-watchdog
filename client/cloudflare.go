@@ -1,7 +1,6 @@
 package client
 
 import (
-	"ddns/common"
 	"encoding/json"
 	"errors"
 	simplejson "github.com/bitly/go-simplejson"
@@ -10,24 +9,12 @@ import (
 	"strings"
 )
 
-func Cloudflare(ipAddr string) (err error) {
-	cfc := CloudflareConf{}
-	// 获取配置
-	err = common.LoadAndUnmarshal(ConfPath+"/cloudflare.json", &cfc)
-	if err != nil {
-		return
-	}
-
-	if cfc.Email == "" || cfc.APIKey == "" || cfc.ZoneID == "" || cfc.Domain == "" {
-		err = errors.New("请打开配置文件 " + ConfPath + "/cloudflare.json 核对你的 email, api_key, zone_id, domain 并重新启动")
-		return
-	}
+func Cloudflare(cfc CloudflareConf, ipAddr string) (err error) {
 	// 获取解析记录
-	domainID, recordIP, err := cfc.GetParseRecord()
+	recordIP, err := cfc.GetParseRecord()
 	if err != nil {
 		return
 	}
-	cfc.DomainID = domainID
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
@@ -46,7 +33,7 @@ func Cloudflare(ipAddr string) (err error) {
 	return
 }
 
-func (cfc CloudflareConf) GetParseRecord() (domainID, recordIP string, err error) {
+func (cfc *CloudflareConf) GetParseRecord() (recordIP string, err error) {
 	httpClient := &http.Client{}
 	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records?name=" + cfc.Domain
 	req, err := http.NewRequest("GET", url, nil)
@@ -82,7 +69,7 @@ func (cfc CloudflareConf) GetParseRecord() (domainID, recordIP string, err error
 	for _, value := range records {
 		element := value.(map[string]interface{})
 		if element["name"] == cfc.Domain {
-			domainID = element["id"].(string)
+			cfc.DomainID = element["id"].(string)
 			recordIP = element["content"].(string)
 			break
 		}

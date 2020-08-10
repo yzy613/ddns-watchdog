@@ -9,25 +9,12 @@ import (
 	"strings"
 )
 
-func DNSPod(ipAddr string) (err error) {
-	dpc := DNSPodConf{}
-	// 获取配置
-	err = common.LoadAndUnmarshal(ConfPath+"/dnspod.json", &dpc)
-	if err != nil {
-		return
-	}
-
-	if dpc.Id == "" || dpc.Token == "" || dpc.Domain == "" || dpc.SubDomain == "" {
-		err = errors.New("请打开配置文件 " + ConfPath + "/dnspod.json 核对你的 id, token, domain, sub_domain 并重新启动")
-		return
-	}
+func DNSPod(dpc DNSPodConf, ipAddr string) (err error) {
 	// 获取解析记录
-	recordId, recordIP, lineId, err := dpc.GetParseRecord()
+	recordIP, err := dpc.GetParseRecord()
 	if err != nil {
 		return
 	}
-	dpc.RecordId = recordId
-	dpc.RecordLineId = lineId
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
@@ -55,7 +42,7 @@ func (dpc DNSPodConf) CheckRespondStatus(jsonObj *simplejson.Json) (err error) {
 	return
 }
 
-func (dpc DNSPodConf) GetParseRecord() (recordId, recordIP, lineId string, err error) {
+func (dpc *DNSPodConf) GetParseRecord() (recordIP string, err error) {
 	postContent := dpc.PublicRequestInit()
 	postContent = postContent + "&" + dpc.RecordRequestInit()
 	recvJson, err := postman("https://dnsapi.cn/Record.List", postContent)
@@ -79,9 +66,9 @@ func (dpc DNSPodConf) GetParseRecord() (recordId, recordIP, lineId string, err e
 	for _, value := range records {
 		element := value.(map[string]interface{})
 		if element["name"] == dpc.SubDomain {
-			recordId = element["id"].(string)
+			dpc.RecordId = element["id"].(string)
 			recordIP = element["value"].(string)
-			lineId = element["line_id"].(string)
+			dpc.RecordLineId = element["line_id"].(string)
 			break
 		}
 	}
