@@ -39,7 +39,7 @@ func NetworkCardRespond() (map[string]string, error) {
 	return networkCardInfo, nil
 }
 
-func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquiredIP string, isIPv6 bool, err error) {
+func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquiredIP string, err error) {
 	if enableNetworkCard {
 		// 网卡获取
 		if networkCard == "" {
@@ -89,12 +89,6 @@ func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquir
 			return
 		}
 		acquiredIP = ipInfo.IP
-	}
-	// 判断 IP 类型
-	if strings.Contains(acquiredIP, ":") {
-		isIPv6 = true
-	} else {
-		isIPv6 = false
 	}
 	return
 }

@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LocalVersion     = "1.0.1"
+	LocalVersion     = "1.1.0"
 	DefaultAPIServer = "https://yzyweb.cn/ddns"
 	ProjectUrl       = "https://github.com/yzy613/ddns/releases"
 )

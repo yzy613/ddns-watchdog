@@ -5,11 +5,11 @@ import (
 	"ddns/common"
 	"flag"
 	"log"
+	"time"
 )
 
 var (
 	enforcement = flag.Bool("f", false, "强制检查 DNS 解析记录")
-	moreTips    = flag.Bool("mt", false, "显示更多的提示")
 	version     = flag.Bool("version", false, "查看当前版本并检查更新")
 	initOption  = flag.Bool("init", false, "初始化配置文件")
 	confPath    = flag.String("conf_path", "", "手动设置配置文件路径（绝对路径）（有空格用双引号）")
@@ -26,8 +26,7 @@ func main() {
 	if *initOption {
 		conf := client.ClientConf{}
 		conf.APIUrl = common.DefaultAPIServer
-		conf.LatestIP = "0:0:0:0:0:0:0:0"
-		conf.IsIPv6 = true
+		conf.CheckCycle = 0
 		err := common.MarshalAndSave(conf, client.ConfPath+"/client.json")
 		if err != nil {
 			log.Fatal(err)
@@ -68,21 +67,28 @@ func main() {
 		log.Fatal("请打开客户端配置文件 " + client.ConfPath + "/client.json 启用需要使用的服务并重新启动")
 	}
 
+	// 周期循环
+	skip := false
+	for !skip {
+		go check(&conf)
+		if conf.CheckCycle != 0 {
+			time.Sleep(time.Duration(conf.CheckCycle) * time.Minute)
+		} else {
+			skip = true
+		}
+	}
+}
+
+func check(conf *client.ClientConf) {
 	// 获取 IP
-	acquiredIP, isIPv6, err := client.GetOwnIP(conf.APIUrl, conf.EnableNetworkCard, conf.NetworkCard)
+	acquiredIP, err := client.GetOwnIP(conf.APIUrl, conf.EnableNetworkCard, conf.NetworkCard)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	switch {
-	case acquiredIP != conf.LatestIP || *enforcement:
+	if acquiredIP != conf.LatestIP || *enforcement {
 		if acquiredIP != conf.LatestIP {
 			conf.LatestIP = acquiredIP
-			conf.IsIPv6 = isIPv6
-			err = common.MarshalAndSave(conf, client.ConfPath+"/client.json")
-			if err != nil {
-				log.Fatal(err)
-			}
 		}
 		waitDNSPod := make(chan bool)
 		waitAliyun := make(chan bool)
@@ -105,9 +111,8 @@ func main() {
 		if conf.Services.Cloudflare {
 			<-waitCloudflare
 		}
-	case *moreTips:
-		log.Println("因为获取的 IP 和当前本地记录的 IP 相同，所以跳过检查解析记录\n" +
-			"若需要强制检查 DNS 解析记录，请添加启动参数 -f")
+	} else {
+		log.Println("当前获取的 IP 和上一次获取的 IP 相同")
 	}
 }
 
@@ -130,7 +135,7 @@ func startAliyun(ipAddr string, done chan bool) {
 func startCloudflare(ipAddr string, done chan bool) {
 	err := client.Cloudflare(ipAddr)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	done <- true
 }

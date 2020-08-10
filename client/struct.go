@@ -2,11 +2,11 @@ package client
 
 type ClientConf struct {
 	APIUrl            string  `json:"api_url"`
-	LatestIP          string  `json:"latest_ip"`
-	IsIPv6            bool    `json:"is_ipv6"`
+	LatestIP          string  `json:"-"`
 	EnableNetworkCard bool    `json:"enable_network_card"`
 	NetworkCard       string  `json:"network_card"`
 	Services          Service `json:"services"`
+	CheckCycle        int     `json:"check_cycle"`
 }
 
 type Service struct {
