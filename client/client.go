@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -26,15 +27,13 @@ func NetworkCardRespond() (map[string]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, addrAndMask := range ipAddr {
+		for j, addrAndMask := range ipAddr {
 			// 分离 IP 和子网掩码
 			addr := strings.Split(addrAndMask.String(), "/")[0]
 			if strings.Contains(addr, ":") {
 				addr = common.DecodeIPv6(addr)
-				networkCardInfo[i.Name+" IPv6"] = addr
-			} else {
-				networkCardInfo[i.Name+" IPv4"] = addr
 			}
+			networkCardInfo[i.Name+" "+strconv.Itoa(j)] = addr
 		}
 	}
 	return networkCardInfo, nil
@@ -54,7 +53,7 @@ func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquir
 				return
 			}
 			err = errors.New("请打开 " + ConfPath + "/network_card.json 选择一个网卡填入 " +
-				ConfPath + "/client.json 的 \"network_card\"")
+				ConfPath + "/client.json 的 network_card")
 			return
 		} else {
 			ncr, getErr := NetworkCardRespond()

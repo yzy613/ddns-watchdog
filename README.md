@@ -41,6 +41,8 @@
 - `./ddns-client -version` 查看当前版本并检查更新
 
 ### 第一次使用？
+- 注意：Windows 的记事本保存的文件编码为 UTF-8 with BOM，需要使用第三方编辑器手动重新编码为 UTF-8，否则会产生乱码
+
 - 不要忘记程序需要执行权限 `chmod 755 ddns-client`
 
 - 使用 `./ddns-client -init` 初始化配置文件

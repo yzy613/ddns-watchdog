@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LocalVersion     = "1.0.0"
+	LocalVersion     = "1.0.1"
 	DefaultAPIServer = "https://yzyweb.cn/ddns"
 	ProjectUrl       = "https://github.com/yzy613/ddns/releases"
 )
@@ -106,7 +106,7 @@ func MarshalAndSave(content interface{}, filePath string) (err error) {
 	if err != nil {
 		return
 	}
-	jsonContent, err := json.Marshal(content)
+	jsonContent, err := json.MarshalIndent(content, "", "\t")
 	if err != nil {
 		return
 	}
