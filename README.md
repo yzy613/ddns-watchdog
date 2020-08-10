@@ -13,6 +13,7 @@
 ![build](https://travis-ci.com/yzy613/ddns.svg?branch=master)
 [![release](https://img.shields.io/github/v/release/yzy613/ddns)](https://github.com/yzy613/ddns/releases)
 [![downloads](https://img.shields.io/github/downloads/yzy613/ddns/total)](https://github.com/yzy613/ddns/releases)
+[![click_download](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/ddns/releases)
 
 开箱即用的 Dynamic DNS 客户端，现已支持 DNSPod 阿里云 Cloudflare，支持网卡 IP
 
