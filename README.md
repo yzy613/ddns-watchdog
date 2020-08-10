@@ -33,7 +33,7 @@
 
 - `./ddns-client` 直接运行
 
-- `./ddns-client -conf_path string` 手动设置配置文件路径（有空格用双引号）
+- `./ddns-client -conf_path string` 手动设置配置文件路径（路径有空格用双引号）
 
 - `./ddns-client -f` 强制检查 DNS 解析记录
 
