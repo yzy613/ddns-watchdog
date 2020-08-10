@@ -13,10 +13,10 @@ var (
 	version     = flag.Bool("version", false, "查看当前版本并检查更新")
 	initOption  = flag.Bool("init", false, "初始化配置文件")
 	confPath    = flag.String("conf_path", "", "手动设置配置文件路径（绝对路径）（有空格用双引号）")
-	conf = client.ClientConf{}
-	dpc = client.DNSPodConf{}
-	ayc = client.AliyunConf{}
-	cfc = client.CloudflareConf{}
+	conf        = client.ClientConf{}
+	dpc         = client.DNSPodConf{}
+	ayc         = client.AliyunConf{}
+	cfc         = client.CloudflareConf{}
 )
 
 func main() {
