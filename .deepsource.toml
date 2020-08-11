@@ -5,4 +5,4 @@ name = "go"
 enabled = true
 
   [analyzers.meta]
-  import_paths = ["github.com/yzy613/ddns"]
+  import_paths = ["github.com/yzy613/watchdog-ddns"]
