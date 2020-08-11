@@ -14,60 +14,53 @@ var (
 	installMode   = flag.Bool("install", false, "安装服务")
 	uninstallMode = flag.Bool("uninstall", false, "卸载服务")
 	version       = flag.Bool("version", false, "查看当前版本并检查更新")
+	confPath      = flag.String("conf_path", "", "手动设置配置文件路径（绝对路径）（有空格用双引号）")
+	initOption    = flag.Bool("init", false, "初始化配置文件")
 )
 
 func main() {
 	flag.Parse()
+	// 加载自定义配置文件路径
+	if *confPath != "" {
+		server.ConfPath = *confPath
+	}
+
+	// 初始化配置
+	if *initOption {
+		err := RunInit()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
+	// 安装 / 卸载服务
 	switch {
 	case *installMode:
-		server.Install()
+		err := server.Install()
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = RunInit()
+		if err != nil {
+			log.Fatal(err)
+		}
 		return
 	case *uninstallMode:
-		server.Uninstall()
+		err := server.Uninstall()
+		if err != nil {
+			log.Fatal(err)
+		}
 		return
 	}
 
 	// 加载配置
 	conf := server.ServerConf{}
-	var getErr error
-	if server.IsWindows() {
-		getErr = common.IsDirExistAndCreate("./conf/")
-	} else {
-		getErr = common.IsDirExistAndCreate(server.ConfPath)
-	}
-	if getErr != nil {
-		log.Fatal(getErr)
-	}
-	if server.IsWindows() {
-		getErr = common.LoadAndUnmarshal("./conf/server.json", &conf)
-	} else {
-		getErr = common.LoadAndUnmarshal(server.ConfPath+"server.json", &conf)
-	}
-	if getErr != nil {
-		log.Println(getErr)
-		// 这里不能 return
+	err := common.LoadAndUnmarshal(server.ConfPath+"/server.json", &conf)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	saveMark := false
-	if conf.Port == "" {
-		conf.Port = ":10032"
-		saveMark = true
-	}
-	if conf.RootServerAddr == "" && !conf.IsRoot {
-		conf.IsRoot = false
-		conf.RootServerAddr = "https://yzyweb.cn/watchdog-ddns"
-		saveMark = true
-	}
-	if saveMark {
-		if server.IsWindows() {
-			getErr = common.MarshalAndSave(conf, "./conf/server.json")
-		} else {
-			getErr = common.MarshalAndSave(conf, server.ConfPath+"server.json")
-		}
-		if getErr != nil {
-			log.Fatal(getErr)
-		}
-	}
 	if *version {
 		conf.CheckLatestVersion()
 		return
@@ -78,13 +71,13 @@ func main() {
 			IP:      server.GetClientIP(req),
 			Version: conf.GetLatestVersion(),
 		}
-		sendJson, getErr := json.Marshal(info)
-		if getErr != nil {
-			log.Fatal(getErr)
+		sendJson, err := json.Marshal(info)
+		if err != nil {
+			log.Fatal(err)
 		}
-		_, getErr = io.WriteString(w, string(sendJson))
-		if getErr != nil {
-			log.Fatal(getErr)
+		_, err = io.WriteString(w, string(sendJson))
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 
@@ -93,8 +86,20 @@ func main() {
 
 	// 启动监听
 	log.Println("Work on", conf.Port)
-	getErr = http.ListenAndServe(conf.Port, nil)
-	if getErr != nil {
-		log.Fatal(getErr)
+	err = http.ListenAndServe(conf.Port, nil)
+	if err != nil {
+		log.Fatal(err)
 	}
+}
+
+func RunInit() (err error) {
+	conf := server.ServerConf{}
+	conf.Port = ":10032"
+	conf.IsRoot = false
+	conf.RootServerAddr = "https://yzyweb.cn/watchdog-ddns"
+	err = common.MarshalAndSave(conf, server.ConfPath+"/server.json")
+	if err != nil {
+		return
+	}
+	return
 }

@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	WorkPath = "/opt/watchdog-ddns/"
-	ConfPath = WorkPath + "conf/"
+	RunPath  = common.GetRunningPath()
+	ConfPath = RunPath + "/conf"
 )
 
 func (conf ServerConf) GetLatestVersion() string {
@@ -48,9 +48,9 @@ func (conf ServerConf) CheckLatestVersion() {
 		fmt.Println("最新版本 ", LatestVersion)
 		switch {
 		case strings.Contains(LatestVersion, "N/A"):
-			fmt.Println("\n需要手动检查更新，请前往 " + common.ProjectUrl + " 查看")
+			fmt.Println("需要手动检查更新，请前往 " + common.ProjectUrl + " 查看")
 		case common.CompareVersionString(LatestVersion, common.LocalVersion):
-			fmt.Println("\n发现新版本，请前往 " + common.ProjectUrl + " 下载")
+			fmt.Println("发现新版本，请前往 " + common.ProjectUrl + " 下载")
 		}
 	} else {
 		fmt.Println("本机是根服务器")
@@ -75,7 +75,7 @@ func GetClientIP(req *http.Request) (ipAddr string) {
 		}
 	}
 
-	// IPv6 转格式 和 ::解压
+	// IPv6 转格式 和 :: 解压
 	switch {
 	case strings.Contains(ipAddr, "["):
 		ipAddr = strings.Split(ipAddr[1:], "]")[0]
@@ -94,35 +94,33 @@ func IsWindows() bool {
 	}
 }
 
-func Install() {
-	serviceContent := []byte("[Unit]\nDescription=watchdog-ddns-server Service\nAfter=network.target\n\n[Service]\nType=simple\nExecStart=/opt/watchdog-ddns/watchdog-ddns-server\nRestart=on-failure\nRestartSec=2\n\n[Install]\nWantedBy=multi-user.target\n")
+func Install() (err error) {
+	serviceContent := []byte("[Unit]\nDescription=watchdog-ddns-server Service\nAfter=network.target\n\n[Service]\nType=simple\nExecStart=" +
+		RunPath + "/watchdog-ddns-server\nRestart=on-failure\nRestartSec=2\n\n[Install]\nWantedBy=multi-user.target\n")
 	if IsWindows() {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
-		// 复制文件到工作目录
-		getErr := common.CopyFile("./watchdog-ddns-server", WorkPath+"watchdog-ddns-server")
-		if getErr != nil {
-			log.Fatal(getErr)
-		}
-
 		// 注册系统服务
-		getErr = ioutil.WriteFile("/etc/systemd/system/watchdog-ddns-server.service", serviceContent, 0664)
-		if getErr != nil {
-			log.Fatal(getErr)
+		err = ioutil.WriteFile("/etc/systemd/system/watchdog-ddns-server.service", serviceContent, 0664)
+		if err != nil {
+			return
+
 		}
 		log.Println("可以使用 systemctl 控制 watchdog-ddns-server 服务了")
 	}
+	return
 }
 
-func Uninstall() {
+func Uninstall() (err error) {
 	if IsWindows() {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
-		err := os.Remove("/etc/systemd/system/watchdog-ddns-server.service")
+		err = os.Remove("/etc/systemd/system/watchdog-ddns-server.service")
 		if err != nil {
-			log.Fatal(err)
+			return
 		}
 		log.Println("卸载服务成功")
-		log.Println("\n若要完全删除，请移步到 " + WorkPath + " 进行完全删除")
+		log.Println("若要完全删除，请移步到 " + RunPath + " 和 " + ConfPath + " 完全删除")
 	}
+	return
 }

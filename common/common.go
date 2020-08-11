@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LocalVersion     = "1.2.0"
+	LocalVersion     = "1.2.1"
 	DefaultAPIServer = "https://yzyweb.cn/watchdog-ddns"
 	ProjectUrl       = "https://github.com/yzy613/watchdog-ddns/releases"
 )
@@ -31,6 +31,7 @@ func IsDirExistAndCreate(dirPath string) (err error) {
 	return
 }
 
+// [存档状态]
 func CopyFile(srcPath, dstPath string) (err error) {
 	srcFile, err := os.Open(srcPath)
 	if err != nil {
