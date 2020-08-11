@@ -56,6 +56,8 @@
 
 - 如果程序无提示结束且域名解析更新成功，那么程序工作正常，可以在 `./conf/client.json` 启用 `check_cycle` 进行定期检查（单位：分钟）（默认为 0，意为不启用定期检查）
 
+- 可添加 [watchdog-ddns-client.service](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client.service) 文件到 `/etc/systemd/system` 使用 `systemctl` 管理 watchdog-ddns-client （需要自行填写 `ExecStart` 参数）
+
 - Enjoy it!
 
 ### 支持的服务商
