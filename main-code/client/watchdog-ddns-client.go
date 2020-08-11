@@ -1,11 +1,11 @@
 package main
 
 import (
-	"ddns/client"
-	"ddns/common"
 	"flag"
 	"log"
 	"time"
+	"watchdog-ddns/client"
+	"watchdog-ddns/common"
 )
 
 var (

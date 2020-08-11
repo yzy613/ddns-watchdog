@@ -1,7 +1,6 @@
 package client
 
 import (
-	"ddns/common"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"watchdog-ddns/common"
 )
 
 var ConfPath = common.GetRunningPath() + "/conf"

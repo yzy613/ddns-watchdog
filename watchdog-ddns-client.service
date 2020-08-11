@@ -1,0 +1,12 @@
+[Unit]
+Description=watchdog-ddns-client Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart="在此填写绝对路径"
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

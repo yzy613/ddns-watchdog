@@ -1,13 +1,13 @@
 package main
 
 import (
-	"ddns/common"
-	"ddns/server"
 	"encoding/json"
 	"flag"
 	"io"
 	"log"
 	"net/http"
+	"watchdog-ddns/common"
+	"watchdog-ddns/server"
 )
 
 var (
@@ -92,7 +92,7 @@ func main() {
 	http.HandleFunc("/", ddnsServerHandler)
 
 	// 启动监听
-	log.Println("Work on ", conf.Port)
+	log.Println("Work on", conf.Port)
 	getErr = http.ListenAndServe(conf.Port, nil)
 	if getErr != nil {
 		log.Fatal(getErr)

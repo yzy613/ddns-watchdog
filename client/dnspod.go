@@ -1,12 +1,12 @@
 package client
 
 import (
-	"ddns/common"
 	"errors"
 	simplejson "github.com/bitly/go-simplejson"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"watchdog-ddns/common"
 )
 
 func DNSPod(dpc DNSPodConf, ipAddr string) (err error) {

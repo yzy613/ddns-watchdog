@@ -1,7 +1,6 @@
 package server
 
 import (
-	"ddns/common"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +9,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"watchdog-ddns/common"
 )
 
 var (
