@@ -92,6 +92,15 @@
 
 - `./watchdog-ddns-server -version` 查看当前版本
 
+## 安装 
+### Arch Linux
+- 对于基于Arch Linux的发行版, 可以通过 [AUR](https://aur.archlinux.org/packages/watchdog-ddns-client) 安装
+
+```bash
+yay -S watchdog-ddns //yay
+pikaur -S watchdog-ddns //pikaur
+```
+
 ## 文档资源
 > DNSPod API (https://www.dnspod.cn/docs/index.html)
 
