@@ -12,16 +12,16 @@
 [![language](https://img.shields.io/badge/language-Go-00acd7)](https://golang.org)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/yzy613/watchdog-ddns/?ref=repository-badge)
 ![build](https://travis-ci.com/yzy613/watchdog-ddns.svg?branch=master)
-[![release](https://img.shields.io/github/v/release/yzy613/watchdog-ddns)](https://github.com/yzy613/watchdog-ddns/releases)
+[![releases](https://img.shields.io/github/v/release/yzy613/watchdog-ddns)](https://github.com/yzy613/watchdog-ddns/releases)
 [![downloads](https://img.shields.io/github/downloads/yzy613/watchdog-ddns/total)](https://github.com/yzy613/watchdog-ddns/releases)
 [![click_download](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/watchdog-ddns/releases)
 
-开箱即用的可常驻 Dynamic DNS 客户端，现已支持 DNSPod 阿里云 Cloudflare，支持网卡 IP
+开箱即用的可常驻 Dynamic DNS 客户端，现已支持 `DNSPod` `阿里云` `Cloudflare`，支持网卡 IP
 
 ## 准备工作
 - 拥有（动态）公网 IPv6 地址或（动态）公网 IPv4 地址
 
-- 拥有一个属于你的域名且有权操作（若没有，可以前往 DNSPod、阿里云或其他提供商购买域名）
+- 拥有一个属于你的域名且有权操作（若没有，可以前往 `DNSPod` `阿里云`或其他提供商购买域名）
 
 - 域名的 DNS 服务器指向 [支持的服务商](https://github.com/yzy613/watchdog-ddns#%E6%94%AF%E6%8C%81%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%95%86)
 
@@ -40,7 +40,7 @@
 - `./watchdog-ddns-client -version` 查看当前版本并检查更新
 
 ### 第一次使用？
-- 注意：Windows 的记事本保存的文件编码为 UTF-8 with BOM，需要使用第三方编辑器手动重新编码为 UTF-8，否则会产生乱码
+- 注意：Windows 的记事本保存的文件编码为 UTF-8 with BOM，需要使用第三方编辑器手动重新编码为 UTF-8，否则将会出现乱码
 
 - 不要忘记程序需要执行权限 `chmod 755 watchdog-ddns-client`
 
@@ -79,7 +79,7 @@
 #### 没有找到你的域名解析服务商？
 - 请在 [Issues](https://github.com/yzy613/watchdog-ddns/issues) 提出请求或者 pr (感激不尽)
 
-## 服务端 (普通用户不会用到。请略过)
+## 服务端 (普通用户不会用到，请略过)
 - 返回 Json 格式的客户端 IP（支持 IPv6）
 
 ### 服务端 用法
@@ -101,8 +101,8 @@ pikaur -S watchdog-ddns //pikaur
 ```
 
 ## 文档资源
-> DNSPod API (https://www.dnspod.cn/docs/index.html)
+> DNSPod API [https://www.dnspod.cn/docs/index.html](https://www.dnspod.cn/docs/index.html)
 
-> Aliyun SDK [GitHub](https://github.com/aliyun/alibaba-cloud-sdk-go) or (https://help.aliyun.com/product/29697.html)
+> Aliyun SDK [GitHub](https://github.com/aliyun/alibaba-cloud-sdk-go) or [https://help.aliyun.com/product/29697.html](https://help.aliyun.com/product/29697.html)
 
-> Cloudflare API (https://api.cloudflare.com/#dns-records-for-a-zone-properties)
+> Cloudflare API [https://api.cloudflare.com/#dns-records-for-a-zone-properties](https://api.cloudflare.com/#dns-records-for-a-zone-properties)
