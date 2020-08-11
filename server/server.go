@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	WorkPath = "/opt/ddns/"
+	WorkPath = "/opt/watchdog-ddns/"
 	ConfPath = WorkPath + "conf/"
 )
 
@@ -95,22 +95,22 @@ func IsWindows() bool {
 }
 
 func Install() {
-	serviceContent := []byte("[Unit]\nDescription=ddns-server Service\nAfter=network.target\n\n[Service]\nType=simple\nExecStart=/opt/ddns/ddns-server\nRestart=on-failure\n\n[Install]\nWantedBy=multi-user.target\n")
+	serviceContent := []byte("[Unit]\nDescription=watchdog-ddns-server Service\nAfter=network.target\n\n[Service]\nType=simple\nExecStart=/opt/watchdog-ddns/watchdog-ddns-server\nRestart=on-failure\nRestartSec=2\n\n[Install]\nWantedBy=multi-user.target\n")
 	if IsWindows() {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
 		// 复制文件到工作目录
-		getErr := common.CopyFile("./ddns-server", WorkPath+"ddns-server")
+		getErr := common.CopyFile("./watchdog-ddns-server", WorkPath+"watchdog-ddns-server")
 		if getErr != nil {
 			log.Fatal(getErr)
 		}
 
 		// 注册系统服务
-		getErr = ioutil.WriteFile("/etc/systemd/system/ddns-server.service", serviceContent, 0664)
+		getErr = ioutil.WriteFile("/etc/systemd/system/watchdog-ddns-server.service", serviceContent, 0664)
 		if getErr != nil {
 			log.Fatal(getErr)
 		}
-		log.Println("可以使用 systemctl 控制 ddns-server 服务了")
+		log.Println("可以使用 systemctl 控制 watchdog-ddns-server 服务了")
 	}
 }
 
@@ -118,7 +118,7 @@ func Uninstall() {
 	if IsWindows() {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
-		err := os.Remove("/etc/systemd/system/ddns-server.service")
+		err := os.Remove("/etc/systemd/system/watchdog-ddns-server.service")
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -55,7 +55,7 @@ func main() {
 	}
 	if conf.RootServerAddr == "" && !conf.IsRoot {
 		conf.IsRoot = false
-		conf.RootServerAddr = "https://yzyweb.cn/ddns"
+		conf.RootServerAddr = "https://yzyweb.cn/watchdog-ddns"
 		saveMark = true
 	}
 	if saveMark {
