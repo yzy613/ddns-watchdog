@@ -95,12 +95,13 @@ func IsWindows() bool {
 }
 
 func Install() (err error) {
-	serviceContent := []byte("[Unit]\nDescription=watchdog-ddns-server Service\nAfter=network.target\n\n[Service]\nType=simple\nExecStart=" +
-		RunPath + "/watchdog-ddns-server\nRestart=on-failure\nRestartSec=2\n\n[Install]\nWantedBy=multi-user.target\n")
 	if IsWindows() {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
 		// 注册系统服务
+		serviceContent := []byte("[Unit]\nDescription=watchdog-ddns-server Service\nAfter=network.target\n\n[Service]\nType=simple\nExecStart=" +
+			RunPath + "/watchdog-ddns-server -conf_path " + ConfPath +
+			"\nRestart=on-failure\nRestartSec=2\n\n[Install]\nWantedBy=multi-user.target\n")
 		err = ioutil.WriteFile("/etc/systemd/system/watchdog-ddns-server.service", serviceContent, 0664)
 		if err != nil {
 			return
