@@ -61,7 +61,6 @@
 - Enjoy it!
 
 ### 支持的服务商
-
 #### DNSPod
 - 请打开配置文件 `./conf/dnspod.json` 填入你的 `id, token, domain, sub_domain` 并重新启动
 
