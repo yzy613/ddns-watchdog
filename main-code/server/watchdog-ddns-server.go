@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	installMode   = flag.Bool("install", false, "安装服务")
-	uninstallMode = flag.Bool("uninstall", false, "卸载服务")
-	version       = flag.Bool("version", false, "查看当前版本并检查更新")
-	confPath      = flag.String("conf_path", "", "手动设置配置文件路径（绝对路径）（有空格用双引号）")
-	initOption    = flag.Bool("init", false, "初始化配置文件")
+	installOption   = flag.Bool("install", false, "安装服务")
+	uninstallOption = flag.Bool("uninstall", false, "卸载服务")
+	version         = flag.Bool("version", false, "查看当前版本并检查更新")
+	confPath        = flag.String("conf_path", "", "手动设置配置文件路径（绝对路径）（有空格用双引号）")
+	initOption      = flag.Bool("init", false, "初始化配置文件")
 )
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
 
 	// 安装 / 卸载服务
 	switch {
-	case *installMode:
+	case *installOption:
 		err := server.Install()
 		if err != nil {
 			log.Fatal(err)
@@ -46,7 +46,7 @@ func main() {
 			log.Fatal(err)
 		}
 		return
-	case *uninstallMode:
+	case *uninstallOption:
 		err := server.Uninstall()
 		if err != nil {
 			log.Fatal(err)
