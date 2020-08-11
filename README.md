@@ -11,17 +11,17 @@
 # Watchdog-ddns
 [![language](https://img.shields.io/badge/language-Go-00acd7)](https://golang.org)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/yzy613/watchdog-ddns/?ref=repository-badge)
-![build](https://travis-ci.com/yzy613/watchdog-ddns.svg?branch=master "build")
+![build](https://travis-ci.com/yzy613/watchdog-ddns.svg?branch=master)
 [![releases](https://img.shields.io/github/v/release/yzy613/watchdog-ddns)](https://github.com/yzy613/watchdog-ddns/releases)
 [![downloads](https://img.shields.io/github/downloads/yzy613/watchdog-ddns/total)](https://github.com/yzy613/watchdog-ddns/releases)
 [![click_download](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/watchdog-ddns/releases)
 
-开箱即用的可常驻 Dynamic DNS 客户端，现已支持 DNSPod 阿里云 Cloudflare，支持网卡 IP
+开箱即用的可常驻 Dynamic DNS 客户端，现已支持 `DNSPod` `阿里云` `Cloudflare`，支持网卡 IP
 
 ## 准备工作
 - 拥有（动态）公网 IPv6 地址或（动态）公网 IPv4 地址
 
-- 拥有一个属于你的域名且有权操作（若没有，可以前往 DNSPod 阿里云或其他提供商购买域名）
+- 拥有一个属于你的域名且有权操作（若没有，可以前往 `DNSPod` `阿里云`或其他提供商购买域名）
 
 - 域名的 DNS 服务器指向 [支持的服务商](https://github.com/yzy613/watchdog-ddns#%E6%94%AF%E6%8C%81%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%95%86)
 
@@ -56,7 +56,7 @@
 
 - 如果程序无提示结束且域名解析更新成功，那么程序工作正常，可以在 `./conf/client.json` 启用 `check_cycle` 进行定期检查（单位：分钟）（默认为 0，意为不启用定期检查）
 
-- 可添加 [watchdog-ddns-client.service](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client.service "watchdog-ddns-client.service") 文件到 `/etc/systemd/system` 使用 `systemctl` 管理 watchdog-ddns-client （需要自行填写 `ExecStart` 参数）
+- 可添加 [watchdog-ddns-client.service](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client.service) 文件到 `/etc/systemd/system` 使用 `systemctl` 管理 watchdog-ddns-client （需要自行填写 `ExecStart` 参数）
 
 - Enjoy it!
 
