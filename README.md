@@ -9,7 +9,7 @@
 
 ```
 # Watchdog-ddns
-[![language-Go](https://img.shields.io/badge/language-Go-00acd7)](https://golang.org/ "golang.org")
+[![language](https://img.shields.io/badge/language-Go-00acd7)](https://golang.org/ "golang.org")
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/yzy613/watchdog-ddns/?ref=repository-badge "DeepSource")
 ![build](https://travis-ci.com/yzy613/watchdog-ddns.svg?branch=master "build")
 [![releases](https://img.shields.io/github/v/release/yzy613/watchdog-ddns)](https://github.com/yzy613/watchdog-ddns/releases "releases")
