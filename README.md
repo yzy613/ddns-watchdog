@@ -40,6 +40,8 @@
 - `./watchdog-ddns-client -version` 查看当前版本并检查更新
 
 ### 第一次使用？
+- 前往 [releases](https://github.com/yzy613/watchdog-ddns/releases) 选择下载符合自己系统的压缩包，解压得到二进制文件
+
 - 注意：Windows 的记事本保存的文件编码为 UTF-8 with BOM，需要使用第三方编辑器手动重新编码为 UTF-8，否则将会出现乱码
 
 - 不要忘记程序需要执行权限 `chmod 755 watchdog-ddns-client`

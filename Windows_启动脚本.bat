@@ -9,6 +9,6 @@ echo 》                   欢迎使用 watchdog-ddns
 echo 》                        程序已运行
 echo 》=================================================================
 echo 》                                     
-call ddns-client.exe
+call watchdog-ddns-client.exe
 echo.
 pause
