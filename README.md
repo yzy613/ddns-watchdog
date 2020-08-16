@@ -16,12 +16,12 @@
 [![downloads](https://img.shields.io/github/downloads/yzy613/watchdog-ddns/total)](https://github.com/yzy613/watchdog-ddns/releases)
 [![click_download](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/watchdog-ddns/releases)
 
-开箱即用的可常驻 Dynamic DNS 客户端，现已支持 `DNSPod` `阿里云` `Cloudflare`，支持网卡 IP
+开箱即用的可常驻 Dynamic DNS 客户端，现已支持 DNSPod 阿里云 Cloudflare，支持网卡 IP
 
 ## 准备工作
 - 拥有（动态）公网 IPv6 地址或（动态）公网 IPv4 地址
 
-- 拥有一个属于你的域名且有权操作（若没有，可以前往 `DNSPod` `阿里云`或其他提供商购买域名）
+- 拥有一个属于你的域名且有权操作（若没有，可以前往 DNSPod 阿里云或其他提供商购买域名）
 
 - 域名的 DNS 服务器指向 [支持的服务商](https://github.com/yzy613/watchdog-ddns#%E6%94%AF%E6%8C%81%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%95%86)
 
@@ -64,19 +64,19 @@
 
 ### 支持的服务商
 #### DNSPod
-- 请打开配置文件 `./conf/dnspod.json` 填入你的 `id, token, domain, sub_domain` 并重新启动
+- 请在 `./conf/client.json` 修改 `dnspod` 为 `true`
 
-- 如果没有生效，请在 `./conf/client.json` 修改 `dnspod` 为 `true`
+- 打开配置文件 `./conf/dnspod.json` 填入你的 `id, token, domain, sub_domain` 并重新启动
 
 #### 阿里云（万网）
-- 请打开配置文件 `./conf/aliyun.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
+- 请在 `./conf/client.json` 修改 `aliyun` 为 `true`
 
-- 如果没有生效，请在 `./conf/client.json` 修改 `aliyun` 为 `true`
+- 打开配置文件 `./conf/aliyun.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
 
 #### Cloudflare
-- 请打开配置文件 `./conf/cloudflare.json` 填入你的 `email, api_key, zone_id, domain` 并重新启动
+- 请在 `./conf/client.json` 修改 `cloudflare` 为 `true`
 
-- 如果没有生效，请在 `./conf/client.json` 修改 `cloudflare` 为 `true`
+- 打开配置文件 `./conf/cloudflare.json` 填入你的 `email, api_key, zone_id, domain` 并重新启动
 
 #### 没有找到你的域名解析服务商？
 - 请在 [Issues](https://github.com/yzy613/watchdog-ddns/issues) 提出请求或者 pr (感激不尽)
