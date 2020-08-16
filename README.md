@@ -66,17 +66,17 @@
 #### DNSPod
 - 请打开配置文件 `./conf/dnspod.json` 填入你的 `id, token, domain, sub_domain` 并重新启动
 
-- 如果没有生效，请注意是否在 `./conf/client.json` 启用 `dnspod`
+- 如果没有生效，请在 `./conf/client.json` 修改 `dnspod` 为 `true`
 
 #### 阿里云（万网）
 - 请打开配置文件 `./conf/aliyun.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
 
-- 如果没有生效，请注意是否在 `./conf/client.json` 启用 `aliyun`
+- 如果没有生效，请在 `./conf/client.json` 修改 `aliyun` 为 `true`
 
 #### Cloudflare
 - 请打开配置文件 `./conf/cloudflare.json` 填入你的 `email, api_key, zone_id, domain` 并重新启动
 
-- 如果没有生效，请注意是否在 `./conf/client.json` 启用 `cloudflare`
+- 如果没有生效，请在 `./conf/client.json` 修改 `cloudflare` 为 `true`
 
 #### 没有找到你的域名解析服务商？
 - 请在 [Issues](https://github.com/yzy613/watchdog-ddns/issues) 提出请求或者 pr (感激不尽)
