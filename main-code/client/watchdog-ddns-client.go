@@ -105,17 +105,19 @@ func main() {
 
 	// 周期循环
 	skip := false
+	waitCheck := make(chan bool)
 	for !skip {
-		go check(&conf)
+		go check(&conf, waitCheck)
 		if conf.CheckCycle != 0 {
 			time.Sleep(time.Duration(conf.CheckCycle) * time.Minute)
 		} else {
 			skip = true
+			<-waitCheck
 		}
 	}
 }
 
-func check(conf *client.ClientConf) {
+func check(conf *client.ClientConf, done chan bool) {
 	// 获取 IP
 	acquiredIP, err := client.GetOwnIP(conf.APIUrl, conf.EnableNetworkCard, conf.NetworkCard)
 	if err != nil {
@@ -150,6 +152,7 @@ func check(conf *client.ClientConf) {
 	} else {
 		log.Println("当前获取的 IP 和上一次获取的 IP 相同")
 	}
+	done <- true
 }
 
 func startDNSPod(ipAddr string, done chan bool) {
