@@ -5,8 +5,8 @@ color 3f
 echo watchdog-ddns-client is starting...
 echo.
 echo =================================================================
-echo                   欢迎使用 watchdog-ddns-client
-echo                           程序已运行
+echo               Welcome to use watchdog-ddns-client
+echo                  watchdog-ddns-client has run
 echo =================================================================
 echo.
 call watchdog-ddns-client.exe
