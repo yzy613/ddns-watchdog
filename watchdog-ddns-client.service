@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart="在此填写绝对路径"
+ExecStart=在此填写watchdog-ddns-client的绝对路径
 Restart=on-failure
 RestartSec=2
 
