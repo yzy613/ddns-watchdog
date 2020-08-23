@@ -105,19 +105,19 @@ func main() {
 
 	// 周期循环
 	skip := false
-	waitCheck := make(chan bool)
+	waitCheckDone := make(chan bool, 1)
 	for !skip {
-		go check(&conf, waitCheck)
+		go asyncCheck(&conf, waitCheckDone)
 		if conf.CheckCycle != 0 {
 			time.Sleep(time.Duration(conf.CheckCycle) * time.Minute)
 		} else {
 			skip = true
-			<-waitCheck
 		}
+		<-waitCheckDone
 	}
 }
 
-func check(conf *client.ClientConf, done chan bool) {
+func asyncCheck(conf *client.ClientConf, done chan bool) {
 	// 获取 IP
 	acquiredIP, err := client.GetOwnIP(conf.APIUrl, conf.EnableNetworkCard, conf.NetworkCard)
 	if err != nil {
@@ -128,26 +128,28 @@ func check(conf *client.ClientConf, done chan bool) {
 		if acquiredIP != conf.LatestIP {
 			conf.LatestIP = acquiredIP
 		}
-		waitDNSPod := make(chan bool)
-		waitAliyun := make(chan bool)
-		waitCloudflare := make(chan bool)
+		servicesCount := 0
 		if conf.Services.DNSPod {
-			go startDNSPod(acquiredIP, waitDNSPod)
+			servicesCount++
 		}
 		if conf.Services.Aliyun {
-			go startAliyun(acquiredIP, waitAliyun)
+			servicesCount++
 		}
 		if conf.Services.Cloudflare {
-			go startCloudflare(acquiredIP, waitCloudflare)
+			servicesCount++
 		}
+		waitServicesDone := make(chan bool, servicesCount)
 		if conf.Services.DNSPod {
-			<-waitDNSPod
+			go asyncDNSPod(acquiredIP, waitServicesDone)
 		}
 		if conf.Services.Aliyun {
-			<-waitAliyun
+			go asyncAliyun(acquiredIP, waitServicesDone)
 		}
 		if conf.Services.Cloudflare {
-			<-waitCloudflare
+			go asyncCloudflare(acquiredIP, waitServicesDone)
+		}
+		for i := 0; i < servicesCount; i++ {
+			<-waitServicesDone
 		}
 	} else {
 		log.Println("当前获取的 IP 和上一次获取的 IP 相同")
@@ -155,7 +157,7 @@ func check(conf *client.ClientConf, done chan bool) {
 	done <- true
 }
 
-func startDNSPod(ipAddr string, done chan bool) {
+func asyncDNSPod(ipAddr string, done chan bool) {
 	err := client.DNSPod(dpc, ipAddr)
 	if err != nil {
 		log.Println(err)
@@ -163,7 +165,7 @@ func startDNSPod(ipAddr string, done chan bool) {
 	done <- true
 }
 
-func startAliyun(ipAddr string, done chan bool) {
+func asyncAliyun(ipAddr string, done chan bool) {
 	err := client.Aliyun(ayc, ipAddr)
 	if err != nil {
 		log.Println(err)
@@ -171,7 +173,7 @@ func startAliyun(ipAddr string, done chan bool) {
 	done <- true
 }
 
-func startCloudflare(ipAddr string, done chan bool) {
+func asyncCloudflare(ipAddr string, done chan bool) {
 	err := client.Cloudflare(cfc, ipAddr)
 	if err != nil {
 		log.Println(err)
