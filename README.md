@@ -44,7 +44,7 @@
 
 - 注意：Windows 的记事本保存的文件编码为 UTF-8 with BOM，需要使用第三方编辑器手动重新编码为 UTF-8，否则将会出现乱码
 
-- 不要忘记程序需要执行权限 `chmod 755 watchdog-ddns-client`
+- 在 Linux 上不要忘记程序需要执行权限 `chmod 755 watchdog-ddns-client`
 
 - 使用 `./watchdog-ddns-client -init` 初始化配置文件（在 Windows 下使用 [watchdog-ddns-client-startup-script.bat](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client-startup-script.bat) 一气呵成）
 
@@ -58,15 +58,16 @@
 
 - 如果程序无提示结束且域名解析更新成功，那么程序工作正常，可以在 `./conf/client.json` 启用 `check_cycle` 进行定期检查（单位：分钟）（默认为 0，意为不启用定期检查）
 
-- 可添加 [watchdog-ddns-client.service](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client.service) 文件到 `/etc/systemd/system` 使用 `systemctl` 管理 watchdog-ddns-client （需要自行填写 `ExecStart` 参数）
+- Enjoy it!（喜欢可以点一个 star 哦）
 
-- 在 Windows 下使用的可选用法
+### 可选操作
+- 在 Linux 上
+1. 可添加 [watchdog-ddns-client.service](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client.service) 文件到 `/etc/systemd/system` 使用 `systemctl` 管理 watchdog-ddns-client（需要自行填写 `ExecStart` 参数）
 
+- 在 Windows 上
 1. [watchdog-ddns-client-startup-script.bat](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client-startup-script.bat) 直接运行程序并回显程序返回的信息（需与 watchdog-ddns-client.exe 同一文件夹）
 2. [watchdog-ddns-client-nohup.vbs](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client-nohup.vbs) 不弹出运行窗口，在后台静默运行（需与 watchdog-ddns-client.exe 同一文件夹）
 3. `Win`+`R` 后键入 `shell:startup` 会打开开机启动文件夹，将快捷方式粘贴在此处，即可进行开机启动（或把 watchdog-ddns-client-nohup.vbs 的快捷方式粘贴在此处，进行开机启动后台静默运行）
-
-- Enjoy it!（喜欢可以点一个 star 哦）
 
 ### 支持的服务商
 #### DNSPod
