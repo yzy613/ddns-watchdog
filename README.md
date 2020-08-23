@@ -46,7 +46,7 @@
 
 - 不要忘记程序需要执行权限 `chmod 755 watchdog-ddns-client`
 
-- 使用 `./watchdog-ddns-client -init` 初始化配置文件
+- 使用 `./watchdog-ddns-client -init` 初始化配置文件（在 Windows 下使用 [watchdog-ddns-client-startup-script.bat](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client-startup-script.bat) 一气呵成）
 
 - 默认获取的是 IPv4，若需 IPv6，请在 `./conf/client.json` 修改 `api_url` 为 `https://yzyweb.cn/watchdog-ddns6`（此方法会优先使用临时 IPv6 地址）
 
