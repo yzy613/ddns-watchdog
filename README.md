@@ -60,7 +60,13 @@
 
 - 可添加 [watchdog-ddns-client.service](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client.service) 文件到 `/etc/systemd/system` 使用 `systemctl` 管理 watchdog-ddns-client （需要自行填写 `ExecStart` 参数）
 
-- Enjoy it!
+- 在 Windows 下使用的可选用法
+
+1. [watchdog-ddns-client-startup-script.bat](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client-startup-script.bat) 直接运行程序并回显程序返回的信息（需与 watchdog-ddns-client.exe 同一文件夹）
+2. [watchdog-ddns-client-nohup.vbs](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client-nohup.vbs) 不弹出运行窗口，在后台静默运行（需与 watchdog-ddns-client.exe 同一文件夹）
+3. `Win`+`R` 后键入 `shell:startup` 会打开开机启动文件夹，将快捷方式粘贴在此处，即可进行开机启动（或把 watchdog-ddns-client-nohup.vbs 的快捷方式粘贴在此处，进行开机启动后台静默运行）
+
+- Enjoy it!（喜欢可以点一个 star 哦）
 
 ### 支持的服务商
 #### DNSPod
