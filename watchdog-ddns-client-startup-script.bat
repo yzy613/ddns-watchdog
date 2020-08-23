@@ -3,17 +3,17 @@ mode con cols=65 lines=30
 title=watchdog-ddns-client-startup-script
 color 3f
 
-:check
 SET conf=.\conf
-if not exist %conf% (md conf)else goto start
-echo Program Init.
-echo Please change .\conf\client.json
+if not exist %conf% (md conf) else goto start
+echo watchdog-ddns-client has initialized
+echo Please change .\conf\client.json file
+echo.
 echo Press any key to contiune ...
 pause>nul
 cls
 
 :start
-echo watchdog-ddns-client is starting...
+echo watchdog-ddns-client is starting ...
 echo.
 echo =================================================================
 echo               Welcome to use watchdog-ddns-client
