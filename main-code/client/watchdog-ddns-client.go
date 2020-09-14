@@ -34,17 +34,14 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		dpc := client.DNSPodConf{}
 		err = common.MarshalAndSave(dpc, client.ConfPath+"/dnspod.json")
 		if err != nil {
 			log.Fatal(err)
 		}
-		ayc := client.AliyunConf{}
 		err = common.MarshalAndSave(ayc, client.ConfPath+"/aliyun.json")
 		if err != nil {
 			log.Fatal(err)
 		}
-		cfc := client.CloudflareConf{}
 		err = common.MarshalAndSave(cfc, client.ConfPath+"/cloudflare.json")
 		if err != nil {
 			log.Fatal(err)
