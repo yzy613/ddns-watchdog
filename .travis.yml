@@ -6,7 +6,7 @@ os:
 dist: "xenial"
 
 go:
-  - 1.14.x
+  - 1.15.x
   # 使用最新 Go 源码运行，但是测试时间会大大延长
   #- master
 
