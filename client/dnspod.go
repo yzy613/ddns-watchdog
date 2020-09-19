@@ -4,31 +4,36 @@ import (
 	"errors"
 	simplejson "github.com/bitly/go-simplejson"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"watchdog-ddns/common"
 )
 
 func DNSPod(dpc DNSPodConf, ipAddr string) (err error) {
-	// 获取解析记录
-	recordIP, err := dpc.GetParseRecord()
-	if err != nil {
-		return
-	}
-	recordType := ""
-	if strings.Contains(ipAddr, ":") {
-		recordType = "AAAA"
-	} else {
-		recordType = "A"
-	}
-	if recordIP == ipAddr {
-		err = errors.New("DNSPod 记录的 IP 和当前获取的 IP 一致")
-		return
-	}
-	// 更新解析记录
-	err = dpc.UpdateParseRecord(ipAddr, recordType)
-	if err != nil {
-		return
+	for _, subDomain := range dpc.SubDomain {
+		// 获取解析记录
+		recordIP, err := dpc.GetParseRecord(subDomain)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		recordType := ""
+		if strings.Contains(ipAddr, ":") {
+			recordType = "AAAA"
+		} else {
+			recordType = "A"
+		}
+		if recordIP == ipAddr {
+			continue
+		}
+		// 更新解析记录
+		err = dpc.UpdateParseRecord(ipAddr, recordType, subDomain)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Println("DNSPod: " + subDomain + "." + dpc.Domain + " has updated")
 	}
 	return
 }
@@ -42,9 +47,9 @@ func (dpc DNSPodConf) CheckRespondStatus(jsonObj *simplejson.Json) (err error) {
 	return
 }
 
-func (dpc *DNSPodConf) GetParseRecord() (recordIP string, err error) {
+func (dpc *DNSPodConf) GetParseRecord(subDomain string) (recordIP string, err error) {
 	postContent := dpc.PublicRequestInit()
-	postContent = postContent + "&" + dpc.RecordRequestInit()
+	postContent = postContent + "&" + dpc.RecordRequestInit(subDomain)
 	recvJson, err := postman("https://dnsapi.cn/Record.List", postContent)
 	if err != nil {
 		return
@@ -60,12 +65,12 @@ func (dpc *DNSPodConf) GetParseRecord() (recordIP string, err error) {
 	}
 	records, err := jsonObj.Get("records").Array()
 	if len(records) == 0 {
-		err = errors.New("DNSPod: " + dpc.SubDomain + "." + dpc.Domain + " 解析记录不存在")
+		err = errors.New("DNSPod: " + subDomain + "." + dpc.Domain + " 解析记录不存在")
 		return
 	}
 	for _, value := range records {
 		element := value.(map[string]interface{})
-		if element["name"] == dpc.SubDomain {
+		if element["name"] == subDomain {
 			dpc.RecordId = element["id"].(string)
 			recordIP = element["value"].(string)
 			dpc.RecordLineId = element["line_id"].(string)
@@ -75,9 +80,9 @@ func (dpc *DNSPodConf) GetParseRecord() (recordIP string, err error) {
 	return
 }
 
-func (dpc DNSPodConf) UpdateParseRecord(ipAddr string, recordType string) (err error) {
+func (dpc DNSPodConf) UpdateParseRecord(ipAddr, recordType, subDomain string) (err error) {
 	postContent := dpc.PublicRequestInit()
-	postContent = postContent + "&" + dpc.RecordModifyRequestInit(ipAddr, recordType)
+	postContent = postContent + "&" + dpc.RecordModifyRequestInit(ipAddr, recordType, subDomain)
 	recvJson, err := postman("https://dnsapi.cn/Record.Modify", postContent)
 	if err != nil {
 		return
@@ -102,16 +107,16 @@ func (dpc DNSPodConf) PublicRequestInit() (pp string) {
 	return
 }
 
-func (dpc DNSPodConf) RecordRequestInit() (rr string) {
+func (dpc DNSPodConf) RecordRequestInit(subDomain string) (rr string) {
 	rr = "domain=" + dpc.Domain +
-		"&sub_domain=" + dpc.SubDomain
+		"&sub_domain=" + subDomain
 	return
 }
 
-func (dpc DNSPodConf) RecordModifyRequestInit(ipAddr string, recordType string) (rm string) {
+func (dpc DNSPodConf) RecordModifyRequestInit(ipAddr, recordType, subDomain string) (rm string) {
 	rm = "domain=" + dpc.Domain +
 		"&record_id=" + dpc.RecordId +
-		"&sub_domain=" + dpc.SubDomain +
+		"&sub_domain=" + subDomain +
 		"&record_type=" + recordType +
 		"&record_line_id=" + dpc.RecordLineId +
 		"&value=" + ipAddr

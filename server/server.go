@@ -7,14 +7,15 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"runtime"
 	"strings"
 	"watchdog-ddns/common"
 )
 
 var (
-	RunPath  = common.GetRunningPath()
-	ConfPath = RunPath + "/conf"
+	RunningName = "watchdog-ddns-server"
+	RunningPath = common.GetRunningPath()
+	InstallPath = "/etc/systemd/system/" + RunningName + ".service"
+	ConfPath    = RunningPath + "conf/"
 )
 
 func (conf ServerConf) GetLatestVersion() string {
@@ -44,14 +45,7 @@ func (conf ServerConf) GetLatestVersion() string {
 func (conf ServerConf) CheckLatestVersion() {
 	if !conf.IsRoot {
 		LatestVersion := conf.GetLatestVersion()
-		fmt.Println("当前版本 ", common.LocalVersion)
-		fmt.Println("最新版本 ", LatestVersion)
-		switch {
-		case strings.Contains(LatestVersion, "N/A"):
-			fmt.Println("需要手动检查更新，请前往 " + common.ProjectUrl + " 查看")
-		case common.CompareVersionString(LatestVersion, common.LocalVersion):
-			fmt.Println("发现新版本，请前往 " + common.ProjectUrl + " 下载")
-		}
+		common.VersionTips(LatestVersion)
 	} else {
 		fmt.Println("本机是根服务器")
 		fmt.Println("当前版本 ", common.LocalVersion)
@@ -86,42 +80,42 @@ func GetClientIP(req *http.Request) (ipAddr string) {
 	return
 }
 
-func IsWindows() bool {
-	if runtime.GOOS == "windows" {
-		return true
-	} else {
-		return false
-	}
-}
-
 func Install() (err error) {
-	if IsWindows() {
+	if common.IsWindows() {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
 		// 注册系统服务
-		serviceContent := []byte("[Unit]\nDescription=watchdog-ddns-server Service\nAfter=network.target\n\n[Service]\nType=simple\nExecStart=" +
-			RunPath + "/watchdog-ddns-server -conf_path " + ConfPath +
-			"\nRestart=on-failure\nRestartSec=2\n\n[Install]\nWantedBy=multi-user.target\n")
-		err = ioutil.WriteFile("/etc/systemd/system/watchdog-ddns-server.service", serviceContent, 0664)
+		serviceContent := []byte(
+			"[Unit]\n" +
+				"Description=" + RunningName + " Service\n" +
+				"After=network.target\n\n" +
+				"[Service]\n" +
+				"Type=simple\n" +
+				"ExecStart=" + RunningPath + RunningName + " -conf_path " + ConfPath +
+				"\nRestart=on-failure\n" +
+				"RestartSec=2\n\n" +
+				"[Install]\n" +
+				"WantedBy=multi-user.target\n")
+		err = ioutil.WriteFile(InstallPath, serviceContent, 0664)
 		if err != nil {
 			return
 
 		}
-		log.Println("可以使用 systemctl 控制 watchdog-ddns-server 服务了")
+		log.Println("可以使用 systemctl 控制 " + RunningName + " 服务了")
 	}
 	return
 }
 
 func Uninstall() (err error) {
-	if IsWindows() {
+	if common.IsWindows() {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
-		err = os.Remove("/etc/systemd/system/watchdog-ddns-server.service")
+		err = os.Remove(InstallPath)
 		if err != nil {
 			return
 		}
 		log.Println("卸载服务成功")
-		log.Println("若要完全删除，请移步到 " + RunPath + " 和 " + ConfPath + " 完全删除")
+		log.Println("若要完全删除，请移步到 " + RunningPath + " 和 " + ConfPath + " 完全删除")
 	}
 	return
 }

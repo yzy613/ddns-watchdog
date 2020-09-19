@@ -22,7 +22,11 @@ func main() {
 	flag.Parse()
 	// 加载自定义配置文件路径
 	if *confPath != "" {
-		server.ConfPath = *confPath
+		tempStr := *confPath
+		if tempStr[len(tempStr)-1:] != "/" {
+			tempStr = tempStr + "/"
+		}
+		server.ConfPath = tempStr
 	}
 
 	// 初始化配置
@@ -41,6 +45,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		// 初始化配置
 		err = RunInit()
 		if err != nil {
 			log.Fatal(err)

@@ -1,79 +1,87 @@
 #!/bin/bash
 
+CLIENT_NAME='watchdog-ddns-client'
+CLIENT_CODE_FILE='./main-code/client/watchdog-ddns-client.go'
+SERVER_NAME='watchdog-ddns-server'
+SERVER_CODE_FILE='./main-code/server/watchdog-ddns-server.go'
+OUTPUT_PATH='./build/'
+
+
 # client
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-w -s" -o watchdog-ddns-client ./main-code/client/watchdog-ddns-client.go
-tar -czvf watchdog-ddns-client.linux-amd64.tar.gz watchdog-ddns-client
-rm -f watchdog-ddns-client
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-w -s" -o $OUTPUT_PATH$CLIENT_NAME $CLIENT_CODE_FILE
+tar -czvf $OUTPUT_PATH$CLIENT_NAME.linux-amd64.tar.gz -C $OUTPUT_PATH $CLIENT_NAME
+rm -f $OUTPUT_PATH$CLIENT_NAME
 
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-w -s" -o watchdog-ddns-client.exe ./main-code/client/watchdog-ddns-client.go
-tar -czvf watchdog-ddns-client.windows-amd64.tar.gz watchdog-ddns-client.exe
-rm -f watchdog-ddns-client.exe
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-w -s" -o $OUTPUT_PATH$CLIENT_NAME.exe $CLIENT_CODE_FILE
+tar -czvf $OUTPUT_PATH$CLIENT_NAME.windows-amd64.tar.gz -C $OUTPUT_PATH $CLIENT_NAME.exe
+rm -f $OUTPUT_PATH$CLIENT_NAME.exe
 
-CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags "-w -s" -o watchdog-ddns-client ./main-code/client/watchdog-ddns-client.go
-tar -czvf watchdog-ddns-client.darwin-amd64.tar.gz watchdog-ddns-client
-rm -f watchdog-ddns-client
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags "-w -s" -o $OUTPUT_PATH$CLIENT_NAME $CLIENT_CODE_FILE
+tar -czvf $OUTPUT_PATH$CLIENT_NAME.darwin-amd64.tar.gz -C $OUTPUT_PATH $CLIENT_NAME
+rm -f $OUTPUT_PATH$CLIENT_NAME
 
 # mips
-CGO_ENABLED=0 GOOS=linux GOARCH=mips64le go build -ldflags "-w -s" -o watchdog-ddns-client ./main-code/client/watchdog-ddns-client.go
-tar -czvf watchdog-ddns-client.linux-mips64le.tar.gz watchdog-ddns-client
-rm -f watchdog-ddns-client
+CGO_ENABLED=0 GOOS=linux GOARCH=mips64le go build -ldflags "-w -s" -o $OUTPUT_PATH$CLIENT_NAME $CLIENT_CODE_FILE
+tar -czvf $OUTPUT_PATH$CLIENT_NAME.linux-mips64le.tar.gz -C $OUTPUT_PATH $CLIENT_NAME
+rm -f $OUTPUT_PATH$CLIENT_NAME
 
-CGO_ENABLED=0 GOOS=linux GOARCH=mips64 go build -ldflags "-w -s" -o watchdog-ddns-client ./main-code/client/watchdog-ddns-client.go
-tar -czvf watchdog-ddns-client.linux-mips64.tar.gz watchdog-ddns-client
-rm -f watchdog-ddns-client
+CGO_ENABLED=0 GOOS=linux GOARCH=mips64 go build -ldflags "-w -s" -o $OUTPUT_PATH$CLIENT_NAME $CLIENT_CODE_FILE
+tar -czvf $OUTPUT_PATH$CLIENT_NAME.linux-mips64.tar.gz -C $OUTPUT_PATH $CLIENT_NAME
+rm -f $OUTPUT_PATH$CLIENT_NAME
 
-CGO_ENABLED=0 GOOS=linux GOARCH=mipsle go build -ldflags "-w -s" -o watchdog-ddns-client ./main-code/client/watchdog-ddns-client.go
-tar -czvf watchdog-ddns-client.linux-mipsle.tar.gz watchdog-ddns-client
-rm -f watchdog-ddns-client
+CGO_ENABLED=0 GOOS=linux GOARCH=mipsle go build -ldflags "-w -s" -o $OUTPUT_PATH$CLIENT_NAME $CLIENT_CODE_FILE
+tar -czvf $OUTPUT_PATH$CLIENT_NAME.linux-mipsle.tar.gz -C $OUTPUT_PATH $CLIENT_NAME
+rm -f $OUTPUT_PATH$CLIENT_NAME
 
-CGO_ENABLED=0 GOOS=linux GOARCH=mips go build -ldflags "-w -s" -o watchdog-ddns-client ./main-code/client/watchdog-ddns-client.go
-tar -czvf watchdog-ddns-client.linux-mips.tar.gz watchdog-ddns-client
-rm -f watchdog-ddns-client
+CGO_ENABLED=0 GOOS=linux GOARCH=mips go build -ldflags "-w -s" -o $OUTPUT_PATH$CLIENT_NAME $CLIENT_CODE_FILE
+tar -czvf $OUTPUT_PATH$CLIENT_NAME.linux-mips.tar.gz -C $OUTPUT_PATH $CLIENT_NAME
+rm -f $OUTPUT_PATH$CLIENT_NAME
 
 # arm
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-w -s" -o watchdog-ddns-client ./main-code/client/watchdog-ddns-client.go
-tar -czvf watchdog-ddns-client.linux-arm64.tar.gz watchdog-ddns-client
-rm -f watchdog-ddns-client
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-w -s" -o $OUTPUT_PATH$CLIENT_NAME $CLIENT_CODE_FILE
+tar -czvf $OUTPUT_PATH$CLIENT_NAME.linux-arm64.tar.gz -C $OUTPUT_PATH $CLIENT_NAME
+rm -f $OUTPUT_PATH$CLIENT_NAME
 
-CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -ldflags "-w -s" -o watchdog-ddns-client ./main-code/client/watchdog-ddns-client.go
-tar -czvf watchdog-ddns-client.linux-arm_v7.tar.gz watchdog-ddns-client
-rm -f watchdog-ddns-client
+CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -ldflags "-w -s" -o $OUTPUT_PATH$CLIENT_NAME $CLIENT_CODE_FILE
+tar -czvf $OUTPUT_PATH$CLIENT_NAME.linux-arm_v7.tar.gz -C $OUTPUT_PATH $CLIENT_NAME
+rm -f $OUTPUT_PATH$CLIENT_NAME
+
 
 # server
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-w -s" -o watchdog-ddns-server ./main-code/server/watchdog-ddns-server.go
-tar -czvf watchdog-ddns-server.linux-amd64.tar.gz watchdog-ddns-server
-rm -f watchdog-ddns-server
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-w -s" -o $OUTPUT_PATH$SERVER_NAME $SERVER_CODE_FILE
+tar -czvf $OUTPUT_PATH$SERVER_NAME.linux-amd64.tar.gz -C $OUTPUT_PATH $SERVER_NAME
+rm -f $OUTPUT_PATH$SERVER_NAME
 
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-w -s" -o watchdog-ddns-server.exe ./main-code/server/watchdog-ddns-server.go
-tar -czvf watchdog-ddns-server.windows-amd64.tar.gz watchdog-ddns-server.exe
-rm -f watchdog-ddns-server.exe
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-w -s" -o $OUTPUT_PATH$SERVER_NAME.exe $SERVER_CODE_FILE
+tar -czvf $OUTPUT_PATH$SERVER_NAME.windows-amd64.tar.gz -C $OUTPUT_PATH $SERVER_NAME.exe
+rm -f $OUTPUT_PATH$SERVER_NAME.exe
 
-CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags "-w -s" -o watchdog-ddns-server ./main-code/server/watchdog-ddns-server.go
-tar -czvf watchdog-ddns-server.darwin-amd64.tar.gz watchdog-ddns-server
-rm -f watchdog-ddns-server
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags "-w -s" -o $OUTPUT_PATH$SERVER_NAME $SERVER_CODE_FILE
+tar -czvf $OUTPUT_PATH$SERVER_NAME.darwin-amd64.tar.gz -C $OUTPUT_PATH $SERVER_NAME
+rm -f $OUTPUT_PATH$SERVER_NAME
 
 # mips
-CGO_ENABLED=0 GOOS=linux GOARCH=mips64le go build -ldflags "-w -s" -o watchdog-ddns-server ./main-code/server/watchdog-ddns-server.go
-tar -czvf watchdog-ddns-server.linux-mips64le.tar.gz watchdog-ddns-server
-rm -f watchdog-ddns-server
+CGO_ENABLED=0 GOOS=linux GOARCH=mips64le go build -ldflags "-w -s" -o $OUTPUT_PATH$SERVER_NAME $SERVER_CODE_FILE
+tar -czvf $OUTPUT_PATH$SERVER_NAME.linux-mips64le.tar.gz -C $OUTPUT_PATH $SERVER_NAME
+rm -f $OUTPUT_PATH$SERVER_NAME
 
-CGO_ENABLED=0 GOOS=linux GOARCH=mips64 go build -ldflags "-w -s" -o watchdog-ddns-server ./main-code/server/watchdog-ddns-server.go
-tar -czvf watchdog-ddns-server.linux-mips64.tar.gz watchdog-ddns-server
-rm -f watchdog-ddns-server
+CGO_ENABLED=0 GOOS=linux GOARCH=mips64 go build -ldflags "-w -s" -o $OUTPUT_PATH$SERVER_NAME $SERVER_CODE_FILE
+tar -czvf $OUTPUT_PATH$SERVER_NAME.linux-mips64.tar.gz -C $OUTPUT_PATH $SERVER_NAME
+rm -f $OUTPUT_PATH$SERVER_NAME
 
-CGO_ENABLED=0 GOOS=linux GOARCH=mipsle go build -ldflags "-w -s" -o watchdog-ddns-server ./main-code/server/watchdog-ddns-server.go
-tar -czvf watchdog-ddns-server.linux-mipsle.tar.gz watchdog-ddns-server
-rm -f watchdog-ddns-server
+CGO_ENABLED=0 GOOS=linux GOARCH=mipsle go build -ldflags "-w -s" -o $OUTPUT_PATH$SERVER_NAME $SERVER_CODE_FILE
+tar -czvf $OUTPUT_PATH$SERVER_NAME.linux-mipsle.tar.gz -C $OUTPUT_PATH $SERVER_NAME
+rm -f $OUTPUT_PATH$SERVER_NAME
 
-CGO_ENABLED=0 GOOS=linux GOARCH=mips go build -ldflags "-w -s" -o watchdog-ddns-server ./main-code/server/watchdog-ddns-server.go
-tar -czvf watchdog-ddns-server.linux-mips.tar.gz watchdog-ddns-server
-rm -f watchdog-ddns-server
+CGO_ENABLED=0 GOOS=linux GOARCH=mips go build -ldflags "-w -s" -o $OUTPUT_PATH$SERVER_NAME $SERVER_CODE_FILE
+tar -czvf $OUTPUT_PATH$SERVER_NAME.linux-mips.tar.gz -C $OUTPUT_PATH $SERVER_NAME
+rm -f $OUTPUT_PATH$SERVER_NAME
 
 # arm
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-w -s" -o watchdog-ddns-server ./main-code/server/watchdog-ddns-server.go
-tar -czvf watchdog-ddns-server.linux-arm64.tar.gz watchdog-ddns-server
-rm -f watchdog-ddns-server
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-w -s" -o $OUTPUT_PATH$SERVER_NAME $SERVER_CODE_FILE
+tar -czvf $OUTPUT_PATH$SERVER_NAME.linux-arm64.tar.gz -C $OUTPUT_PATH $SERVER_NAME
+rm -f $OUTPUT_PATH$SERVER_NAME
 
-CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -ldflags "-w -s" -o watchdog-ddns-server ./main-code/server/watchdog-ddns-server.go
-tar -czvf watchdog-ddns-server.linux-arm_v7.tar.gz watchdog-ddns-server
-rm -f watchdog-ddns-server
+CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -ldflags "-w -s" -o $OUTPUT_PATH$SERVER_NAME $SERVER_CODE_FILE
+tar -czvf $OUTPUT_PATH$SERVER_NAME.linux-arm_v7.tar.gz -C $OUTPUT_PATH $SERVER_NAME
+rm -f $OUTPUT_PATH$SERVER_NAME

@@ -9,40 +9,48 @@ import (
 )
 
 var (
-	enforcement = flag.Bool("f", false, "强制检查 DNS 解析记录")
-	version     = flag.Bool("version", false, "查看当前版本并检查更新")
-	initOption  = flag.Bool("init", false, "初始化配置文件")
-	confPath    = flag.String("conf_path", "", "手动设置配置文件路径（绝对路径）（有空格用双引号）")
-	conf        = client.ClientConf{}
-	dpc         = client.DNSPodConf{}
-	ayc         = client.AliyunConf{}
-	cfc         = client.CloudflareConf{}
+	installOption   = flag.Bool("install", false, "安装服务")
+	uninstallOption = flag.Bool("uninstall", false, "卸载服务")
+	enforcement     = flag.Bool("f", false, "强制检查 DNS 解析记录")
+	version         = flag.Bool("version", false, "查看当前版本并检查更新")
+	initOption      = flag.Bool("init", false, "初始化配置文件")
+	confPath        = flag.String("conf_path", "", "手动设置配置文件路径(最好是绝对路径)(路径有空格请放在双引号中间)")
+	conf            = client.ClientConf{}
+	dpc             = client.DNSPodConf{}
+	ayc             = client.AliyunConf{}
+	cfc             = client.CloudflareConf{}
 )
 
 func main() {
 	flag.Parse()
 	// 加载自定义配置文件路径
 	if *confPath != "" {
-		client.ConfPath = *confPath
+		tempStr := *confPath
+		if tempStr[len(tempStr)-1:] != "/" {
+			tempStr = tempStr + "/"
+		}
+		client.ConfPath = tempStr
 	}
 
 	// 初始化配置
 	if *initOption {
-		conf.APIUrl = common.DefaultAPIServer
-		conf.CheckCycle = 0
-		err := common.MarshalAndSave(conf, client.ConfPath+"/client.json")
+		err := RunInit()
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = common.MarshalAndSave(dpc, client.ConfPath+"/dnspod.json")
+		return
+	}
+
+	// 安装 / 卸载服务
+	switch {
+	case *installOption:
+		err := client.Install()
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = common.MarshalAndSave(ayc, client.ConfPath+"/aliyun.json")
-		if err != nil {
-			log.Fatal(err)
-		}
-		err = common.MarshalAndSave(cfc, client.ConfPath+"/cloudflare.json")
+		return
+	case *uninstallOption:
+		err := client.Uninstall()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -50,43 +58,60 @@ func main() {
 	}
 
 	// 加载客户端配置
-	err := common.LoadAndUnmarshal(client.ConfPath+"/client.json", &conf)
+	err := common.LoadAndUnmarshal(client.ConfPath+client.ConfFileName, &conf)
 	if err != nil {
 		log.Fatal(err)
 	}
+	// 检查版本
+	if *version {
+		conf.CheckLatestVersion()
+		return
+	}
 	// 检查启用 ddns
-	if !conf.Services.DNSPod && !conf.Services.Aliyun && !conf.Services.Cloudflare {
-		log.Fatal("请打开客户端配置文件 " + client.ConfPath + "/client.json 启用需要使用的服务并重新启动")
+	if !conf.Services.DNSPod && !conf.Services.Alidns && !conf.Services.Cloudflare {
+		log.Fatal("请打开客户端配置文件 " + client.ConfPath + client.ConfFileName + " 启用需要使用的服务并重新启动")
 	}
 	servicesErr := false
 	// 加载服务配置
 	if conf.Services.DNSPod {
-		err = common.LoadAndUnmarshal(client.ConfPath+"/dnspod.json", &dpc)
+		err = common.LoadAndUnmarshal(client.ConfPath+client.DNSPodConfFileName, &dpc)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if dpc.Id == "" || dpc.Token == "" || dpc.Domain == "" || dpc.SubDomain == "" {
-			log.Println("请打开配置文件 " + client.ConfPath + "/dnspod.json 检查你的 id, token, domain, sub_domain 并重新启动")
+		if dpc.Id == "" || dpc.Token == "" || dpc.Domain == "" {
+			log.Println("请打开配置文件 " + client.ConfPath + client.DNSPodConfFileName + " 检查你的 id, token, domain 并重新启动")
+			servicesErr = true
+		}
+		if len(dpc.SubDomain) == 0 {
+			log.Println("请打开配置文件 " + client.ConfPath + client.DNSPodConfFileName + " 检查你的 sub_domain 并重新启动")
 			servicesErr = true
 		}
 	}
-	if conf.Services.Aliyun {
-		err = common.LoadAndUnmarshal(client.ConfPath+"/aliyun.json", &ayc)
+	if conf.Services.Alidns {
+		err = common.LoadAndUnmarshal(client.ConfPath+client.AliDNSConfFileName, &ayc)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if ayc.AccessKeyId == "" || ayc.AccessKeySecret == "" || ayc.Domain == "" || ayc.SubDomain == "" {
-			log.Println("请打开配置文件 " + client.ConfPath + "/aliyun.json 检查你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
+		if ayc.AccessKeyId == "" || ayc.AccessKeySecret == "" || ayc.Domain == "" {
+			log.Println("请打开配置文件 " + client.ConfPath + client.AliDNSConfFileName + " 检查你的 accesskey_id, accesskey_secret, domain 并重新启动")
+			servicesErr = true
+		}
+		if len(ayc.SubDomain) == 0 {
+			log.Println("请打开配置文件 " + client.ConfPath + client.AliDNSConfFileName + " 检查你的 sub_domain 并重新启动")
 			servicesErr = true
 		}
 	}
 	if conf.Services.Cloudflare {
-		err = common.LoadAndUnmarshal(client.ConfPath+"/cloudflare.json", &cfc)
+		err = common.LoadAndUnmarshal(client.ConfPath+client.CloudflareConfFileName, &cfc)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if cfc.Email == "" || cfc.APIKey == "" || cfc.ZoneID == "" || cfc.Domain == "" {
-			log.Println("请打开配置文件 " + client.ConfPath + "/cloudflare.json 检查你的 email, api_key, zone_id, domain 并重新启动")
+		if cfc.Email == "" || cfc.APIKey == "" || cfc.ZoneID == "" {
+			log.Println("请打开配置文件 " + client.ConfPath + client.CloudflareConfFileName + " 检查你的 email, api_key, zone_id 并重新启动")
+			servicesErr = true
+		}
+		for len(cfc.Domain) == 0 {
+			log.Println("请打开配置文件 " + client.ConfPath + client.CloudflareConfFileName + " 检查你的 domain 并重新启动")
 			servicesErr = true
 		}
 	}
@@ -94,24 +119,44 @@ func main() {
 		log.Fatal("请检查以上错误")
 	}
 
-	// 检查版本
-	if *version {
-		conf.CheckLatestVersion()
+	// 周期循环
+	waitCheckDone := make(chan bool, 1)
+	if conf.CheckCycle == 0 {
+		go asyncCheck(&conf, waitCheckDone)
+		<-waitCheckDone
+	} else {
+		cycle := time.NewTicker(time.Duration(conf.CheckCycle) * time.Minute)
+		for {
+			go asyncCheck(&conf, waitCheckDone)
+			<-waitCheckDone
+			<-cycle.C
+		}
+	}
+}
+
+func RunInit() (err error) {
+	conf.APIUrl = common.DefaultAPIServer
+	conf.CheckCycle = 0
+	err = common.MarshalAndSave(conf, client.ConfPath+client.ConfFileName)
+	if err != nil {
 		return
 	}
-
-	// 周期循环
-	skip := false
-	waitCheckDone := make(chan bool, 1)
-	for !skip {
-		go asyncCheck(&conf, waitCheckDone)
-		if conf.CheckCycle != 0 {
-			time.Sleep(time.Duration(conf.CheckCycle) * time.Minute)
-		} else {
-			skip = true
-		}
-		<-waitCheckDone
+	dpc.SubDomain = append(dpc.SubDomain, "example")
+	err = common.MarshalAndSave(dpc, client.ConfPath+client.DNSPodConfFileName)
+	if err != nil {
+		return
 	}
+	ayc.SubDomain = append(ayc.SubDomain, "example")
+	err = common.MarshalAndSave(ayc, client.ConfPath+client.AliDNSConfFileName)
+	if err != nil {
+		return
+	}
+	cfc.Domain = append(cfc.Domain, "example")
+	err = common.MarshalAndSave(cfc, client.ConfPath+client.CloudflareConfFileName)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func asyncCheck(conf *client.ClientConf, done chan bool) {
@@ -129,7 +174,7 @@ func asyncCheck(conf *client.ClientConf, done chan bool) {
 		if conf.Services.DNSPod {
 			servicesCount++
 		}
-		if conf.Services.Aliyun {
+		if conf.Services.Alidns {
 			servicesCount++
 		}
 		if conf.Services.Cloudflare {
@@ -139,7 +184,7 @@ func asyncCheck(conf *client.ClientConf, done chan bool) {
 		if conf.Services.DNSPod {
 			go asyncDNSPod(acquiredIP, waitServicesDone)
 		}
-		if conf.Services.Aliyun {
+		if conf.Services.Alidns {
 			go asyncAliyun(acquiredIP, waitServicesDone)
 		}
 		if conf.Services.Cloudflare {
@@ -148,8 +193,6 @@ func asyncCheck(conf *client.ClientConf, done chan bool) {
 		for i := 0; i < servicesCount; i++ {
 			<-waitServicesDone
 		}
-	} else {
-		log.Println("当前获取的 IP 和上一次获取的 IP 相同")
 	}
 	done <- true
 }
@@ -163,7 +206,7 @@ func asyncDNSPod(ipAddr string, done chan bool) {
 }
 
 func asyncAliyun(ipAddr string, done chan bool) {
-	err := client.Aliyun(ayc, ipAddr)
+	err := client.Alidns(ayc, ipAddr)
 	if err != nil {
 		log.Println(err)
 	}

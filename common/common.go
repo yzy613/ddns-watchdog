@@ -2,22 +2,36 @@ package common
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
 const (
-	LocalVersion     = "1.2.4"
+	LocalVersion     = "1.3.0"
 	DefaultAPIServer = "https://yzyweb.cn/watchdog-ddns"
-	ProjectUrl       = "https://github.com/yzy613/watchdog-ddns/releases"
+	ProjectUrl       = "https://github.com/yzy613/watchdog-ddns"
 )
 
 func GetRunningPath() (path string) {
 	path, _ = filepath.Abs(filepath.Dir(os.Args[0]))
-	return strings.ReplaceAll(path, "\\", "/")
+	tempStr := strings.ReplaceAll(path, "\\", "/")
+	if tempStr[len(tempStr)-1:] != "/" {
+		tempStr = tempStr + "/"
+	}
+	return tempStr
+}
+
+func IsWindows() bool {
+	if runtime.GOOS == "windows" {
+		return true
+	} else {
+		return false
+	}
 }
 
 func IsDirExistAndCreate(dirPath string) (err error) {
@@ -123,8 +137,11 @@ func CompareVersionString(remoteVersion, localVersion string) bool {
 	lv := strings.Split(localVersion, ".")
 	if len(rv) <= len(lv) {
 		for key, value := range rv {
-			if value > lv[key] {
+			switch {
+			case value > lv[key]:
 				return true
+			case value < lv[key]:
+				return false
 			}
 		}
 	}
@@ -159,4 +176,16 @@ func DecodeIPv6(srcIP string) (dstIP string) {
 		dstIP = srcIP
 	}
 	return
+}
+
+func VersionTips(LatestVersion string) {
+	fmt.Println("当前版本 ", LocalVersion)
+	fmt.Println("最新版本 ", LatestVersion)
+	fmt.Println("项目地址 ", ProjectUrl)
+	switch {
+	case strings.Contains(LatestVersion, "N/A"):
+		fmt.Println("\n需要手动检查更新，请前往 项目地址 查看")
+	case CompareVersionString(LatestVersion, LocalVersion):
+		fmt.Println("\n发现新版本，请前往 项目地址 下载")
+	}
 }

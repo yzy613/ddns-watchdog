@@ -5,37 +5,42 @@ import (
 	"errors"
 	simplejson "github.com/bitly/go-simplejson"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
 
 func Cloudflare(cfc CloudflareConf, ipAddr string) (err error) {
-	// 获取解析记录
-	recordIP, err := cfc.GetParseRecord()
-	if err != nil {
-		return
-	}
-	recordType := ""
-	if strings.Contains(ipAddr, ":") {
-		recordType = "AAAA"
-	} else {
-		recordType = "A"
-	}
-	if recordIP == ipAddr {
-		err = errors.New("Cloudflare 记录的 IP 和当前获取的 IP 一致")
-		return
-	}
-	// 更新解析记录
-	err = cfc.UpdateParseRecord(ipAddr, recordType)
-	if err != nil {
-		return
+	for _, domain := range cfc.Domain {
+		// 获取解析记录
+		recordIP, err := cfc.GetParseRecord(domain)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		recordType := ""
+		if strings.Contains(ipAddr, ":") {
+			recordType = "AAAA"
+		} else {
+			recordType = "A"
+		}
+		if recordIP == ipAddr {
+			continue
+		}
+		// 更新解析记录
+		err = cfc.UpdateParseRecord(ipAddr, recordType, domain)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Println("Cloudflare: " + domain + " has updated")
 	}
 	return
 }
 
-func (cfc *CloudflareConf) GetParseRecord() (recordIP string, err error) {
+func (cfc *CloudflareConf) GetParseRecord(domain string) (recordIP string, err error) {
 	httpClient := &http.Client{}
-	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records?name=" + cfc.Domain
+	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records?name=" + domain
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return
@@ -63,12 +68,12 @@ func (cfc *CloudflareConf) GetParseRecord() (recordIP string, err error) {
 	}
 	records, err := jsonObj.Get("result").Array()
 	if len(records) == 0 {
-		err = errors.New("Cloudflare: " + cfc.Domain + " 解析记录不存在")
+		err = errors.New("Cloudflare: " + domain + " 解析记录不存在")
 		return
 	}
 	for _, value := range records {
 		element := value.(map[string]interface{})
-		if element["name"] == cfc.Domain {
+		if element["name"] == domain {
 			cfc.DomainID = element["id"].(string)
 			recordIP = element["content"].(string)
 			break
@@ -77,12 +82,12 @@ func (cfc *CloudflareConf) GetParseRecord() (recordIP string, err error) {
 	return
 }
 
-func (cfc CloudflareConf) UpdateParseRecord(ipAddr string, recordType string) (err error) {
+func (cfc CloudflareConf) UpdateParseRecord(ipAddr, recordType, domain string) (err error) {
 	httpClient := &http.Client{}
 	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records/" + cfc.DomainID
 	reqData := CloudflareUpdateRequest{
 		Type:    recordType,
-		Name:    cfc.Domain,
+		Name:    domain,
 		Content: ipAddr,
 		Ttl:     1,
 	}

@@ -3,16 +3,67 @@ package client
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"watchdog-ddns/common"
 )
 
-var ConfPath = common.GetRunningPath() + "/conf"
+var (
+	RunningName            = "watchdog-ddns-client"
+	RunningPath            = common.GetRunningPath()
+	InstallPath            = "/etc/systemd/system/" + RunningName + ".service"
+	ConfPath               = RunningPath + "conf/"
+	ConfFileName           = "client.json"
+	DNSPodConfFileName     = "dnspod.json"
+	AliDNSConfFileName     = "alidns.json"
+	CloudflareConfFileName = "cloudflare.json"
+	NetworkCardFileName    = "network_card.json"
+)
+
+func Install() (err error) {
+	if common.IsWindows() {
+		log.Println("Windows 暂不支持安装到系统")
+	} else {
+		// 注册系统服务
+		serviceContent := []byte(
+			"[Unit]\n" +
+				"Description=" + RunningName + " Service\n" +
+				"After=network.target\n\n" +
+				"[Service]\n" +
+				"Type=simple\n" +
+				"ExecStart=" + RunningPath + RunningName + " -conf_path " + ConfPath +
+				"\nRestart=on-failure\n" +
+				"RestartSec=2\n\n" +
+				"[Install]\n" +
+				"WantedBy=multi-user.target\n")
+		err = ioutil.WriteFile(InstallPath, serviceContent, 0664)
+		if err != nil {
+			return
+
+		}
+		log.Println("可以使用 systemctl 控制 " + RunningName + " 服务了")
+	}
+	return
+}
+
+func Uninstall() (err error) {
+	if common.IsWindows() {
+		log.Println("Windows 暂不支持安装到系统")
+	} else {
+		err = os.Remove(InstallPath)
+		if err != nil {
+			return
+		}
+		log.Println("卸载服务成功")
+		log.Println("若要完全删除，请移步到 " + RunningPath + " 和 " + ConfPath + " 完全删除")
+	}
+	return
+}
 
 func NetworkCardRespond() (map[string]string, error) {
 	networkCardInfo := make(map[string]string)
@@ -48,12 +99,12 @@ func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquir
 			if err != nil {
 				return
 			}
-			err = common.MarshalAndSave(ncr, ConfPath+"/network_card.json")
+			err = common.MarshalAndSave(ncr, ConfPath+NetworkCardFileName)
 			if err != nil {
 				return
 			}
-			err = errors.New("请打开 " + ConfPath + "/network_card.json 选择一个网卡填入 " +
-				ConfPath + "/client.json 的 network_card")
+			err = errors.New("请打开 " + ConfPath + NetworkCardFileName + " 选择一个网卡填入 " +
+				ConfPath + ConfFileName + " 的 network_card")
 			return
 		} else {
 			ncr, getErr := NetworkCardRespond()
@@ -116,12 +167,5 @@ func (conf ClientConf) GetLatestVersion() string {
 
 func (conf ClientConf) CheckLatestVersion() {
 	LatestVersion := conf.GetLatestVersion()
-	fmt.Println("当前版本 ", common.LocalVersion)
-	fmt.Println("最新版本 ", LatestVersion)
-	switch {
-	case strings.Contains(LatestVersion, "N/A"):
-		fmt.Println("\n需要手动检查更新，请前往 " + common.ProjectUrl + " 查看")
-	case common.CompareVersionString(LatestVersion, common.LocalVersion):
-		fmt.Println("\n发现新版本，请前往 " + common.ProjectUrl + " 下载")
-	}
+	common.VersionTips(LatestVersion)
 }

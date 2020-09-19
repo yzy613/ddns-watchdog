@@ -33,7 +33,11 @@
 
 - `./watchdog-ddns-client` 直接运行
 
-- `./watchdog-ddns-client -conf_path string` 手动设置配置文件路径（路径有空格用双引号）
+- `./watchdog-ddns-client -conf_path string` 手动设置配置文件路径(最好是绝对路径)(路径有空格请放在双引号中间)
+
+- `./watchdog-ddns-client -install` 安装服务
+
+- `./watchdog-ddns-client -uninstall` 卸载服务
 
 - `./watchdog-ddns-client -f` 强制检查 DNS 解析记录
 
@@ -54,7 +58,7 @@
 
 - 按照 [支持的服务商](https://github.com/yzy613/watchdog-ddns#%E6%94%AF%E6%8C%81%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%95%86) 进行配置
 
-- 若需配置多个 IP 的 watchdog-ddns，可以结合 `-conf_path string` 启动参数配置多种配置文件（可搭配 `-init` 启动参数初始化配置文件）
+- 若需配置不同域名的 watchdog-ddns，可以结合 `-conf_path string` 启动参数配置多种配置文件（可搭配 `-init` 启动参数初始化配置文件）
 
 - 如果域名解析更新成功，那么程序工作正常，可以在 `./conf/client.json` 启用 `check_cycle` 进行定期检查（单位：分钟）（默认为 0，意为不启用定期检查）
 
@@ -62,7 +66,7 @@
 
 ### 可选操作
 - 在 Linux 上
-1. 可添加 [watchdog-ddns-client.service](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client.service) 文件到 `/etc/systemd/system` 使用 `systemctl` 管理 watchdog-ddns-client（需要自行填写 `ExecStart` 参数）
+1. 使用 `./watchdog-ddns-client -install` 安装服务，就可以使用 `systemctl` 管理 watchdog-ddns-client 了
 
 - 在 Windows 上
 1. [watchdog-ddns-client-startup-script.bat](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client-startup-script.bat) 直接运行程序并回显程序返回的信息（需与 watchdog-ddns-client.exe 同一文件夹）
@@ -75,15 +79,21 @@
 
 - 打开配置文件 `./conf/dnspod.json` 填入你的 `id, token, domain, sub_domain` 并重新启动
 
-#### 阿里云（万网）
-- 请在 `./conf/client.json` 修改 `aliyun` 为 `true`
+- 支持多个子域名同时更新解析
 
-- 打开配置文件 `./conf/aliyun.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
+#### AliDNS (阿里云 DNS)
+- 请在 `./conf/client.json` 修改 `alidns` 为 `true`
+
+- 打开配置文件 `./conf/alidns.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
+
+- 支持多个子域名同时更新解析
 
 #### Cloudflare
 - 请在 `./conf/client.json` 修改 `cloudflare` 为 `true`
 
 - 打开配置文件 `./conf/cloudflare.json` 填入你的 `email, api_key, zone_id, domain` 并重新启动
+
+- 支持多个域名同时更新解析
 
 #### 没有找到你的域名解析服务商？
 - 请在 [Issues](https://github.com/yzy613/watchdog-ddns/issues) 提出请求或者 pr (感激不尽)
