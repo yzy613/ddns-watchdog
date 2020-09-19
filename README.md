@@ -16,7 +16,7 @@
 [![downloads](https://img.shields.io/github/downloads/yzy613/watchdog-ddns/total)](https://github.com/yzy613/watchdog-ddns/releases)
 [![click_download](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/watchdog-ddns/releases)
 
-开箱即用的可常驻 Dynamic DNS 客户端，现已支持 DNSPod 阿里云 Cloudflare，支持网卡 IP
+开箱即用的可常驻 Dynamic DNS 客户端，现已支持 DNSPod AliDNS(阿里云 DNS) Cloudflare，支持使用网卡 IP
 
 ## 准备工作
 - 拥有（动态）公网 IPv6 地址或（动态）公网 IPv4 地址
@@ -66,7 +66,7 @@
 
 ### 可选操作
 - 在 Linux 上
-1. 使用 `./watchdog-ddns-client -install` 安装服务，就可以使用 `systemctl` 管理 watchdog-ddns-client 了
+1. 使用 `./watchdog-ddns-client -install` 安装服务，就可以使用 `systemctl` 管理 watchdog-ddns-client 服务了
 
 - 在 Windows 上
 1. [watchdog-ddns-client-startup-script.bat](https://github.com/yzy613/watchdog-ddns/blob/master/watchdog-ddns-client-startup-script.bat) 直接运行程序并回显程序返回的信息（需与 watchdog-ddns-client.exe 同一文件夹）
@@ -79,14 +79,14 @@
 
 - 打开配置文件 `./conf/dnspod.json` 填入你的 `id, token, domain, sub_domain` 并重新启动
 
-- 支持多个子域名同时更新解析
+- 支持同一个域名的多个子域名同时更新解析
 
 #### AliDNS (阿里云 DNS)
 - 请在 `./conf/client.json` 修改 `alidns` 为 `true`
 
 - 打开配置文件 `./conf/alidns.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
 
-- 支持多个子域名同时更新解析
+- 支持同一个域名的多个子域名同时更新解析
 
 #### Cloudflare
 - 请在 `./conf/client.json` 修改 `cloudflare` 为 `true`
