@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Alidns(ayc AliyunConf, ipAddr string) (err error) {
+func AliDNS(ayc AliDNSConf, ipAddr string) (err error) {
 	for _, subDomain := range ayc.SubDomain {
 		// 获取解析记录
 		recordIP, err := ayc.GetParseRecord(subDomain)
@@ -35,7 +35,7 @@ func Alidns(ayc AliyunConf, ipAddr string) (err error) {
 	return
 }
 
-func (ayc *AliyunConf) GetParseRecord(subDomain string) (recordIP string, err error) {
+func (ayc *AliDNSConf) GetParseRecord(subDomain string) (recordIP string, err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
 	if err != nil {
 		return
@@ -64,7 +64,7 @@ func (ayc *AliyunConf) GetParseRecord(subDomain string) (recordIP string, err er
 	return
 }
 
-func (ayc AliyunConf) UpdateParseRecord(ipAddr, recordType, subDomain string) (err error) {
+func (ayc AliDNSConf) UpdateParseRecord(ipAddr, recordType, subDomain string) (err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
 	if err != nil {
 		return

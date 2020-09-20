@@ -17,7 +17,7 @@ var (
 	confPath        = flag.String("conf_path", "", "手动设置配置文件路径(最好是绝对路径)(路径有空格请放在双引号中间)")
 	conf            = client.ClientConf{}
 	dpc             = client.DNSPodConf{}
-	ayc             = client.AliyunConf{}
+	ayc             = client.AliDNSConf{}
 	cfc             = client.CloudflareConf{}
 )
 
@@ -68,7 +68,7 @@ func main() {
 		return
 	}
 	// 检查启用 ddns
-	if !conf.Services.DNSPod && !conf.Services.Alidns && !conf.Services.Cloudflare {
+	if !conf.Services.DNSPod && !conf.Services.AliDNS && !conf.Services.Cloudflare {
 		log.Fatal("请打开客户端配置文件 " + client.ConfPath + client.ConfFileName + " 启用需要使用的服务并重新启动")
 	}
 	servicesErr := false
@@ -87,7 +87,7 @@ func main() {
 			servicesErr = true
 		}
 	}
-	if conf.Services.Alidns {
+	if conf.Services.AliDNS {
 		err = common.LoadAndUnmarshal(client.ConfPath+client.AliDNSConfFileName, &ayc)
 		if err != nil {
 			log.Fatal(err)
@@ -174,7 +174,7 @@ func asyncCheck(conf *client.ClientConf, done chan bool) {
 		if conf.Services.DNSPod {
 			servicesCount++
 		}
-		if conf.Services.Alidns {
+		if conf.Services.AliDNS {
 			servicesCount++
 		}
 		if conf.Services.Cloudflare {
@@ -184,7 +184,7 @@ func asyncCheck(conf *client.ClientConf, done chan bool) {
 		if conf.Services.DNSPod {
 			go asyncDNSPod(acquiredIP, waitServicesDone)
 		}
-		if conf.Services.Alidns {
+		if conf.Services.AliDNS {
 			go asyncAliyun(acquiredIP, waitServicesDone)
 		}
 		if conf.Services.Cloudflare {
@@ -206,7 +206,7 @@ func asyncDNSPod(ipAddr string, done chan bool) {
 }
 
 func asyncAliyun(ipAddr string, done chan bool) {
-	err := client.Alidns(ayc, ipAddr)
+	err := client.AliDNS(ayc, ipAddr)
 	if err != nil {
 		log.Println(err)
 	}

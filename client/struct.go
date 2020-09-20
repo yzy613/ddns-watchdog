@@ -11,7 +11,7 @@ type ClientConf struct {
 
 type Service struct {
 	DNSPod     bool `json:"dnspod"`
-	Alidns     bool `json:"alidns"`
+	AliDNS     bool `json:"alidns"`
 	Cloudflare bool `json:"cloudflare"`
 }
 
@@ -24,7 +24,7 @@ type DNSPodConf struct {
 	RecordLineId string   `json:"-"`
 }
 
-type AliyunConf struct {
+type AliDNSConf struct {
 	AccessKeyId     string   `json:"accesskey_id"`
 	AccessKeySecret string   `json:"accesskey_secret"`
 	Domain          string   `json:"domain"`
