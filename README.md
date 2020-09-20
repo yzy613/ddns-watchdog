@@ -112,7 +112,7 @@
 
 - `./watchdog-ddns-server -uninstall` 卸载服务
 
-- `./watchdog-ddns-server -version` 查看当前版本
+- `./watchdog-ddns-server -version` 查看当前版本并检查更新
 
 ## 安装 
 ### Arch Linux
