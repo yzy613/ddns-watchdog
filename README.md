@@ -33,7 +33,7 @@
 
 - `./watchdog-ddns-client` 直接运行
 
-- `./watchdog-ddns-client -conf_path string` 指定配置文件路径(最好是绝对路径)(路径有空格请放在双引号中间)
+- `./watchdog-ddns-client -conf_path string` 指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)
 
 - `./watchdog-ddns-client -install` 安装服务
 
