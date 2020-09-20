@@ -81,6 +81,18 @@
 
 - 支持同一个域名的多个子域名同时更新解析
 
+```json
+{
+    "id": "",
+    "token": "",
+    "domain": "example.com",
+    "sub_domain": [
+        "@",
+        "wwww"
+    ]
+}
+```
+
 #### AliDNS (阿里云 DNS)
 - 请在 `./conf/client.json` 修改 `alidns` 为 `true`
 
@@ -88,12 +100,36 @@
 
 - 支持同一个域名的多个子域名同时更新解析
 
+```json
+{
+    "accesskey_id": "",
+    "accesskey_secret": "",
+    "domain": "example.com",
+    "sub_domain": [
+        "@",
+        "wwww"
+    ]
+}
+```
+
 #### Cloudflare
 - 请在 `./conf/client.json` 修改 `cloudflare` 为 `true`
 
 - 打开配置文件 `./conf/cloudflare.json` 填入你的 `email, api_key, zone_id, domain` 并重新启动
 
 - 支持多个域名同时更新解析
+
+```json
+{
+    "email": "",
+    "api_key": "",
+    "zone_id": "",
+    "domain": [
+        "example.com",
+        "www.example.com"
+    ]
+}
+```
 
 #### 没有找到你的域名解析服务商？
 - 请在 [Issues](https://github.com/yzy613/watchdog-ddns/issues) 提出请求或者 pr（感激不尽）

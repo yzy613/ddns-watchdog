@@ -59,7 +59,7 @@ func (ayc *AliDNSConf) GetParseRecord(subDomain string) (recordIP string, err er
 		}
 	}
 	if ayc.RecordId == "" || recordIP == "" {
-		err = errors.New("阿里云: " + subDomain + "." + ayc.Domain + " 解析记录不存在")
+		err = errors.New("AliDNS: " + subDomain + "." + ayc.Domain + " 解析记录不存在")
 	}
 	return
 }
