@@ -33,7 +33,7 @@
 
 - `./watchdog-ddns-client` 直接运行
 
-- `./watchdog-ddns-client -conf_path string` 手动设置配置文件路径(最好是绝对路径)(路径有空格请放在双引号中间)
+- `./watchdog-ddns-client -conf_path string` 指定配置文件路径(最好是绝对路径)(路径有空格请放在双引号中间)
 
 - `./watchdog-ddns-client -install` 安装服务
 
@@ -96,15 +96,15 @@
 - 支持多个域名同时更新解析
 
 #### 没有找到你的域名解析服务商？
-- 请在 [Issues](https://github.com/yzy613/watchdog-ddns/issues) 提出请求或者 pr (感激不尽)
+- 请在 [Issues](https://github.com/yzy613/watchdog-ddns/issues) 提出请求或者 pr（感激不尽）
 
 ## 服务端 (普通用户不会用到，请略过)
 - 返回 Json 格式的客户端 IP（支持 IPv6）
 
 ### 服务端 用法
-- `./watchdog-ddns-server -install` 安装服务（已经包含 `-init` 启动参数）
+- `./watchdog-ddns-server -install` 安装服务 (已经包含 `-init` 启动参数)
 
-- `./watchdog-ddns-server -conf_path string` 手动设置配置文件路径（路径有空格用双引号）
+- `./watchdog-ddns-server -conf_path string` 指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)
 
 - `./watchdog-ddns-server -init` 初始化配置文件
 
