@@ -9,12 +9,12 @@
 
 ```
 # Watchdog-ddns
-[![language](https://img.shields.io/badge/language-Go-00acd7)](https://golang.org)
+[![Language](https://img.shields.io/badge/language-Go-00acd7)](https://golang.org)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/yzy613/watchdog-ddns/?ref=repository-badge)
-![build](https://travis-ci.com/yzy613/watchdog-ddns.svg?branch=master)
-[![releases](https://img.shields.io/github/v/release/yzy613/watchdog-ddns)](https://github.com/yzy613/watchdog-ddns/releases)
-[![downloads](https://img.shields.io/github/downloads/yzy613/watchdog-ddns/total)](https://github.com/yzy613/watchdog-ddns/releases)
-[![click_download](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/watchdog-ddns/releases)
+[![Build Status](https://travis-ci.com/yzy613/watchdog-ddns.svg?branch=master)](https://travis-ci.com/yzy613/watchdog-ddns)
+[![Releases](https://img.shields.io/github/v/release/yzy613/watchdog-ddns)](https://github.com/yzy613/watchdog-ddns/releases)
+[![Downloads](https://img.shields.io/github/downloads/yzy613/watchdog-ddns/total)](https://github.com/yzy613/watchdog-ddns/releases)
+[![ClickDownload](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/watchdog-ddns/releases)
 
 开箱即用的可常驻 Dynamic DNS 客户端，现已支持 DNSPod AliDNS(阿里云 DNS) Cloudflare，支持使用网卡 IP
 
