@@ -29,7 +29,13 @@
 - 自动将域名解析到动态 IP（支持 IPv6）
 
 ### 用法
-- `./watchdog-ddns-client -init` 初始化配置文件
+- `./watchdog-ddns-client -init string` 有选择地初始化配置文件，可以组合使用 (例 01)
+    ```
+    0 -> client.json
+    1 -> dnspod.json
+    2 -> alidns.json
+    3 -> cloudflare.json
+    ```
 
 - `./watchdog-ddns-client` 直接运行
 
@@ -80,18 +86,17 @@
 - 打开配置文件 `./conf/dnspod.json` 填入你的 `id, token, domain, sub_domain` 并重新启动
 
 - 支持同一个域名的多个子域名同时更新解析
-
-```json
-{
-    "id": "",
-    "token": "",
-    "domain": "example.com",
-    "sub_domain": [
-        "@",
-        "wwww"
-    ]
-}
-```
+    ```json
+    {
+        "id": "",
+        "token": "",
+        "domain": "example.com",
+        "sub_domain": [
+            "@",
+            "wwww"
+        ]
+    }
+    ```
 
 #### AliDNS (阿里云 DNS)
 - 请在 `./conf/client.json` 修改 `alidns` 为 `true`
@@ -99,18 +104,17 @@
 - 打开配置文件 `./conf/alidns.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
 
 - 支持同一个域名的多个子域名同时更新解析
-
-```json
-{
-    "accesskey_id": "",
-    "accesskey_secret": "",
-    "domain": "example.com",
-    "sub_domain": [
-        "@",
-        "wwww"
-    ]
-}
-```
+    ```json
+    {
+        "accesskey_id": "",
+        "accesskey_secret": "",
+        "domain": "example.com",
+        "sub_domain": [
+            "@",
+            "wwww"
+        ]
+    }
+    ```
 
 #### Cloudflare
 - 请在 `./conf/client.json` 修改 `cloudflare` 为 `true`
@@ -118,18 +122,17 @@
 - 打开配置文件 `./conf/cloudflare.json` 填入你的 `email, api_key, zone_id, domain` 并重新启动
 
 - 支持多个域名同时更新解析
-
-```json
-{
-    "email": "",
-    "api_key": "",
-    "zone_id": "",
-    "domain": [
-        "example.com",
-        "www.example.com"
-    ]
-}
-```
+    ```json
+    {
+        "email": "",
+        "api_key": "",
+        "zone_id": "",
+        "domain": [
+            "example.com",
+            "www.example.com"
+        ]
+    }
+    ```
 
 #### 没有找到你的域名解析服务商？
 - 请在 [Issues](https://github.com/yzy613/watchdog-ddns/issues) 提出请求或者 pr（感激不尽）

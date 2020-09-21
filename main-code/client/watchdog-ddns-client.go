@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"log"
 	"time"
@@ -13,12 +14,16 @@ var (
 	uninstallOption = flag.Bool("uninstall", false, "卸载服务")
 	enforcement     = flag.Bool("f", false, "强制检查 DNS 解析记录")
 	version         = flag.Bool("version", false, "查看当前版本并检查更新")
-	initOption      = flag.Bool("init", false, "初始化配置文件")
-	confPath        = flag.String("conf_path", "", "手动设置配置文件路径(最好是绝对路径)(路径有空格请放在双引号中间)")
-	conf            = client.ClientConf{}
-	dpc             = client.DNSPodConf{}
-	ayc             = client.AliDNSConf{}
-	cfc             = client.CloudflareConf{}
+	initOption      = flag.String("init", "", "有选择地初始化配置文件，可以组合使用 (例 01)\n"+
+		"0 -> client.json\n"+
+		"1 -> dnspod.json\n"+
+		"2 -> alidns.json\n"+
+		"3 -> cloudflare.json")
+	confPath = flag.String("conf_path", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
+	conf     = client.ClientConf{}
+	dpc      = client.DNSPodConf{}
+	ayc      = client.AliDNSConf{}
+	cfc      = client.CloudflareConf{}
 )
 
 func main() {
@@ -32,11 +37,13 @@ func main() {
 		client.ConfPath = tempStr
 	}
 
-	// 初始化配置
-	if *initOption {
-		err := RunInit()
-		if err != nil {
-			log.Fatal(err)
+	// 有选择地初始化配置文件
+	if *initOption != "" {
+		for _, event := range *initOption {
+			err := RunInit(string(event))
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		return
 	}
@@ -134,27 +141,35 @@ func main() {
 	}
 }
 
-func RunInit() (err error) {
-	conf.APIUrl = common.DefaultAPIServer
-	conf.CheckCycle = 0
-	err = common.MarshalAndSave(conf, client.ConfPath+client.ConfFileName)
-	if err != nil {
-		return
-	}
-	dpc.SubDomain = append(dpc.SubDomain, "example")
-	err = common.MarshalAndSave(dpc, client.ConfPath+client.DNSPodConfFileName)
-	if err != nil {
-		return
-	}
-	ayc.SubDomain = append(ayc.SubDomain, "example")
-	err = common.MarshalAndSave(ayc, client.ConfPath+client.AliDNSConfFileName)
-	if err != nil {
-		return
-	}
-	cfc.Domain = append(cfc.Domain, "example")
-	err = common.MarshalAndSave(cfc, client.ConfPath+client.CloudflareConfFileName)
-	if err != nil {
-		return
+func RunInit(event string) (err error) {
+	switch event {
+	case "0":
+		conf.APIUrl = common.DefaultAPIServer
+		conf.CheckCycle = 0
+		err = common.MarshalAndSave(conf, client.ConfPath+client.ConfFileName)
+		if err != nil {
+			return
+		}
+	case "1":
+		dpc.SubDomain = append(dpc.SubDomain, "example")
+		err = common.MarshalAndSave(dpc, client.ConfPath+client.DNSPodConfFileName)
+		if err != nil {
+			return
+		}
+	case "2":
+		ayc.SubDomain = append(ayc.SubDomain, "example")
+		err = common.MarshalAndSave(ayc, client.ConfPath+client.AliDNSConfFileName)
+		if err != nil {
+			return
+		}
+	case "3":
+		cfc.Domain = append(cfc.Domain, "example")
+		err = common.MarshalAndSave(cfc, client.ConfPath+client.CloudflareConfFileName)
+		if err != nil {
+			return
+		}
+	default:
+		err = errors.New("你初始化了一个寂寞")
 	}
 	return
 }
