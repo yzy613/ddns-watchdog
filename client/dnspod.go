@@ -33,7 +33,7 @@ func DNSPod(dpc DNSPodConf, ipAddr string) (err error) {
 			log.Println(err)
 			continue
 		}
-		log.Println("DNSPod: " + subDomain + "." + dpc.Domain + " has updated")
+		log.Println("DNSPod: " + subDomain + "." + dpc.Domain + " 已更新解析记录 " + ipAddr)
 	}
 	return
 }

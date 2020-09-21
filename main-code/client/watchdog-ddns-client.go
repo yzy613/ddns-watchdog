@@ -150,24 +150,28 @@ func RunInit(event string) (err error) {
 		if err != nil {
 			return
 		}
+		log.Println("初始化 " + client.ConfPath + client.ConfFileName)
 	case "1":
 		dpc.SubDomain = append(dpc.SubDomain, "example")
 		err = common.MarshalAndSave(dpc, client.ConfPath+client.DNSPodConfFileName)
 		if err != nil {
 			return
 		}
+		log.Println("初始化 " + client.ConfPath + client.DNSPodConfFileName)
 	case "2":
 		ayc.SubDomain = append(ayc.SubDomain, "example")
 		err = common.MarshalAndSave(ayc, client.ConfPath+client.AliDNSConfFileName)
 		if err != nil {
 			return
 		}
+		log.Println("初始化 " + client.ConfPath + client.AliDNSConfFileName)
 	case "3":
 		cfc.Domain = append(cfc.Domain, "example")
 		err = common.MarshalAndSave(cfc, client.ConfPath+client.CloudflareConfFileName)
 		if err != nil {
 			return
 		}
+		log.Println("初始化 " + client.ConfPath + client.CloudflareConfFileName)
 	default:
 		err = errors.New("你初始化了一个寂寞")
 	}

@@ -30,7 +30,7 @@ func AliDNS(ayc AliDNSConf, ipAddr string) (err error) {
 			log.Println(err)
 			continue
 		}
-		log.Println("AliDNS: " + subDomain + "." + ayc.Domain + " has updated")
+		log.Println("AliDNS: " + subDomain + "." + ayc.Domain + " 已更新解析记录 " + ipAddr)
 	}
 	return
 }

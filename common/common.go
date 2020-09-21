@@ -36,7 +36,7 @@ func IsWindows() bool {
 
 func IsDirExistAndCreate(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)
-	if err != nil || !os.IsExist(err) {
+	if err != nil || os.IsNotExist(err) {
 		err = os.MkdirAll(dirPath, 0750)
 		if err != nil {
 			return err
@@ -99,11 +99,8 @@ func CopyFile(srcPath, dstPath string) (err error) {
 // dst 参数要加 & 才能修改原变量
 func LoadAndUnmarshal(filePath string, dst interface{}) (err error) {
 	_, err = os.Stat(filePath)
-	if err != nil || os.IsExist(err) {
-		_, err = os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0600)
-		if err != nil {
-			return
-		}
+	if err != nil {
+		return
 	}
 	jsonContent, err := ioutil.ReadFile(filePath)
 	if err != nil {

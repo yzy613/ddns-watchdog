@@ -33,7 +33,7 @@ func Cloudflare(cfc CloudflareConf, ipAddr string) (err error) {
 			log.Println(err)
 			continue
 		}
-		log.Println("Cloudflare: " + domain + " has updated")
+		log.Println("Cloudflare: " + domain + " 已更新解析记录 " + ipAddr)
 	}
 	return
 }
