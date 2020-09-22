@@ -44,7 +44,6 @@ func Install() (err error) {
 		err = ioutil.WriteFile(InstallPath, serviceContent, 0664)
 		if err != nil {
 			return
-
 		}
 		log.Println("可以使用 systemctl 控制 " + RunningName + " 服务了")
 	}
