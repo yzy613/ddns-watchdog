@@ -11,18 +11,19 @@ import (
 )
 
 func Cloudflare(cfc CloudflareConf, ipAddr string) (err error) {
+	recordType := ""
+	if strings.Contains(ipAddr, ":") {
+		recordType = "AAAA"
+	} else {
+		recordType = "A"
+	}
+
 	for _, domain := range cfc.Domain {
 		// 获取解析记录
 		recordIP, err := cfc.GetParseRecord(domain)
 		if err != nil {
 			log.Println(err)
 			continue
-		}
-		recordType := ""
-		if strings.Contains(ipAddr, ":") {
-			recordType = "AAAA"
-		} else {
-			recordType = "A"
 		}
 		if recordIP == ipAddr {
 			continue

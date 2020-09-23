@@ -8,18 +8,19 @@ import (
 )
 
 func AliDNS(ayc AliDNSConf, ipAddr string) (err error) {
+	recordType := ""
+	if strings.Contains(ipAddr, ":") {
+		recordType = "AAAA"
+	} else {
+		recordType = "A"
+	}
+
 	for _, subDomain := range ayc.SubDomain {
 		// 获取解析记录
 		recordIP, err := ayc.GetParseRecord(subDomain)
 		if err != nil {
 			log.Println(err)
 			continue
-		}
-		recordType := ""
-		if strings.Contains(ipAddr, ":") {
-			recordType = "AAAA"
-		} else {
-			recordType = "A"
 		}
 		if recordIP == ipAddr {
 			continue

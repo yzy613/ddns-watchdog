@@ -11,18 +11,19 @@ import (
 )
 
 func DNSPod(dpc DNSPodConf, ipAddr string) (err error) {
+	recordType := ""
+	if strings.Contains(ipAddr, ":") {
+		recordType = "AAAA"
+	} else {
+		recordType = "A"
+	}
+
 	for _, subDomain := range dpc.SubDomain {
 		// 获取解析记录
 		recordIP, err := dpc.GetParseRecord(subDomain)
 		if err != nil {
 			log.Println(err)
 			continue
-		}
-		recordType := ""
-		if strings.Contains(ipAddr, ":") {
-			recordType = "AAAA"
-		} else {
-			recordType = "A"
 		}
 		if recordIP == ipAddr {
 			continue

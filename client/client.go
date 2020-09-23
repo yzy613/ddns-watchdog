@@ -165,6 +165,5 @@ func (conf ClientConf) GetLatestVersion() string {
 }
 
 func (conf ClientConf) CheckLatestVersion() {
-	LatestVersion := conf.GetLatestVersion()
-	common.VersionTips(LatestVersion)
+	common.VersionTips(conf.GetLatestVersion())
 }
