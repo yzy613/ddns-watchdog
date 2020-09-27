@@ -5,12 +5,11 @@ import (
 	"errors"
 	simplejson "github.com/bitly/go-simplejson"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 )
 
-func Cloudflare(cfc CloudflareConf, ipAddr string) (err error) {
+func Cloudflare(cfc CloudflareConf, ipAddr string) (msg []string, err error) {
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
@@ -22,7 +21,7 @@ func Cloudflare(cfc CloudflareConf, ipAddr string) (err error) {
 		// 获取解析记录
 		recordIP, err := cfc.GetParseRecord(domain)
 		if err != nil {
-			log.Println(err)
+			msg = append(msg, err.Error())
 			continue
 		}
 		if recordIP == ipAddr {
@@ -31,10 +30,10 @@ func Cloudflare(cfc CloudflareConf, ipAddr string) (err error) {
 		// 更新解析记录
 		err = cfc.UpdateParseRecord(ipAddr, recordType, domain)
 		if err != nil {
-			log.Println(err)
+			msg = append(msg, err.Error())
 			continue
 		}
-		log.Println("Cloudflare: " + domain + " 已更新解析记录 " + ipAddr)
+		msg = append(msg, "Cloudflare: " + domain + " 已更新解析记录 " + ipAddr)
 	}
 	return
 }

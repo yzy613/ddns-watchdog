@@ -3,11 +3,10 @@ package client
 import (
 	"errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
-	"log"
 	"strings"
 )
 
-func AliDNS(ayc AliDNSConf, ipAddr string) (err error) {
+func AliDNS(ayc AliDNSConf, ipAddr string) (msg []string, err error) {
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
@@ -19,7 +18,7 @@ func AliDNS(ayc AliDNSConf, ipAddr string) (err error) {
 		// 获取解析记录
 		recordIP, err := ayc.GetParseRecord(subDomain)
 		if err != nil {
-			log.Println(err)
+			msg = append(msg, err.Error())
 			continue
 		}
 		if recordIP == ipAddr {
@@ -28,10 +27,10 @@ func AliDNS(ayc AliDNSConf, ipAddr string) (err error) {
 		// 更新解析记录
 		err = ayc.UpdateParseRecord(ipAddr, recordType, subDomain)
 		if err != nil {
-			log.Println(err)
+			msg = append(msg, err.Error())
 			continue
 		}
-		log.Println("AliDNS: " + subDomain + "." + ayc.Domain + " 已更新解析记录 " + ipAddr)
+		msg = append(msg, "AliDNS: " + subDomain + "." + ayc.Domain + " 已更新解析记录 " + ipAddr)
 	}
 	return
 }

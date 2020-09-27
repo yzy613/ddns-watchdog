@@ -4,13 +4,12 @@ import (
 	"errors"
 	simplejson "github.com/bitly/go-simplejson"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"watchdog-ddns/common"
 )
 
-func DNSPod(dpc DNSPodConf, ipAddr string) (err error) {
+func DNSPod(dpc DNSPodConf, ipAddr string) (msg []string, err error) {
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
@@ -22,7 +21,7 @@ func DNSPod(dpc DNSPodConf, ipAddr string) (err error) {
 		// 获取解析记录
 		recordIP, err := dpc.GetParseRecord(subDomain)
 		if err != nil {
-			log.Println(err)
+			msg = append(msg, err.Error())
 			continue
 		}
 		if recordIP == ipAddr {
@@ -31,10 +30,10 @@ func DNSPod(dpc DNSPodConf, ipAddr string) (err error) {
 		// 更新解析记录
 		err = dpc.UpdateParseRecord(ipAddr, recordType, subDomain)
 		if err != nil {
-			log.Println(err)
+			msg = append(msg, err.Error())
 			continue
 		}
-		log.Println("DNSPod: " + subDomain + "." + dpc.Domain + " 已更新解析记录 " + ipAddr)
+		msg = append(msg, "DNSPod: " + subDomain + "." + dpc.Domain + " 已更新解析记录 " + ipAddr)
 	}
 	return
 }

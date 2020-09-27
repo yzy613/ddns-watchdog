@@ -204,7 +204,7 @@ func asyncCheck(conf *client.ClientConf, done chan bool) {
 			go asyncDNSPod(acquiredIP, waitServicesDone)
 		}
 		if conf.Services.AliDNS {
-			go asyncAliyun(acquiredIP, waitServicesDone)
+			go asyncAliDNS(acquiredIP, waitServicesDone)
 		}
 		if conf.Services.Cloudflare {
 			go asyncCloudflare(acquiredIP, waitServicesDone)
@@ -217,25 +217,37 @@ func asyncCheck(conf *client.ClientConf, done chan bool) {
 }
 
 func asyncDNSPod(ipAddr string, done chan bool) {
-	err := client.DNSPod(dpc, ipAddr)
+	msg, err := client.DNSPod(dpc, ipAddr)
 	if err != nil {
 		log.Println(err)
+	} else {
+		for _, row := range msg {
+			log.Println(row)
+		}
 	}
 	done <- true
 }
 
-func asyncAliyun(ipAddr string, done chan bool) {
-	err := client.AliDNS(ayc, ipAddr)
+func asyncAliDNS(ipAddr string, done chan bool) {
+	msg, err := client.AliDNS(ayc, ipAddr)
 	if err != nil {
 		log.Println(err)
+	} else {
+		for _, row := range msg {
+			log.Println(row)
+		}
 	}
 	done <- true
 }
 
 func asyncCloudflare(ipAddr string, done chan bool) {
-	err := client.Cloudflare(cfc, ipAddr)
+	msg, err := client.Cloudflare(cfc, ipAddr)
 	if err != nil {
 		log.Println(err)
+	} else {
+		for _, row := range msg {
+			log.Println(row)
+		}
 	}
 	done <- true
 }
