@@ -7,30 +7,32 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"watchdog-ddns/common"
 )
 
-func Cloudflare(cfc CloudflareConf, ipAddr string) (msg []string, err error) {
+func Cloudflare(cfc CloudflareConf, ipAddr string) (msg []string, err []error) {
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
+		ipAddr = common.DecodeIPv6(ipAddr)
 	} else {
 		recordType = "A"
 	}
 
 	for _, domain := range cfc.Domain {
 		// 获取解析记录
-		recordIP, err := cfc.GetParseRecord(domain)
-		if err != nil {
-			msg = append(msg, err.Error())
+		recordIP, currentErr := cfc.GetParseRecord(domain)
+		if currentErr != nil {
+			err = append(err, currentErr)
 			continue
 		}
 		if recordIP == ipAddr {
 			continue
 		}
 		// 更新解析记录
-		err = cfc.UpdateParseRecord(ipAddr, recordType, domain)
-		if err != nil {
-			msg = append(msg, err.Error())
+		currentErr = cfc.UpdateParseRecord(ipAddr, recordType, domain)
+		if currentErr != nil {
+			err = append(err, currentErr)
 			continue
 		}
 		msg = append(msg, "Cloudflare: " + domain + " 已更新解析记录 " + ipAddr)

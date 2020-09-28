@@ -9,28 +9,29 @@ import (
 	"watchdog-ddns/common"
 )
 
-func DNSPod(dpc DNSPodConf, ipAddr string) (msg []string, err error) {
+func DNSPod(dpc DNSPodConf, ipAddr string) (msg []string, err []error) {
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
+		ipAddr = common.DecodeIPv6(ipAddr)
 	} else {
 		recordType = "A"
 	}
 
 	for _, subDomain := range dpc.SubDomain {
 		// 获取解析记录
-		recordIP, err := dpc.GetParseRecord(subDomain)
-		if err != nil {
-			msg = append(msg, err.Error())
+		recordIP, currentErr := dpc.GetParseRecord(subDomain)
+		if currentErr != nil {
+			err = append(err, currentErr)
 			continue
 		}
 		if recordIP == ipAddr {
 			continue
 		}
 		// 更新解析记录
-		err = dpc.UpdateParseRecord(ipAddr, recordType, subDomain)
-		if err != nil {
-			msg = append(msg, err.Error())
+		currentErr = dpc.UpdateParseRecord(ipAddr, recordType, subDomain)
+		if currentErr != nil {
+			err = append(err, currentErr)
 			continue
 		}
 		msg = append(msg, "DNSPod: " + subDomain + "." + dpc.Domain + " 已更新解析记录 " + ipAddr)

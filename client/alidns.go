@@ -4,33 +4,35 @@ import (
 	"errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"strings"
+	"watchdog-ddns/common"
 )
 
-func AliDNS(ayc AliDNSConf, ipAddr string) (msg []string, err error) {
+func AliDNS(adc AliDNSConf, ipAddr string) (msg []string, err []error) {
 	recordType := ""
 	if strings.Contains(ipAddr, ":") {
 		recordType = "AAAA"
+		ipAddr = common.DecodeIPv6(ipAddr)
 	} else {
 		recordType = "A"
 	}
 
-	for _, subDomain := range ayc.SubDomain {
+	for _, subDomain := range adc.SubDomain {
 		// 获取解析记录
-		recordIP, err := ayc.GetParseRecord(subDomain)
-		if err != nil {
-			msg = append(msg, err.Error())
+		recordIP, currentErr := adc.GetParseRecord(subDomain)
+		if currentErr != nil {
+			err = append(err, currentErr)
 			continue
 		}
 		if recordIP == ipAddr {
 			continue
 		}
 		// 更新解析记录
-		err = ayc.UpdateParseRecord(ipAddr, recordType, subDomain)
-		if err != nil {
-			msg = append(msg, err.Error())
+		currentErr = adc.UpdateParseRecord(ipAddr, recordType, subDomain)
+		if currentErr != nil {
+			err = append(err, currentErr)
 			continue
 		}
-		msg = append(msg, "AliDNS: " + subDomain + "." + ayc.Domain + " 已更新解析记录 " + ipAddr)
+		msg = append(msg, "AliDNS: " + subDomain + "." + adc.Domain + " 已更新解析记录 " + ipAddr)
 	}
 	return
 }

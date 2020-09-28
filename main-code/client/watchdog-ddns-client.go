@@ -22,7 +22,7 @@ var (
 	confPath = flag.String("conf_path", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
 	conf     = client.ClientConf{}
 	dpc      = client.DNSPodConf{}
-	ayc      = client.AliDNSConf{}
+	adc      = client.AliDNSConf{}
 	cfc      = client.CloudflareConf{}
 )
 
@@ -95,15 +95,15 @@ func main() {
 		}
 	}
 	if conf.Services.AliDNS {
-		err = common.LoadAndUnmarshal(client.ConfPath+client.AliDNSConfFileName, &ayc)
+		err = common.LoadAndUnmarshal(client.ConfPath+client.AliDNSConfFileName, &adc)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if ayc.AccessKeyId == "" || ayc.AccessKeySecret == "" || ayc.Domain == "" {
+		if adc.AccessKeyId == "" || adc.AccessKeySecret == "" || adc.Domain == "" {
 			log.Println("请打开配置文件 " + client.ConfPath + client.AliDNSConfFileName + " 检查你的 accesskey_id, accesskey_secret, domain 并重新启动")
 			servicesErr = true
 		}
-		if len(ayc.SubDomain) == 0 {
+		if len(adc.SubDomain) == 0 {
 			log.Println("请打开配置文件 " + client.ConfPath + client.AliDNSConfFileName + " 检查你的 sub_domain 并重新启动")
 			servicesErr = true
 		}
@@ -159,8 +159,8 @@ func RunInit(event string) (err error) {
 		}
 		log.Println("初始化 " + client.ConfPath + client.DNSPodConfFileName)
 	case "2":
-		ayc.SubDomain = append(ayc.SubDomain, "example")
-		err = common.MarshalAndSave(ayc, client.ConfPath+client.AliDNSConfFileName)
+		adc.SubDomain = append(adc.SubDomain, "example")
+		err = common.MarshalAndSave(adc, client.ConfPath+client.AliDNSConfFileName)
 		if err != nil {
 			return
 		}
@@ -218,36 +218,33 @@ func asyncCheck(conf *client.ClientConf, done chan bool) {
 
 func asyncDNSPod(ipAddr string, done chan bool) {
 	msg, err := client.DNSPod(dpc, ipAddr)
-	if err != nil {
-		log.Println(err)
-	} else {
-		for _, row := range msg {
-			log.Println(row)
-		}
+	for _, row := range err {
+		log.Println(row)
+	}
+	for _, row := range msg {
+		log.Println(row)
 	}
 	done <- true
 }
 
 func asyncAliDNS(ipAddr string, done chan bool) {
-	msg, err := client.AliDNS(ayc, ipAddr)
-	if err != nil {
-		log.Println(err)
-	} else {
-		for _, row := range msg {
-			log.Println(row)
-		}
+	msg, err := client.AliDNS(adc, ipAddr)
+	for _, row := range err {
+		log.Println(row)
+	}
+	for _, row := range msg {
+		log.Println(row)
 	}
 	done <- true
 }
 
 func asyncCloudflare(ipAddr string, done chan bool) {
 	msg, err := client.Cloudflare(cfc, ipAddr)
-	if err != nil {
-		log.Println(err)
-	} else {
-		for _, row := range msg {
-			log.Println(row)
-		}
+	for _, row := range err {
+		log.Println(row)
+	}
+	for _, row := range msg {
+		log.Println(row)
 	}
 	done <- true
 }
