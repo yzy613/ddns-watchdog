@@ -3,11 +3,11 @@ package client
 import (
 	"encoding/json"
 	"errors"
-	simplejson "github.com/bitly/go-simplejson"
+	"github.com/bitly/go-simplejson"
+	"github.com/yzy613/watchdog-ddns/common"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"watchdog-ddns/common"
 )
 
 func Cloudflare(cfc CloudflareConf, ipAddr string) (msg []string, err []error) {

@@ -3,10 +3,10 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/yzy613/watchdog-ddns/client"
+	"github.com/yzy613/watchdog-ddns/common"
 	"log"
 	"time"
-	"watchdog-ddns/client"
-	"watchdog-ddns/common"
 )
 
 var (

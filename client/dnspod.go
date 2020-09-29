@@ -2,11 +2,11 @@ package client
 
 import (
 	"errors"
-	simplejson "github.com/bitly/go-simplejson"
+	"github.com/bitly/go-simplejson"
+	"github.com/yzy613/watchdog-ddns/common"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"watchdog-ddns/common"
 )
 
 func DNSPod(dpc DNSPodConf, ipAddr string) (msg []string, err []error) {

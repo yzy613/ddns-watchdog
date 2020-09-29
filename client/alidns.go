@@ -3,8 +3,8 @@ package client
 import (
 	"errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
+	"github.com/yzy613/watchdog-ddns/common"
 	"strings"
-	"watchdog-ddns/common"
 )
 
 func AliDNS(adc AliDNSConf, ipAddr string) (msg []string, err []error) {

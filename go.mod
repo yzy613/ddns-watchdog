@@ -1,4 +1,4 @@
-module watchdog-ddns
+module github.com/yzy613/watchdog-ddns
 
 go 1.15
 

@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"errors"
+	"github.com/yzy613/watchdog-ddns/common"
 	"io/ioutil"
 	"log"
 	"net"
@@ -10,7 +11,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"watchdog-ddns/common"
 )
 
 var (

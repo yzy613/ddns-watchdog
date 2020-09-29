@@ -3,12 +3,12 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/yzy613/watchdog-ddns/common"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-	"watchdog-ddns/common"
 )
 
 var (

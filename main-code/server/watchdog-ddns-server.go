@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"github.com/yzy613/watchdog-ddns/common"
+	"github.com/yzy613/watchdog-ddns/server"
 	"io"
 	"log"
 	"net/http"
-	"watchdog-ddns/common"
-	"watchdog-ddns/server"
 )
 
 var (
