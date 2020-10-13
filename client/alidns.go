@@ -32,7 +32,7 @@ func AliDNS(adc AliDNSConf, ipAddr string) (msg []string, err []error) {
 			err = append(err, currentErr)
 			continue
 		}
-		msg = append(msg, "AliDNS: " + subDomain + "." + adc.Domain + " 已更新解析记录 " + ipAddr)
+		msg = append(msg, "AliDNS: "+subDomain+"."+adc.Domain+" 已更新解析记录 "+ipAddr)
 	}
 	return
 }

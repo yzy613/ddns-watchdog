@@ -35,7 +35,7 @@ func Cloudflare(cfc CloudflareConf, ipAddr string) (msg []string, err []error) {
 			err = append(err, currentErr)
 			continue
 		}
-		msg = append(msg, "Cloudflare: " + domain + " 已更新解析记录 " + ipAddr)
+		msg = append(msg, "Cloudflare: "+domain+" 已更新解析记录 "+ipAddr)
 	}
 	return
 }
