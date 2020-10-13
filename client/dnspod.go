@@ -34,7 +34,7 @@ func DNSPod(dpc DNSPodConf, ipAddr string) (msg []string, err []error) {
 			err = append(err, currentErr)
 			continue
 		}
-		msg = append(msg, "DNSPod: " + subDomain + "." + dpc.Domain + " 已更新解析记录 " + ipAddr)
+		msg = append(msg, "DNSPod: "+subDomain+"."+dpc.Domain+" 已更新解析记录 "+ipAddr)
 	}
 	return
 }
@@ -132,7 +132,7 @@ func postman(url, src string) (dst []byte, err error) {
 	}
 	defer req.Body.Close()
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("User-Agent", "ddns-client/"+common.LocalVersion+" ()")
+	req.Header.Set("User-Agent", RunningName+"/"+common.LocalVersion+" ()")
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
