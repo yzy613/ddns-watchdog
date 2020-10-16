@@ -3,7 +3,7 @@ package client
 import (
 	"errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
-	"github.com/yzy613/watchdog-ddns/common"
+	"github.com/yzy613/ddns-watchdog/common"
 	"strings"
 )
 

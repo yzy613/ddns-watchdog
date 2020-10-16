@@ -1,0 +1,1 @@
+CreateObject("WScript.Shell").Run "cmd /c ddns-watchdog-client.exe",0

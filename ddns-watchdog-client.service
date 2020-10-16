@@ -1,10 +1,10 @@
 [Unit]
-Description=watchdog-ddns-client Service
+Description=ddns-watchdog-client Service
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=在此填写watchdog-ddns-client的绝对路径
+ExecStart=在此填写ddns-watchdog-client的绝对路径
 Restart=on-failure
 RestartSec=2
 

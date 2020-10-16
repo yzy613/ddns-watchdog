@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/yzy613/watchdog-ddns/client"
-	"github.com/yzy613/watchdog-ddns/common"
+	"github.com/yzy613/ddns-watchdog/client"
+	"github.com/yzy613/ddns-watchdog/common"
 	"log"
 	"time"
 )

@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/json"
 	"errors"
-	"github.com/yzy613/watchdog-ddns/common"
+	"github.com/yzy613/ddns-watchdog/common"
 	"io/ioutil"
 	"log"
 	"net"
@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	RunningName            = "watchdog-ddns-client"
+	RunningName            = "ddns-watchdog-client"
 	RunningPath            = common.GetRunningPath()
 	InstallPath            = "/etc/systemd/system/" + RunningName + ".service"
 	ConfPath               = RunningPath + "conf/"

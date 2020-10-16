@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/yzy613/watchdog-ddns/common"
-	"github.com/yzy613/watchdog-ddns/server"
+	"github.com/yzy613/ddns-watchdog/common"
+	"github.com/yzy613/ddns-watchdog/server"
 	"io"
 	"log"
 	"net/http"
@@ -101,7 +101,7 @@ func RunInit() (err error) {
 	conf := server.ServerConf{}
 	conf.Port = ":10032"
 	conf.IsRoot = false
-	conf.RootServerAddr = "https://yzyweb.cn/watchdog-ddns"
+	conf.RootServerAddr = "https://yzyweb.cn/ddns-watchdog"
 	err = common.MarshalAndSave(conf, server.ConfPath+"/server.json")
 	if err != nil {
 		return

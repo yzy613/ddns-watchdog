@@ -25,24 +25,24 @@ deploy:
   token: ${TOKEN}
   cleanup: false
   file:
-    - build/watchdog-ddns-client.linux-amd64.tar.gz
-    - build/watchdog-ddns-client.windows-amd64.tar.gz
-    - build/watchdog-ddns-client.darwin-amd64.tar.gz
-    - build/watchdog-ddns-client.linux-mips64le.tar.gz
-    - build/watchdog-ddns-client.linux-mips64.tar.gz
-    - build/watchdog-ddns-client.linux-mipsle.tar.gz
-    - build/watchdog-ddns-client.linux-mips.tar.gz
-    - build/watchdog-ddns-client.linux-arm64.tar.gz
-    - build/watchdog-ddns-client.linux-arm_v7.tar.gz
-    - build/watchdog-ddns-server.linux-amd64.tar.gz
-    - build/watchdog-ddns-server.windows-amd64.tar.gz
-    - build/watchdog-ddns-server.darwin-amd64.tar.gz
-    - build/watchdog-ddns-server.linux-mips64le.tar.gz
-    - build/watchdog-ddns-server.linux-mips64.tar.gz
-    - build/watchdog-ddns-server.linux-mipsle.tar.gz
-    - build/watchdog-ddns-server.linux-mips.tar.gz
-    - build/watchdog-ddns-server.linux-arm64.tar.gz
-    - build/watchdog-ddns-server.linux-arm_v7.tar.gz
+    - build/ddns-watchdog-client.linux-amd64.tar.gz
+    - build/ddns-watchdog-client.windows-amd64.tar.gz
+    - build/ddns-watchdog-client.darwin-amd64.tar.gz
+    - build/ddns-watchdog-client.linux-mips64le.tar.gz
+    - build/ddns-watchdog-client.linux-mips64.tar.gz
+    - build/ddns-watchdog-client.linux-mipsle.tar.gz
+    - build/ddns-watchdog-client.linux-mips.tar.gz
+    - build/ddns-watchdog-client.linux-arm64.tar.gz
+    - build/ddns-watchdog-client.linux-arm_v7.tar.gz
+    - build/ddns-watchdog-server.linux-amd64.tar.gz
+    - build/ddns-watchdog-server.windows-amd64.tar.gz
+    - build/ddns-watchdog-server.darwin-amd64.tar.gz
+    - build/ddns-watchdog-server.linux-mips64le.tar.gz
+    - build/ddns-watchdog-server.linux-mips64.tar.gz
+    - build/ddns-watchdog-server.linux-mipsle.tar.gz
+    - build/ddns-watchdog-server.linux-mips.tar.gz
+    - build/ddns-watchdog-server.linux-arm64.tar.gz
+    - build/ddns-watchdog-server.linux-arm_v7.tar.gz
   on:
     tags: true
     all_branches: true

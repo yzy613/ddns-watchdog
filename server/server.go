@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/yzy613/watchdog-ddns/common"
+	"github.com/yzy613/ddns-watchdog/common"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	RunningName = "watchdog-ddns-server"
+	RunningName = "ddns-watchdog-server"
 	RunningPath = common.GetRunningPath()
 	InstallPath = "/etc/systemd/system/" + RunningName + ".service"
 	ConfPath    = RunningPath + "conf/"

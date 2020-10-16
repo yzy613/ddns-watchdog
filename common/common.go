@@ -13,8 +13,8 @@ import (
 
 const (
 	LocalVersion     = "1.3.2"
-	DefaultAPIServer = "https://yzyweb.cn/watchdog-ddns"
-	ProjectUrl       = "https://github.com/yzy613/watchdog-ddns"
+	DefaultAPIServer = "https://yzyweb.cn/ddns-watchdog"
+	ProjectUrl       = "https://github.com/yzy613/ddns-watchdog"
 )
 
 func GetRunningPath() (path string) {
@@ -181,7 +181,7 @@ func VersionTips(LatestVersion string) {
 	fmt.Println("项目地址 ", ProjectUrl)
 	switch {
 	case strings.Contains(LatestVersion, "N/A"):
-		fmt.Println("\n需要手动检查更新，请前往 项目地址 查看")
+		fmt.Println("\n" + LatestVersion + "\n需要手动检查更新，请前往 项目地址 查看")
 	case CompareVersionString(LatestVersion, LocalVersion):
 		fmt.Println("\n发现新版本，请前往 项目地址 下载")
 	}
