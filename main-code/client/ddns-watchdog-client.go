@@ -15,10 +15,10 @@ var (
 	enforcement     = flag.Bool("f", false, "强制检查 DNS 解析记录")
 	version         = flag.Bool("version", false, "查看当前版本并检查更新")
 	initOption      = flag.String("init", "", "有选择地初始化配置文件，可以组合使用 (例 01)\n"+
-		"0 -> client.json\n"+
-		"1 -> dnspod.json\n"+
-		"2 -> alidns.json\n"+
-		"3 -> cloudflare.json")
+		"0 -> "+client.ConfFileName+"\n"+
+		"1 -> "+client.DNSPodConfFileName+"\n"+
+		"2 -> "+client.AliDNSConfFileName+"\n"+
+		"3 -> "+client.CloudflareConfFileName)
 	confPath = flag.String("conf_path", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
 	conf     = client.ClientConf{}
 	dpc      = client.DNSPodConf{}
@@ -40,7 +40,7 @@ func main() {
 	// 有选择地初始化配置文件
 	if *initOption != "" {
 		for _, event := range *initOption {
-			err := RunInit(string(event))
+			err := runInit(string(event))
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -141,7 +141,7 @@ func main() {
 	}
 }
 
-func RunInit(event string) (err error) {
+func runInit(event string) (err error) {
 	switch event {
 	case "0":
 		conf.APIUrl = common.DefaultAPIServer
