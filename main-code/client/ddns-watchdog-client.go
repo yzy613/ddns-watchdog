@@ -182,7 +182,9 @@ func asyncCheck(conf *client.ClientConf, done chan bool) {
 	// 获取 IP
 	acquiredIP, err := client.GetOwnIP(conf.APIUrl, conf.EnableNetworkCard, conf.NetworkCard)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		done <- true
+		return
 	}
 
 	if acquiredIP != conf.LatestIP || *enforcement {
