@@ -18,7 +18,7 @@ func AliDNS(adc AliDNSConf, ipAddr string) (msg []string, err []error) {
 
 	for _, subDomain := range adc.SubDomain {
 		// 获取解析记录
-		recordIP, currentErr := adc.GetParseRecord(subDomain)
+		recordIP, currentErr := adc.GetParseRecord(subDomain, recordType)
 		if currentErr != nil {
 			err = append(err, currentErr)
 			continue
@@ -37,7 +37,7 @@ func AliDNS(adc AliDNSConf, ipAddr string) (msg []string, err []error) {
 	return
 }
 
-func (ayc *AliDNSConf) GetParseRecord(subDomain string) (recordIP string, err error) {
+func (ayc *AliDNSConf) GetParseRecord(subDomain, recordType string) (recordIP string, err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
 	if err != nil {
 		return
@@ -57,7 +57,9 @@ func (ayc *AliDNSConf) GetParseRecord(subDomain string) (recordIP string, err er
 		if response.DomainRecords.Record[i].RR == subDomain {
 			ayc.RecordId = response.DomainRecords.Record[i].RecordId
 			recordIP = response.DomainRecords.Record[i].Value
-			break
+			if response.DomainRecords.Record[i].Type == recordType {
+				break
+			}
 		}
 	}
 	if ayc.RecordId == "" || recordIP == "" {

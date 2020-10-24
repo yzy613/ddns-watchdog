@@ -20,7 +20,7 @@ func DNSPod(dpc DNSPodConf, ipAddr string) (msg []string, err []error) {
 
 	for _, subDomain := range dpc.SubDomain {
 		// 获取解析记录
-		recordIP, currentErr := dpc.GetParseRecord(subDomain)
+		recordIP, currentErr := dpc.GetParseRecord(subDomain, recordType)
 		if currentErr != nil {
 			err = append(err, currentErr)
 			continue
@@ -48,7 +48,7 @@ func (dpc DNSPodConf) CheckRespondStatus(jsonObj *simplejson.Json) (err error) {
 	return
 }
 
-func (dpc *DNSPodConf) GetParseRecord(subDomain string) (recordIP string, err error) {
+func (dpc *DNSPodConf) GetParseRecord(subDomain, recordType string) (recordIP string, err error) {
 	postContent := dpc.PublicRequestInit()
 	postContent = postContent + "&" + dpc.RecordRequestInit(subDomain)
 	recvJson, err := postman("https://dnsapi.cn/Record.List", postContent)
@@ -71,11 +71,13 @@ func (dpc *DNSPodConf) GetParseRecord(subDomain string) (recordIP string, err er
 	}
 	for _, value := range records {
 		element := value.(map[string]interface{})
-		if element["name"] == subDomain {
+		if element["name"].(string) == subDomain {
 			dpc.RecordId = element["id"].(string)
 			recordIP = element["value"].(string)
 			dpc.RecordLineId = element["line_id"].(string)
-			break
+			if element["type"].(string) == recordType {
+				break
+			}
 		}
 	}
 	return

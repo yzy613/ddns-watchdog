@@ -21,7 +21,7 @@ func Cloudflare(cfc CloudflareConf, ipAddr string) (msg []string, err []error) {
 
 	for _, domain := range cfc.Domain {
 		// 获取解析记录
-		recordIP, currentErr := cfc.GetParseRecord(domain)
+		recordIP, currentErr := cfc.GetParseRecord(domain, recordType)
 		if currentErr != nil {
 			err = append(err, currentErr)
 			continue
@@ -40,7 +40,7 @@ func Cloudflare(cfc CloudflareConf, ipAddr string) (msg []string, err []error) {
 	return
 }
 
-func (cfc *CloudflareConf) GetParseRecord(domain string) (recordIP string, err error) {
+func (cfc *CloudflareConf) GetParseRecord(domain, recordType string) (recordIP string, err error) {
 	httpClient := &http.Client{}
 	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records?name=" + domain
 	req, err := http.NewRequest("GET", url, nil)
@@ -75,10 +75,12 @@ func (cfc *CloudflareConf) GetParseRecord(domain string) (recordIP string, err e
 	}
 	for _, value := range records {
 		element := value.(map[string]interface{})
-		if element["name"] == domain {
+		if element["name"].(string) == domain {
 			cfc.DomainID = element["id"].(string)
 			recordIP = element["content"].(string)
-			break
+			if element["type"].(string) == recordType {
+				break
+			}
 		}
 	}
 	return
