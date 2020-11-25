@@ -16,7 +16,7 @@
 [![Downloads](https://img.shields.io/github/downloads/yzy613/ddns-watchdog/total)](https://github.com/yzy613/ddns-watchdog/releases)
 [![ClickDownload](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/ddns-watchdog/releases)
 
-开箱即用的可常驻 Dynamic DNS 客户端，现已支持 DNSPod AliDNS(阿里云 DNS) Cloudflare，支持使用网卡 IP
+现已支持 DNSPod AliDNS(阿里云 DNS) Cloudflare，支持使用 IPv6 和网卡 IP
 
 ## 准备工作
 - 拥有（动态）公网 IPv6 地址或（动态）公网 IPv4 地址
@@ -95,7 +95,7 @@
         "domain": "example.com",
         "sub_domain": [
             "@",
-            "wwww"
+            "www"
         ]
     }
     ```
@@ -113,7 +113,7 @@
         "domain": "example.com",
         "sub_domain": [
             "@",
-            "wwww"
+            "www"
         ]
     }
     ```
