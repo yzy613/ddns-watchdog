@@ -37,8 +37,8 @@ func AliDNS(adc AliDNSConf, ipAddr string) (msg []string, err []error) {
 	return
 }
 
-func (ayc *AliDNSConf) GetParseRecord(subDomain, recordType string) (recordIP string, err error) {
-	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
+func (adc *AliDNSConf) GetParseRecord(subDomain, recordType string) (recordIP string, err error) {
+	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", adc.AccessKeyId, adc.AccessKeySecret)
 	if err != nil {
 		return
 	}
@@ -46,7 +46,7 @@ func (ayc *AliDNSConf) GetParseRecord(subDomain, recordType string) (recordIP st
 	request := alidns.CreateDescribeDomainRecordsRequest()
 	request.Scheme = "https"
 
-	request.DomainName = ayc.Domain
+	request.DomainName = adc.Domain
 
 	response, err := client.DescribeDomainRecords(request)
 	if err != nil {
@@ -55,21 +55,21 @@ func (ayc *AliDNSConf) GetParseRecord(subDomain, recordType string) (recordIP st
 
 	for i := range response.DomainRecords.Record {
 		if response.DomainRecords.Record[i].RR == subDomain {
-			ayc.RecordId = response.DomainRecords.Record[i].RecordId
+			adc.RecordId = response.DomainRecords.Record[i].RecordId
 			recordIP = response.DomainRecords.Record[i].Value
 			if response.DomainRecords.Record[i].Type == recordType {
 				break
 			}
 		}
 	}
-	if ayc.RecordId == "" || recordIP == "" {
-		err = errors.New("AliDNS: " + subDomain + "." + ayc.Domain + " 解析记录不存在")
+	if adc.RecordId == "" || recordIP == "" {
+		err = errors.New("AliDNS: " + subDomain + "." + adc.Domain + " 解析记录不存在")
 	}
 	return
 }
 
-func (ayc AliDNSConf) UpdateParseRecord(ipAddr, recordType, subDomain string) (err error) {
-	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", ayc.AccessKeyId, ayc.AccessKeySecret)
+func (adc AliDNSConf) UpdateParseRecord(ipAddr, recordType, subDomain string) (err error) {
+	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", adc.AccessKeyId, adc.AccessKeySecret)
 	if err != nil {
 		return
 	}
@@ -77,7 +77,7 @@ func (ayc AliDNSConf) UpdateParseRecord(ipAddr, recordType, subDomain string) (e
 	request := alidns.CreateUpdateDomainRecordRequest()
 	request.Scheme = "https"
 
-	request.RecordId = ayc.RecordId
+	request.RecordId = adc.RecordId
 	request.RR = subDomain
 	request.Type = recordType
 	request.Value = ipAddr
