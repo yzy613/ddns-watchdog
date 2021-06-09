@@ -10,16 +10,16 @@ import (
 )
 
 var (
-	installOption   = flag.Bool("install", false, "安装服务")
-	uninstallOption = flag.Bool("uninstall", false, "卸载服务")
+	installOption   = flag.Bool("I", false, "安装服务")
+	uninstallOption = flag.Bool("u", false, "卸载服务")
 	enforcement     = flag.Bool("f", false, "强制检查 DNS 解析记录")
-	version         = flag.Bool("version", false, "查看当前版本并检查更新")
-	initOption      = flag.String("init", "", "有选择地初始化配置文件，可以组合使用 (例 01)\n"+
+	version         = flag.Bool("v", false, "查看当前版本并检查更新")
+	initOption      = flag.String("i", "", "有选择地初始化配置文件，可以组合使用 (例 01)\n"+
 		"0 -> "+client.ConfFileName+"\n"+
 		"1 -> "+client.DNSPodConfFileName+"\n"+
 		"2 -> "+client.AliDNSConfFileName+"\n"+
 		"3 -> "+client.CloudflareConfFileName)
-	confPath = flag.String("conf_path", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
+	confPath = flag.String("c", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
 	conf     = client.ClientConf{}
 	dpc      = client.DNSPodConf{}
 	adc      = client.AliDNSConf{}

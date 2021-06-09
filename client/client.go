@@ -36,7 +36,7 @@ func Install() (err error) {
 				"After=network.target\n\n" +
 				"[Service]\n" +
 				"Type=simple\n" +
-				"ExecStart=" + RunningPath + RunningName + " -conf_path " + ConfPath +
+				"ExecStart=" + RunningPath + RunningName + " -c " + ConfPath +
 				"\nRestart=on-failure\n" +
 				"RestartSec=2\n\n" +
 				"[Install]\n" +
