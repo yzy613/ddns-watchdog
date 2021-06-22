@@ -11,7 +11,7 @@ import (
 
 var (
 	installOption   = flag.Bool("I", false, "安装服务")
-	uninstallOption = flag.Bool("u", false, "卸载服务")
+	uninstallOption = flag.Bool("U", false, "卸载服务")
 	enforcement     = flag.Bool("f", false, "强制检查 DNS 解析记录")
 	version         = flag.Bool("v", false, "查看当前版本并检查更新")
 	initOption      = flag.String("i", "", "有选择地初始化配置文件，可以组合使用 (例 01)\n"+

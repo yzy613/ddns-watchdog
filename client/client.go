@@ -13,16 +13,19 @@ import (
 	"strings"
 )
 
-var (
+const (
 	RunningName            = "ddns-watchdog-client"
-	RunningPath            = common.GetRunningPath()
-	InstallPath            = "/etc/systemd/system/" + RunningName + ".service"
-	ConfPath               = RunningPath + "conf/"
 	ConfFileName           = "client.json"
 	DNSPodConfFileName     = "dnspod.json"
 	AliDNSConfFileName     = "alidns.json"
 	CloudflareConfFileName = "cloudflare.json"
 	NetworkCardFileName    = "network_card.json"
+)
+
+var (
+	RunningPath = common.GetRunningPath()
+	InstallPath = "/etc/systemd/system/" + RunningName + ".service"
+	ConfPath    = RunningPath + "conf/"
 )
 
 func Install() (err error) {

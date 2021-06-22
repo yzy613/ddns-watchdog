@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	installOption   = flag.Bool("install", false, "安装服务")
-	uninstallOption = flag.Bool("uninstall", false, "卸载服务")
-	version         = flag.Bool("version", false, "查看当前版本并检查更新")
-	confPath        = flag.String("conf_path", "", "手动设置配置文件路径（绝对路径）（有空格用双引号）")
-	initOption      = flag.Bool("init", false, "初始化配置文件")
+	installOption   = flag.Bool("I", false, "安装服务")
+	uninstallOption = flag.Bool("U", false, "卸载服务")
+	version         = flag.Bool("v", false, "查看当前版本并检查更新")
+	confPath        = flag.String("c", "", "手动设置配置文件路径（绝对路径）（有空格用双引号）")
+	initOption      = flag.Bool("i", false, "初始化配置文件")
 )
 
 func main() {
@@ -61,7 +61,7 @@ func main() {
 
 	// 加载配置
 	conf := server.ServerConf{}
-	err := common.LoadAndUnmarshal(server.ConfPath+"/server.json", &conf)
+	err := common.LoadAndUnmarshal(server.ConfPath+server.ConfFileName, &conf)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func RunInit() (err error) {
 	conf.Port = ":10032"
 	conf.IsRoot = false
 	conf.RootServerAddr = "https://yzyweb.cn/ddns-watchdog"
-	err = common.MarshalAndSave(conf, server.ConfPath+"/server.json")
+	err = common.MarshalAndSave(conf, server.ConfPath+server.ConfFileName)
 	if err != nil {
 		return
 	}

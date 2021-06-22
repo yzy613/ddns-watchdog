@@ -29,7 +29,7 @@
 - 自动将域名解析到动态 IP（支持 IPv6）
 
 ### 用法
-- `./ddns-watchdog-client -init string` 有选择地初始化配置文件，可以组合使用 (例 01)
+- `./ddns-watchdog-client -i string` 有选择地初始化配置文件，可以组合使用 (例`./ddns-watchdog-client -i 01`)
     ```
     0 -> client.json
     1 -> dnspod.json
@@ -39,15 +39,15 @@
 
 - `./ddns-watchdog-client` 直接运行
 
-- `./ddns-watchdog-client -conf_path string` 指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)
+- `./ddns-watchdog-client -c string` 指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)
 
-- `./ddns-watchdog-client -install` 安装服务
+- `./ddns-watchdog-client -I` 安装服务 (对于 Linux)
 
-- `./ddns-watchdog-client -uninstall` 卸载服务
+- `./ddns-watchdog-client -U` 卸载服务 (对于 Linux)
 
 - `./ddns-watchdog-client -f` 强制检查 DNS 解析记录
 
-- `./ddns-watchdog-client -version` 查看当前版本并检查更新
+- `./ddns-watchdog-client -v` 查看当前版本并检查更新
 
 ### 第一次使用？
 - 前往 [releases](https://github.com/yzy613/ddns-watchdog/releases) 选择下载符合自己系统的压缩包，解压得到二进制文件
@@ -56,7 +56,7 @@
 
 - 在 Linux 上不要忘记程序需要执行权限 `chmod 755 ddns-watchdog-client`
 
-- 使用 `./ddns-watchdog-client -init string` 初始化配置文件（在 Windows 上使用 [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-startup-script.bat) 一气呵成）
+- 使用 `./ddns-watchdog-client -i string` 初始化配置文件（在 Windows 上使用 [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-startup-script.bat) 一气呵成）
 
 - 默认获取的是 IPv4，若需 IPv6，请在 `./conf/client.json` 修改 `api_url` 为 `https://yzyweb.cn/ddns-watchdog6`（此方法会优先使用临时 IPv6 地址）
 
@@ -64,7 +64,7 @@
 
 - 按照 [支持的服务商](https://github.com/yzy613/ddns-watchdog#%E6%94%AF%E6%8C%81%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%95%86) 进行配置
 
-- 若需配置不同域名的 ddns-watchdog，可以结合 `-conf_path string` 启动参数配置多种配置文件（可搭配 `-init` 启动参数初始化配置文件）
+- 若需配置不同域名的 ddns-watchdog，可以结合 `-c string` 启动参数配置多种配置文件（可搭配 `-i` 启动参数初始化配置文件）
 
 - 如果域名解析更新成功，那么程序工作正常，可以在 `./conf/client.json` 启用 `check_cycle` 进行定期检查（单位：分钟）（默认为 0，意为不启用定期检查）
 
@@ -74,7 +74,7 @@
 
 ### 可选操作
 - 在 Linux 上
-1. 使用 `./ddns-watchdog-client -install` 安装服务，就可以使用 `systemctl` 管理 ddns-watchdog-client 服务了
+1. 使用 `./ddns-watchdog-client -I` 安装服务，就可以使用 `systemctl` 管理 ddns-watchdog-client 服务了
 
 - 在 Windows 上
 1. [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-startup-script.bat) 直接运行程序并回显程序返回的信息（需与 ddns-watchdog-client.exe 同一文件夹）
@@ -143,17 +143,17 @@
 - 返回 Json 格式的客户端 IP（支持 IPv6）
 
 ### 服务端 用法
-- `./ddns-watchdog-server -install` 安装服务 (已经包含 `-init` 启动参数)
+- `./ddns-watchdog-server -I` 安装服务 (已经包含 `-i` 启动参数)
 
-- `./ddns-watchdog-server -conf_path string` 指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)
+- `./ddns-watchdog-server -c string` 指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)
 
-- `./ddns-watchdog-server -init` 初始化配置文件
+- `./ddns-watchdog-server -i` 初始化配置文件
 
 - `systemctl start ddns-watchdog-server` 启动服务
 
-- `./ddns-watchdog-server -uninstall` 卸载服务
+- `./ddns-watchdog-server -U` 卸载服务
 
-- `./ddns-watchdog-server -version` 查看当前版本并检查更新
+- `./ddns-watchdog-server -v` 查看当前版本并检查更新
 
 ## 安装 
 ### Arch Linux

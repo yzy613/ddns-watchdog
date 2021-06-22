@@ -11,8 +11,12 @@ import (
 	"strings"
 )
 
+const (
+	RunningName  = "ddns-watchdog-server"
+	ConfFileName = "server.json"
+)
+
 var (
-	RunningName = "ddns-watchdog-server"
 	RunningPath = common.GetRunningPath()
 	InstallPath = "/etc/systemd/system/" + RunningName + ".service"
 	ConfPath    = RunningPath + "conf/"
@@ -91,7 +95,7 @@ func Install() (err error) {
 				"After=network.target\n\n" +
 				"[Service]\n" +
 				"Type=simple\n" +
-				"ExecStart=" + RunningPath + RunningName + " -conf_path " + ConfPath +
+				"ExecStart=" + RunningPath + RunningName + " -c " + ConfPath +
 				"\nRestart=on-failure\n" +
 				"RestartSec=2\n\n" +
 				"[Install]\n" +
