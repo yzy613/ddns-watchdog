@@ -4,7 +4,7 @@ title=ddns-watchdog-client-startup-script
 color 3f
 
 SET conf=.\conf
-if not exist %conf% (call ddns-watchdog-client.exe -init 0123) else goto start
+if not exist %conf% (call ddns-watchdog-client.exe -i 0123) else goto start
 echo ddns-watchdog-client has initialized
 echo Please change .\conf\client.json
 echo.
