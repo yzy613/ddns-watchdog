@@ -128,11 +128,11 @@ func main() {
 
 	// 周期循环
 	waitCheckDone := make(chan bool, 1)
-	if conf.CheckCycle == 0 {
+	if conf.CheckCycleMinutes == 0 {
 		go asyncCheck(&conf, waitCheckDone)
 		<-waitCheckDone
 	} else {
-		cycle := time.NewTicker(time.Duration(conf.CheckCycle) * time.Minute)
+		cycle := time.NewTicker(time.Duration(conf.CheckCycleMinutes) * time.Minute)
 		for {
 			go asyncCheck(&conf, waitCheckDone)
 			<-waitCheckDone
@@ -145,7 +145,7 @@ func runInit(event string) (err error) {
 	switch event {
 	case "0":
 		conf.APIUrl = common.DefaultAPIServer
-		conf.CheckCycle = 0
+		conf.CheckCycleMinutes = 0
 		err = common.MarshalAndSave(conf, client.ConfPath+client.ConfFileName)
 		if err != nil {
 			return

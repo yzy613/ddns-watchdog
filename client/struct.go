@@ -6,7 +6,7 @@ type ClientConf struct {
 	EnableNetworkCard bool    `json:"enable_network_card"`
 	NetworkCard       string  `json:"network_card"`
 	Services          Service `json:"services"`
-	CheckCycle        int     `json:"check_cycle"`
+	CheckCycleMinutes int     `json:"check_cycle_minutes"`
 }
 
 type Service struct {
