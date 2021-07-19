@@ -13,20 +13,21 @@ import (
 	"strings"
 )
 
-const (
-	RunningName            = "ddns-watchdog-client"
-	ConfFileName           = "client.json"
-	DNSPodConfFileName     = "dnspod.json"
-	AliDNSConfFileName     = "alidns.json"
-	CloudflareConfFileName = "cloudflare.json"
-	NetworkCardFileName    = "network_card.json"
-)
+func (conf *clientConf) InitConf() (msg string, err error) {
+	*conf = clientConf{}
+	conf.APIUrl.IPv4 = common.DefaultAPIUrl
+	conf.APIUrl.IPv6 = common.DefaultIPv6APIUrl
+	conf.APIUrl.Version = common.DefaultAPIUrl
+	conf.CheckCycleMinutes = 0
+	err = common.MarshalAndSave(conf, ConfPath+ConfFileName)
+	msg = "初始化 " + ConfPath + ConfFileName
+	return
+}
 
-var (
-	RunningPath = common.GetRunningPath()
-	InstallPath = "/etc/systemd/system/" + RunningName + ".service"
-	ConfPath    = RunningPath + "conf/"
-)
+func (conf *clientConf) LoadConf() (err error) {
+	err = common.LoadAndUnmarshal(ConfPath+ConfFileName, &conf)
+	return
+}
 
 func Install() (err error) {
 	if common.IsWindows() {
@@ -92,62 +93,113 @@ func NetworkCardRespond() (map[string]string, error) {
 	return networkCardInfo, nil
 }
 
-func GetOwnIP(apiUrl string, enableNetworkCard bool, networkCard string) (acquiredIP string, err error) {
-	if enableNetworkCard {
-		// 网卡获取
-		if networkCard == "" {
-			ncr, getErr := NetworkCardRespond()
-			err = getErr
-			if err != nil {
-				return
-			}
-			err = common.MarshalAndSave(ncr, ConfPath+NetworkCardFileName)
-			if err != nil {
-				return
-			}
-			err = errors.New("请打开 " + ConfPath + NetworkCardFileName + " 选择一个网卡填入 " +
-				ConfPath + ConfFileName + " 的 network_card")
+func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string, err error) {
+	ncr := make(map[string]string)
+	// 若需网卡信息，则获取网卡信息并提供给用户
+	if enabled.NetworkCard && nc.IPv4 == "" && nc.IPv6 == "" {
+		ncr, err = NetworkCardRespond()
+		if err != nil {
 			return
+		}
+		err = common.MarshalAndSave(ncr, ConfPath+NetworkCardFileName)
+		if err != nil {
+			return
+		}
+		err = errors.New("请打开 " + ConfPath + NetworkCardFileName + " 选择网卡填入 " +
+			ConfPath + ConfFileName + " 的 network_card")
+		return
+	}
+
+	// 若需网卡信息，则获取获取网卡信息
+	if enabled.NetworkCard && (nc.IPv4 != "" || nc.IPv6 != "") {
+		ncr, err = NetworkCardRespond()
+		if err != nil {
+			return
+		}
+	}
+
+	// 启用 IPv4
+	if enabled.IPv4 {
+		// 启用网卡 IPv4
+		if enabled.NetworkCard && nc.IPv4 != "" {
+			ipv4 = ncr[nc.IPv4]
+			if ipv4 == "" {
+				err = errors.New("IPv4 选择了不存在的网卡")
+				return
+			}
 		} else {
-			ncr, getErr := NetworkCardRespond()
-			err = getErr
+			// 使用 API 获取 IPv4
+			if apiUrl.IPv4 == "" {
+				apiUrl.IPv4 = common.DefaultAPIUrl
+			}
+			res, err2 := http.Get(apiUrl.IPv4)
+			err = err2
 			if err != nil {
 				return
 			}
-			acquiredIP = ncr[networkCard]
-			if acquiredIP == "" {
-				err = errors.New("选择了不存在的网卡")
+			defer res.Body.Close()
+			recvJson, err2 := ioutil.ReadAll(res.Body)
+			err = err2
+			if err != nil {
 				return
 			}
+			var ipInfo common.PublicInfo
+			err = json.Unmarshal(recvJson, &ipInfo)
+			if err != nil {
+				return
+			}
+			ipv4 = ipInfo.IP
 		}
-	} else {
-		// 远程获取
-		if apiUrl == "" {
-			apiUrl = common.DefaultAPIServer
-		}
-		res, getErr := http.Get(apiUrl)
-		err = getErr
-		if err != nil {
+		if strings.Contains(ipv4, ":") {
+			err = errors.New("获取到的 IPv4 格式错误，意外获取到了 " + ipv4)
 			return
 		}
-		defer res.Body.Close()
-		recvJson, getErr := ioutil.ReadAll(res.Body)
-		err = getErr
-		if err != nil {
+	}
+
+	// 启用 IPv6
+	if enabled.IPv6 {
+		// 启用网卡 IPv6
+		if enabled.NetworkCard && nc.IPv6 != "" {
+			ipv6 = ncr[nc.IPv6]
+			if ipv6 == "" {
+				err = errors.New("IPv6 选择了不存在的网卡")
+				return
+			}
+		} else {
+			// 使用 API 获取 IPv4
+			if apiUrl.IPv6 == "" {
+				apiUrl.IPv6 = common.DefaultIPv6APIUrl
+			}
+			res, err2 := http.Get(apiUrl.IPv6)
+			err = err2
+			if err != nil {
+				return
+			}
+			defer res.Body.Close()
+			recvJson, err2 := ioutil.ReadAll(res.Body)
+			err = err2
+			if err != nil {
+				return
+			}
+			var ipInfo common.PublicInfo
+			err = json.Unmarshal(recvJson, &ipInfo)
+			if err != nil {
+				return
+			}
+			ipv6 = ipInfo.IP
+		}
+		if strings.Contains(ipv6, ":") {
+			ipv6 = common.DecodeIPv6(ipv6)
+		} else {
+			err = errors.New("获取到的 IPv6 格式错误，意外获取到了 " + ipv6)
 			return
 		}
-		var ipInfo common.PublicInfo
-		err = json.Unmarshal(recvJson, &ipInfo)
-		if err != nil {
-			return
-		}
-		acquiredIP = ipInfo.IP
 	}
 	return
 }
 
-func (conf ClientConf) GetLatestVersion() string {
-	res, err := http.Get(conf.APIUrl)
+func (conf clientConf) GetLatestVersion() string {
+	res, err := http.Get(conf.APIUrl.Version)
 	if err != nil {
 		return "N/A (请检查网络连接)"
 	}
@@ -167,6 +219,6 @@ func (conf ClientConf) GetLatestVersion() string {
 	return recv.Version
 }
 
-func (conf ClientConf) CheckLatestVersion() {
+func (conf clientConf) CheckLatestVersion() {
 	common.VersionTips(conf.GetLatestVersion())
 }

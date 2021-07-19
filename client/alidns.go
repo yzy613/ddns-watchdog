@@ -4,40 +4,71 @@ import (
 	"errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/yzy613/ddns-watchdog/common"
-	"strings"
+	"log"
 )
 
-func AliDNS(adc AliDNSConf, ipAddr string) (msg []string, err []error) {
-	recordType := ""
-	if strings.Contains(ipAddr, ":") {
-		recordType = "AAAA"
-		ipAddr = common.DecodeIPv6(ipAddr)
-	} else {
-		recordType = "A"
-	}
+func (adc *aliDNSConf) InitConf() (msg string, err error) {
+	*adc = aliDNSConf{}
+	adc.AccessKeyId = "在 https://ram.console.aliyun.com/users 获取"
+	adc.AccessKeySecret = adc.AccessKeyId
+	adc.Domain = "example.com"
+	adc.SubDomain.A = "ipv4"
+	adc.SubDomain.AAAA = "ipv6"
+	err = common.MarshalAndSave(adc, ConfPath+AliDNSConfFileName)
+	msg = "初始化 " + ConfPath + AliDNSConfFileName
+	return
+}
 
-	for _, subDomain := range adc.SubDomain {
-		// 获取解析记录
-		recordIP, currentErr := adc.GetParseRecord(subDomain, recordType)
-		if currentErr != nil {
-			err = append(err, currentErr)
-			continue
-		}
-		if recordIP == ipAddr {
-			continue
-		}
-		// 更新解析记录
-		currentErr = adc.UpdateParseRecord(ipAddr, recordType, subDomain)
-		if currentErr != nil {
-			err = append(err, currentErr)
-			continue
-		}
-		msg = append(msg, "AliDNS: "+subDomain+"."+adc.Domain+" 已更新解析记录 "+ipAddr)
+func (adc *aliDNSConf) LoadConf() (err error) {
+	err = common.LoadAndUnmarshal(ConfPath+AliDNSConfFileName, &adc)
+	if err != nil {
+		return
+	}
+	if adc.AccessKeyId == "" || adc.AccessKeySecret == "" || adc.Domain == "" || (adc.SubDomain.A == "" && adc.SubDomain.AAAA == "") {
+		log.Println("请打开配置文件 " + ConfPath + AliDNSConfFileName + " 检查你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
 	}
 	return
 }
 
-func (adc *AliDNSConf) GetParseRecord(subDomain, recordType string) (recordIP string, err error) {
+func (adc aliDNSConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs []error) {
+	if enabled.IPv4 {
+		// 获取解析记录
+		recordIP, err := adc.GetParseRecord(adc.SubDomain.A, "A")
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			if recordIP != ipv4 {
+				// 更新解析记录
+				err = adc.UpdateParseRecord(ipv4, "A", adc.SubDomain.A)
+				if err != nil {
+					errs = append(errs, err)
+				} else {
+					msg = append(msg, "AliDNS: "+adc.SubDomain.A+"."+adc.Domain+" 已更新解析记录 "+ipv4)
+				}
+			}
+		}
+	}
+	if enabled.IPv6 {
+		// 获取解析记录
+		recordIP, err := adc.GetParseRecord(adc.SubDomain.AAAA, "AAAA")
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			if recordIP != ipv6 {
+				// 更新解析记录
+				err = adc.UpdateParseRecord(ipv6, "AAAA", adc.SubDomain.AAAA)
+				if err != nil {
+					errs = append(errs, err)
+				} else {
+					msg = append(msg, "AliDNS: "+adc.SubDomain.AAAA+"."+adc.Domain+" 已更新解析记录 "+ipv6)
+				}
+			}
+		}
+	}
+	return
+}
+
+func (adc *aliDNSConf) GetParseRecord(subDomain, recordType string) (recordIP string, err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", adc.AccessKeyId, adc.AccessKeySecret)
 	if err != nil {
 		return
@@ -68,7 +99,7 @@ func (adc *AliDNSConf) GetParseRecord(subDomain, recordType string) (recordIP st
 	return
 }
 
-func (adc AliDNSConf) UpdateParseRecord(ipAddr, recordType, subDomain string) (err error) {
+func (adc aliDNSConf) UpdateParseRecord(ipAddr, recordType, subDomain string) (err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", adc.AccessKeyId, adc.AccessKeySecret)
 	if err != nil {
 		return

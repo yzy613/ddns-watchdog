@@ -6,41 +6,74 @@ import (
 	"github.com/bitly/go-simplejson"
 	"github.com/yzy613/ddns-watchdog/common"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
 
-func Cloudflare(cfc CloudflareConf, ipAddr string) (msg []string, err []error) {
-	recordType := ""
-	if strings.Contains(ipAddr, ":") {
-		recordType = "AAAA"
-		ipAddr = common.DecodeIPv6(ipAddr)
-	} else {
-		recordType = "A"
-	}
+func (cfc *cloudflareConf) InitConf() (msg string, err error) {
+	*cfc = cloudflareConf{}
+	cfc.Email = "你的注册邮箱"
+	cfc.APIKey = "在 https://dash.cloudflare.com/profile/api-tokens 获取"
+	cfc.ZoneID = "在你域名页面的右下角有个区域 ID"
+	cfc.Domain.A = "ipv4.example.com"
+	cfc.Domain.AAAA = "ipv6.example.com"
+	err = common.MarshalAndSave(cfc, ConfPath+CloudflareConfFileName)
+	msg = "初始化 " + ConfPath + CloudflareConfFileName
+	return
+}
 
-	for _, domain := range cfc.Domain {
-		// 获取解析记录
-		recordIP, currentErr := cfc.GetParseRecord(domain, recordType)
-		if currentErr != nil {
-			err = append(err, currentErr)
-			continue
-		}
-		if recordIP == ipAddr {
-			continue
-		}
-		// 更新解析记录
-		currentErr = cfc.UpdateParseRecord(ipAddr, recordType, domain)
-		if currentErr != nil {
-			err = append(err, currentErr)
-			continue
-		}
-		msg = append(msg, "Cloudflare: "+domain+" 已更新解析记录 "+ipAddr)
+func (cfc *cloudflareConf) LoadConf() (err error) {
+	err = common.LoadAndUnmarshal(ConfPath+CloudflareConfFileName, &cfc)
+	if err != nil {
+		return
+	}
+	if cfc.Email == "" || cfc.APIKey == "" || cfc.ZoneID == "" || (cfc.Domain.A == "" && cfc.Domain.AAAA == "") {
+		log.Println("请打开配置文件 " + ConfPath + CloudflareConfFileName + " 检查你的 email, api_key, zone_id, domain 并重新启动")
 	}
 	return
 }
 
-func (cfc *CloudflareConf) GetParseRecord(domain, recordType string) (recordIP string, err error) {
+func (cfc cloudflareConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs []error) {
+	if enabled.IPv4 {
+		// 获取解析记录
+		recordIP, err := cfc.GetParseRecord(cfc.Domain.A, "A")
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			if recordIP != ipv4 {
+				// 更新解析记录
+				err = cfc.UpdateParseRecord(ipv4, "A", cfc.Domain.A)
+				if err != nil {
+					errs = append(errs, err)
+				} else {
+					msg = append(msg, "Cloudflare: "+cfc.Domain.A+" 已更新解析记录 "+ipv4)
+				}
+			}
+		}
+	}
+	if enabled.IPv6 {
+		// 获取解析记录
+		recordIP, err := cfc.GetParseRecord(cfc.Domain.AAAA, "AAAA")
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+
+		}
+		if recordIP != ipv6 {
+			// 更新解析记录
+			err = cfc.UpdateParseRecord(ipv6, "AAAA", cfc.Domain.AAAA)
+			if err != nil {
+				errs = append(errs, err)
+			} else {
+				msg = append(msg, "Cloudflare: "+cfc.Domain.AAAA+" 已更新解析记录 "+ipv6)
+			}
+		}
+	}
+	return
+}
+
+func (cfc *cloudflareConf) GetParseRecord(domain, recordType string) (recordIP string, err error) {
 	httpClient := &http.Client{}
 	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records?name=" + domain
 	req, err := http.NewRequest("GET", url, nil)
@@ -86,10 +119,10 @@ func (cfc *CloudflareConf) GetParseRecord(domain, recordType string) (recordIP s
 	return
 }
 
-func (cfc CloudflareConf) UpdateParseRecord(ipAddr, recordType, domain string) (err error) {
+func (cfc cloudflareConf) UpdateParseRecord(ipAddr, recordType, domain string) (err error) {
 	httpClient := &http.Client{}
 	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records/" + cfc.DomainID
-	reqData := CloudflareUpdateRequest{
+	reqData := cloudflareUpdateRequest{
 		Type:    recordType,
 		Name:    domain,
 		Content: ipAddr,

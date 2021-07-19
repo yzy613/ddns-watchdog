@@ -11,12 +11,6 @@ import (
 	"strings"
 )
 
-const (
-	LocalVersion     = "1.3.5"
-	DefaultAPIServer = "https://yzyweb.cn/ddns-watchdog"
-	ProjectUrl       = "https://github.com/yzy613/ddns-watchdog"
-)
-
 func GetRunningPath() (path string) {
 	path, _ = filepath.Abs(filepath.Dir(os.Args[0]))
 	tempStr := strings.ReplaceAll(path, "\\", "/")

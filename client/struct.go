@@ -1,46 +1,90 @@
 package client
 
-type ClientConf struct {
-	APIUrl            string  `json:"api_url"`
-	LatestIP          string  `json:"-"`
-	EnableNetworkCard bool    `json:"enable_network_card"`
-	NetworkCard       string  `json:"network_card"`
-	Services          Service `json:"services"`
-	CheckCycleMinutes int     `json:"check_cycle_minutes"`
+import "github.com/yzy613/ddns-watchdog/common"
+
+const (
+	RunningName            = "ddns-watchdog-client"
+	ConfFileName           = "client.json"
+	DNSPodConfFileName     = "dnspod.json"
+	AliDNSConfFileName     = "alidns.json"
+	CloudflareConfFileName = "cloudflare.json"
+	NetworkCardFileName    = "network_card.json"
+)
+
+var (
+	RunningPath = common.GetRunningPath()
+	InstallPath = "/etc/systemd/system/" + RunningName + ".service"
+	ConfPath    = RunningPath + "conf/"
+	Conf        = clientConf{}
+	Dpc         = dnspodConf{}
+	Adc         = aliDNSConf{}
+	Cfc         = cloudflareConf{}
+)
+
+type clientConf struct {
+	APIUrl            apiUrl      `json:"api_url"`
+	Enable            enable      `json:"enable"`
+	NetworkCard       networkCard `json:"network_card"`
+	Services          service     `json:"services"`
+	CheckCycleMinutes int         `json:"check_cycle_minutes"`
+	LatestIPv4        string      `json:"-"`
+	LatestIPv6        string      `json:"-"`
 }
 
-type Service struct {
+type apiUrl struct {
+	IPv4    string `json:"ipv4"`
+	IPv6    string `json:"ipv6"`
+	Version string `json:"version"`
+}
+
+type enable struct {
+	IPv4        bool `json:"ipv4"`
+	IPv6        bool `json:"ipv6"`
+	NetworkCard bool `json:"network_card"`
+}
+
+type networkCard struct {
+	IPv4 string `json:"ipv4"`
+	IPv6 string `json:"ipv6"`
+}
+
+type service struct {
 	DNSPod     bool `json:"dnspod"`
 	AliDNS     bool `json:"alidns"`
 	Cloudflare bool `json:"cloudflare"`
 }
 
-type DNSPodConf struct {
-	Id           string   `json:"id"`
-	Token        string   `json:"token"`
-	Domain       string   `json:"domain"`
-	SubDomain    []string `json:"sub_domain"`
-	RecordId     string   `json:"-"`
-	RecordLineId string   `json:"-"`
+type subdomain struct {
+	A    string `json:"a"`
+	AAAA string `json:"aaaa"`
 }
 
-type AliDNSConf struct {
-	AccessKeyId     string   `json:"accesskey_id"`
-	AccessKeySecret string   `json:"accesskey_secret"`
-	Domain          string   `json:"domain"`
-	SubDomain       []string `json:"sub_domain"`
-	RecordId        string   `json:"-"`
+type dnspodConf struct {
+	Id           string    `json:"id"`
+	Token        string    `json:"token"`
+	Domain       string    `json:"domain"`
+	SubDomain    subdomain `json:"sub_domain"`
+	RecordId     string    `json:"-"`
+	RecordLineId string    `json:"-"`
 }
 
-type CloudflareConf struct {
-	Email    string   `json:"email"`
-	APIKey   string   `json:"api_key"`
-	ZoneID   string   `json:"zone_id"`
-	Domain   []string `json:"domain"`
-	DomainID string   `json:"-"`
+type aliDNSConf struct {
+	AccessKeyId     string    `json:"accesskey_id"`
+	AccessKeySecret string    `json:"accesskey_secret"`
+	Domain          string    `json:"domain"`
+	SubDomain       subdomain `json:"sub_domain"`
+	RecordId        string    `json:"-"`
 }
 
-type CloudflareUpdateRequest struct {
+type cloudflareConf struct {
+	Email    string    `json:"email"`
+	APIKey   string    `json:"api_key"`
+	ZoneID   string    `json:"zone_id"`
+	Domain   subdomain `json:"domain"`
+	DomainID string    `json:"-"`
+}
+
+type cloudflareUpdateRequest struct {
 	Type    string `json:"type"`
 	Name    string `json:"name"`
 	Content string `json:"content"`
