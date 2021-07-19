@@ -12,8 +12,8 @@ func (adc *aliDNSConf) InitConf() (msg string, err error) {
 	adc.AccessKeyId = "在 https://ram.console.aliyun.com/users 获取"
 	adc.AccessKeySecret = adc.AccessKeyId
 	adc.Domain = "example.com"
-	adc.SubDomain.A = "ipv4"
-	adc.SubDomain.AAAA = "ipv6"
+	adc.SubDomain.A = "example4"
+	adc.SubDomain.AAAA = "example6"
 	err = common.MarshalAndSave(adc, ConfPath+AliDNSConfFileName)
 	msg = "初始化 " + ConfPath + AliDNSConfFileName
 	return
@@ -36,15 +36,13 @@ func (adc aliDNSConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs
 		recordIP, err := adc.GetParseRecord(adc.SubDomain.A, "A")
 		if err != nil {
 			errs = append(errs, err)
-		} else {
-			if recordIP != ipv4 {
-				// 更新解析记录
-				err = adc.UpdateParseRecord(ipv4, "A", adc.SubDomain.A)
-				if err != nil {
-					errs = append(errs, err)
-				} else {
-					msg = append(msg, "AliDNS: "+adc.SubDomain.A+"."+adc.Domain+" 已更新解析记录 "+ipv4)
-				}
+		} else if recordIP != ipv4 {
+			// 更新解析记录
+			err = adc.UpdateParseRecord(ipv4, "A", adc.SubDomain.A)
+			if err != nil {
+				errs = append(errs, err)
+			} else {
+				msg = append(msg, "AliDNS: "+adc.SubDomain.A+"."+adc.Domain+" 已更新解析记录 "+ipv4)
 			}
 		}
 	}
@@ -53,15 +51,13 @@ func (adc aliDNSConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs
 		recordIP, err := adc.GetParseRecord(adc.SubDomain.AAAA, "AAAA")
 		if err != nil {
 			errs = append(errs, err)
-		} else {
-			if recordIP != ipv6 {
-				// 更新解析记录
-				err = adc.UpdateParseRecord(ipv6, "AAAA", adc.SubDomain.AAAA)
-				if err != nil {
-					errs = append(errs, err)
-				} else {
-					msg = append(msg, "AliDNS: "+adc.SubDomain.AAAA+"."+adc.Domain+" 已更新解析记录 "+ipv6)
-				}
+		} else if recordIP != ipv6 {
+			// 更新解析记录
+			err = adc.UpdateParseRecord(ipv6, "AAAA", adc.SubDomain.AAAA)
+			if err != nil {
+				errs = append(errs, err)
+			} else {
+				msg = append(msg, "AliDNS: "+adc.SubDomain.AAAA+"."+adc.Domain+" 已更新解析记录 "+ipv6)
 			}
 		}
 	}

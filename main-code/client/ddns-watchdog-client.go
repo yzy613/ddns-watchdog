@@ -173,10 +173,10 @@ func asyncCheck(done chan bool) {
 	// 进入更新流程
 	if ipv4 != client.Conf.LatestIPv4 || ipv6 != client.Conf.LatestIPv6 || *enforcement {
 		if ipv4 != client.Conf.LatestIPv4 {
-			ipv4 = client.Conf.LatestIPv4
+			client.Conf.LatestIPv4 = ipv4
 		}
 		if ipv6 != client.Conf.LatestIPv6 {
-			ipv6 = client.Conf.LatestIPv6
+			client.Conf.LatestIPv6 = ipv6
 		}
 		servicesCount := 0
 		if client.Conf.Services.DNSPod {

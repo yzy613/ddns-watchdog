@@ -16,8 +16,8 @@ func (cfc *cloudflareConf) InitConf() (msg string, err error) {
 	cfc.Email = "你的注册邮箱"
 	cfc.APIKey = "在 https://dash.cloudflare.com/profile/api-tokens 获取"
 	cfc.ZoneID = "在你域名页面的右下角有个区域 ID"
-	cfc.Domain.A = "ipv4.example.com"
-	cfc.Domain.AAAA = "ipv6.example.com"
+	cfc.Domain.A = "example4.example.com"
+	cfc.Domain.AAAA = "example6.example.com"
 	err = common.MarshalAndSave(cfc, ConfPath+CloudflareConfFileName)
 	msg = "初始化 " + ConfPath + CloudflareConfFileName
 	return
@@ -40,15 +40,13 @@ func (cfc cloudflareConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, 
 		recordIP, err := cfc.GetParseRecord(cfc.Domain.A, "A")
 		if err != nil {
 			errs = append(errs, err)
-		} else {
-			if recordIP != ipv4 {
-				// 更新解析记录
-				err = cfc.UpdateParseRecord(ipv4, "A", cfc.Domain.A)
-				if err != nil {
-					errs = append(errs, err)
-				} else {
-					msg = append(msg, "Cloudflare: "+cfc.Domain.A+" 已更新解析记录 "+ipv4)
-				}
+		} else if recordIP != ipv4 {
+			// 更新解析记录
+			err = cfc.UpdateParseRecord(ipv4, "A", cfc.Domain.A)
+			if err != nil {
+				errs = append(errs, err)
+			} else {
+				msg = append(msg, "Cloudflare: "+cfc.Domain.A+" 已更新解析记录 "+ipv4)
 			}
 		}
 	}
@@ -57,10 +55,7 @@ func (cfc cloudflareConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, 
 		recordIP, err := cfc.GetParseRecord(cfc.Domain.AAAA, "AAAA")
 		if err != nil {
 			errs = append(errs, err)
-		} else {
-
-		}
-		if recordIP != ipv6 {
+		} else if recordIP != ipv6 {
 			// 更新解析记录
 			err = cfc.UpdateParseRecord(ipv6, "AAAA", cfc.Domain.AAAA)
 			if err != nil {

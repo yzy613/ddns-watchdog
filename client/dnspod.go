@@ -15,8 +15,8 @@ func (dpc *dnspodConf) InitConf() (msg string, err error) {
 	dpc.Id = "在 https://console.dnspod.cn/account/token/token 获取"
 	dpc.Token = dpc.Id
 	dpc.Domain = "example.com"
-	dpc.SubDomain.A = "ipv4"
-	dpc.SubDomain.AAAA = "ipv6"
+	dpc.SubDomain.A = "example4"
+	dpc.SubDomain.AAAA = "example6"
 	err = common.MarshalAndSave(dpc, ConfPath+DNSPodConfFileName)
 	msg = "初始化 " + ConfPath + DNSPodConfFileName
 	return
@@ -39,15 +39,13 @@ func (dpc dnspodConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs
 		recordIP, err := dpc.GetParseRecord(dpc.SubDomain.A, "A")
 		if err != nil {
 			errs = append(errs, err)
-		} else {
-			if recordIP != ipv4 {
-				// 更新解析记录
-				err = dpc.UpdateParseRecord(ipv4, "A", dpc.SubDomain.A)
-				if err != nil {
-					errs = append(errs, err)
-				} else {
-					msg = append(msg, "DNSPod: "+dpc.SubDomain.A+"."+dpc.Domain+" 已更新解析记录 "+ipv4)
-				}
+		} else if recordIP != ipv4 {
+			// 更新解析记录
+			err = dpc.UpdateParseRecord(ipv4, "A", dpc.SubDomain.A)
+			if err != nil {
+				errs = append(errs, err)
+			} else {
+				msg = append(msg, "DNSPod: "+dpc.SubDomain.A+"."+dpc.Domain+" 已更新解析记录 "+ipv4)
 			}
 		}
 	}
@@ -56,15 +54,13 @@ func (dpc dnspodConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs
 		recordIP, err := dpc.GetParseRecord(dpc.SubDomain.AAAA, "AAAA")
 		if err != nil {
 			errs = append(errs, err)
-		} else {
-			if recordIP != ipv6 {
-				// 更新解析记录
-				err = dpc.UpdateParseRecord(ipv6, "AAAA", dpc.SubDomain.AAAA)
-				if err != nil {
-					errs = append(errs, err)
-				} else {
-					msg = append(msg, "DNSPod: "+dpc.SubDomain.AAAA+"."+dpc.Domain+" 已更新解析记录 "+ipv6)
-				}
+		} else if recordIP != ipv6 {
+			// 更新解析记录
+			err = dpc.UpdateParseRecord(ipv6, "AAAA", dpc.SubDomain.AAAA)
+			if err != nil {
+				errs = append(errs, err)
+			} else {
+				msg = append(msg, "DNSPod: "+dpc.SubDomain.AAAA+"."+dpc.Domain+" 已更新解析记录 "+ipv6)
 			}
 		}
 	}
