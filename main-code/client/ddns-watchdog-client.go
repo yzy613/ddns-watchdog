@@ -23,9 +23,12 @@ var (
 
 func main() {
 	// 初始化并处理 flag
-	err := runInitProcess()
+	exit, err := runInitProcess()
 	if err != nil {
 		log.Fatal(err)
+	}
+	if exit {
+		return
 	}
 
 	// 加载服务配置
@@ -49,7 +52,7 @@ func main() {
 	}
 }
 
-func runInitProcess() (err error) {
+func runInitProcess() (exit bool, err error) {
 	flag.Parse()
 	// 加载自定义配置文件路径
 	if *confPath != "" {
@@ -68,6 +71,7 @@ func runInitProcess() (err error) {
 				return
 			}
 		}
+		exit = true
 		return
 	}
 
@@ -78,12 +82,14 @@ func runInitProcess() (err error) {
 		if err != nil {
 			return
 		}
+		exit = true
 		return
 	case *uninstallOption:
 		err = client.Uninstall()
 		if err != nil {
 			return
 		}
+		exit = true
 		return
 	}
 
@@ -96,12 +102,14 @@ func runInitProcess() (err error) {
 	// 检查版本
 	if *version {
 		client.Conf.CheckLatestVersion()
+		exit = true
 		return
 	}
 
 	// 检查启用 ddns
 	if !client.Conf.Services.DNSPod && !client.Conf.Services.AliDNS && !client.Conf.Services.Cloudflare {
 		err = errors.New("请打开客户端配置文件 " + client.ConfPath + client.ConfFileName + " 启用需要使用的服务并重新启动")
+		exit = true
 	}
 	return
 }

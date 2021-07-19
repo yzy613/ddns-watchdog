@@ -5,7 +5,6 @@ import (
 	"github.com/bitly/go-simplejson"
 	"github.com/yzy613/ddns-watchdog/common"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -15,8 +14,8 @@ func (dpc *dnspodConf) InitConf() (msg string, err error) {
 	dpc.Id = "在 https://console.dnspod.cn/account/token/token 获取"
 	dpc.Token = dpc.Id
 	dpc.Domain = "example.com"
-	dpc.SubDomain.A = "example4"
-	dpc.SubDomain.AAAA = "example6"
+	dpc.SubDomain.A = "A记录子域名"
+	dpc.SubDomain.AAAA = "AAAA记录子域名"
 	err = common.MarshalAndSave(dpc, ConfPath+DNSPodConfFileName)
 	msg = "初始化 " + ConfPath + DNSPodConfFileName
 	return
@@ -28,13 +27,13 @@ func (dpc *dnspodConf) LoadCOnf() (err error) {
 		return
 	}
 	if dpc.Id == "" || dpc.Token == "" || dpc.Domain == "" || (dpc.SubDomain.A == "" && dpc.SubDomain.AAAA == "") {
-		log.Println("请打开配置文件 " + ConfPath + DNSPodConfFileName + " 检查你的 id, token, domain, sub_domain 并重新启动")
+		err = errors.New("请打开配置文件 " + ConfPath + DNSPodConfFileName + " 检查你的 id, token, domain, sub_domain 并重新启动")
 	}
 	return
 }
 
 func (dpc dnspodConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs []error) {
-	if enabled.IPv4 {
+	if enabled.IPv4 && dpc.SubDomain.A != "" {
 		// 获取解析记录
 		recordIP, err := dpc.GetParseRecord(dpc.SubDomain.A, "A")
 		if err != nil {
@@ -49,7 +48,7 @@ func (dpc dnspodConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs
 			}
 		}
 	}
-	if enabled.IPv6 {
+	if enabled.IPv6 && dpc.SubDomain.AAAA != "" {
 		// 获取解析记录
 		recordIP, err := dpc.GetParseRecord(dpc.SubDomain.AAAA, "AAAA")
 		if err != nil {

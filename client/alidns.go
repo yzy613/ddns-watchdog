@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/yzy613/ddns-watchdog/common"
-	"log"
 )
 
 func (adc *aliDNSConf) InitConf() (msg string, err error) {
@@ -12,8 +11,8 @@ func (adc *aliDNSConf) InitConf() (msg string, err error) {
 	adc.AccessKeyId = "在 https://ram.console.aliyun.com/users 获取"
 	adc.AccessKeySecret = adc.AccessKeyId
 	adc.Domain = "example.com"
-	adc.SubDomain.A = "example4"
-	adc.SubDomain.AAAA = "example6"
+	adc.SubDomain.A = "A记录子域名"
+	adc.SubDomain.AAAA = "AAAA记录子域名"
 	err = common.MarshalAndSave(adc, ConfPath+AliDNSConfFileName)
 	msg = "初始化 " + ConfPath + AliDNSConfFileName
 	return
@@ -25,13 +24,13 @@ func (adc *aliDNSConf) LoadConf() (err error) {
 		return
 	}
 	if adc.AccessKeyId == "" || adc.AccessKeySecret == "" || adc.Domain == "" || (adc.SubDomain.A == "" && adc.SubDomain.AAAA == "") {
-		log.Println("请打开配置文件 " + ConfPath + AliDNSConfFileName + " 检查你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
+		err = errors.New("请打开配置文件 " + ConfPath + AliDNSConfFileName + " 检查你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
 	}
 	return
 }
 
 func (adc aliDNSConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs []error) {
-	if enabled.IPv4 {
+	if enabled.IPv4 && adc.SubDomain.A != "" {
 		// 获取解析记录
 		recordIP, err := adc.GetParseRecord(adc.SubDomain.A, "A")
 		if err != nil {
@@ -46,7 +45,7 @@ func (adc aliDNSConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs
 			}
 		}
 	}
-	if enabled.IPv6 {
+	if enabled.IPv6 && adc.SubDomain.AAAA != "" {
 		// 获取解析记录
 		recordIP, err := adc.GetParseRecord(adc.SubDomain.AAAA, "AAAA")
 		if err != nil {

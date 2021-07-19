@@ -77,9 +77,8 @@ type aliDNSConf struct {
 }
 
 type cloudflareConf struct {
-	Email    string    `json:"email"`
-	APIKey   string    `json:"api_key"`
 	ZoneID   string    `json:"zone_id"`
+	APIToken string    `json:"api_token"`
 	Domain   subdomain `json:"domain"`
 	DomainID string    `json:"-"`
 }

@@ -219,6 +219,9 @@ func (conf clientConf) GetLatestVersion() string {
 	return recv.Version
 }
 
-func (conf clientConf) CheckLatestVersion() {
+func (conf *clientConf) CheckLatestVersion() {
+	if conf.APIUrl.Version == "" {
+		conf.APIUrl.Version = common.DefaultAPIUrl
+	}
 	common.VersionTips(conf.GetLatestVersion())
 }

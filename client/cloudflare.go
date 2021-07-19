@@ -6,18 +6,16 @@ import (
 	"github.com/bitly/go-simplejson"
 	"github.com/yzy613/ddns-watchdog/common"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 )
 
 func (cfc *cloudflareConf) InitConf() (msg string, err error) {
 	*cfc = cloudflareConf{}
-	cfc.Email = "你的注册邮箱"
-	cfc.APIKey = "在 https://dash.cloudflare.com/profile/api-tokens 获取"
+	cfc.APIToken = "在 https://dash.cloudflare.com/profile/api-tokens 获取"
 	cfc.ZoneID = "在你域名页面的右下角有个区域 ID"
-	cfc.Domain.A = "example4.example.com"
-	cfc.Domain.AAAA = "example6.example.com"
+	cfc.Domain.A = "A记录子域名.example.com"
+	cfc.Domain.AAAA = "AAAA记录子域名.example.com"
 	err = common.MarshalAndSave(cfc, ConfPath+CloudflareConfFileName)
 	msg = "初始化 " + ConfPath + CloudflareConfFileName
 	return
@@ -28,14 +26,14 @@ func (cfc *cloudflareConf) LoadConf() (err error) {
 	if err != nil {
 		return
 	}
-	if cfc.Email == "" || cfc.APIKey == "" || cfc.ZoneID == "" || (cfc.Domain.A == "" && cfc.Domain.AAAA == "") {
-		log.Println("请打开配置文件 " + ConfPath + CloudflareConfFileName + " 检查你的 email, api_key, zone_id, domain 并重新启动")
+	if cfc.ZoneID == "" || cfc.APIToken == "" || (cfc.Domain.A == "" && cfc.Domain.AAAA == "") {
+		err = errors.New("请打开配置文件 " + ConfPath + CloudflareConfFileName + " 检查你的 zone_id, api_token, domain 并重新启动")
 	}
 	return
 }
 
 func (cfc cloudflareConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs []error) {
-	if enabled.IPv4 {
+	if enabled.IPv4 && cfc.Domain.A != "" {
 		// 获取解析记录
 		recordIP, err := cfc.GetParseRecord(cfc.Domain.A, "A")
 		if err != nil {
@@ -50,7 +48,7 @@ func (cfc cloudflareConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, 
 			}
 		}
 	}
-	if enabled.IPv6 {
+	if enabled.IPv6 && cfc.Domain.AAAA != "" {
 		// 获取解析记录
 		recordIP, err := cfc.GetParseRecord(cfc.Domain.AAAA, "AAAA")
 		if err != nil {
@@ -75,8 +73,7 @@ func (cfc *cloudflareConf) GetParseRecord(domain, recordType string) (recordIP s
 	if err != nil {
 		return
 	}
-	req.Header.Set("X-Auth-Email", cfc.Email)
-	req.Header.Set("X-Auth-Key", cfc.APIKey)
+	req.Header.Set("Authorization", "Bearer "+cfc.APIToken)
 	req.Header.Set("Content-Type", "application/json")
 	res, err := httpClient.Do(req)
 	if err != nil {
@@ -92,8 +89,12 @@ func (cfc *cloudflareConf) GetParseRecord(domain, recordType string) (recordIP s
 	if err != nil {
 		return
 	}
-	if getErr := jsonObj.Get("error").MustString(); getErr != "" {
-		err = errors.New(getErr)
+	if err2 := jsonObj.Get("error").MustString(); err2 != "" {
+		err = errors.New(err2)
+		return
+	}
+	if !jsonObj.Get("success").MustBool() {
+		err = errors.New("Cloudflare: 登录似乎有问题")
 		return
 	}
 	records, err := jsonObj.Get("result").Array()
@@ -129,8 +130,7 @@ func (cfc cloudflareConf) UpdateParseRecord(ipAddr, recordType, domain string) (
 		return
 	}
 	defer req.Body.Close()
-	req.Header.Set("X-Auth-Email", cfc.Email)
-	req.Header.Set("X-Auth-Key", cfc.APIKey)
+	req.Header.Set("Authorization", "Bearer "+cfc.APIToken)
 	req.Header.Set("Content-Type", "application/json")
 	res, err := httpClient.Do(req)
 	if err != nil {
