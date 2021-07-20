@@ -14,7 +14,7 @@ var (
 	installOption   = flag.Bool("I", false, "安装服务")
 	uninstallOption = flag.Bool("U", false, "卸载服务")
 	version         = flag.Bool("v", false, "查看当前版本并检查更新")
-	confPath        = flag.String("c", "", "手动设置配置文件路径（绝对路径）（有空格用双引号）")
+	confPath        = flag.String("c", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
 	initOption      = flag.Bool("i", false, "初始化配置文件")
 )
 

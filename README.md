@@ -82,7 +82,7 @@
 
 - 在 Linux 上不要忘记程序需要执行权限 `chmod 755 ddns-watchdog-client`
 
-- 使用 `./ddns-watchdog-client -i string` 初始化配置文件 (在 Windows 上使用 [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-startup-script.bat) 一气呵成)
+- 使用 `./ddns-watchdog-client -i 0123` 初始化配置文件 (在 Windows 上使用 [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-startup-script.bat) 一气呵成)
 
 - 根据使用环境确定启用 (`enable`) IPv4 还是 IPv6 或是两者都启用
 
@@ -133,6 +133,7 @@
 
 - 支持同一个域名的 A 和 AAAA 记录的子域名同时更新解析
 
+    ##### 初始 DNSPod 配置文件
     ```json
     {
 	    "id": "在 https://console.dnspod.cn/account/token/token 获取",
@@ -152,6 +153,7 @@
 
 - 支持同一个域名的 A 和 AAAA 记录的子域名同时更新解析
 
+    ##### 初始 AliDNS 配置文件
     ```json
     {
         "accesskey_id": "在 https://ram.console.aliyun.com/users 获取",
@@ -171,6 +173,7 @@
 
 - 支持同一个域名的 A 和 AAAA 记录的子域名同时更新解析
 
+    ##### 初始 Cloudflare 配置文件
     ```json
     {
         "zone_id": "在你域名页面的右下角有个区域 ID",

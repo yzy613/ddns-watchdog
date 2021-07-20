@@ -1,5 +1,18 @@
 package server
 
+import "github.com/yzy613/ddns-watchdog/common"
+
+const (
+	RunningName  = "ddns-watchdog-server"
+	ConfFileName = "server.json"
+)
+
+var (
+	RunningPath = common.GetRunningPath()
+	InstallPath = "/etc/systemd/system/" + RunningName + ".service"
+	ConfPath    = RunningPath + "conf/"
+)
+
 type ServerConf struct {
 	Port           string `json:"port"`
 	IsRoot         bool   `json:"is_root"`

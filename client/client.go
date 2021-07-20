@@ -110,7 +110,7 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 		return
 	}
 
-	// 若需网卡信息，则获取获取网卡信息
+	// 若需网卡信息，则获取网卡信息
 	if enabled.NetworkCard && (nc.IPv4 != "" || nc.IPv6 != "") {
 		ncr, err = NetworkCardRespond()
 		if err != nil {

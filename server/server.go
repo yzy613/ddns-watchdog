@@ -11,17 +11,6 @@ import (
 	"strings"
 )
 
-const (
-	RunningName  = "ddns-watchdog-server"
-	ConfFileName = "server.json"
-)
-
-var (
-	RunningPath = common.GetRunningPath()
-	InstallPath = "/etc/systemd/system/" + RunningName + ".service"
-	ConfPath    = RunningPath + "conf/"
-)
-
 func (conf ServerConf) GetLatestVersion() string {
 	if !conf.IsRoot {
 		res, err := http.Get(conf.RootServerAddr)

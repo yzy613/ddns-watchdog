@@ -94,7 +94,7 @@ func (cfc *cloudflareConf) GetParseRecord(domain, recordType string) (recordIP s
 		return
 	}
 	if !jsonObj.Get("success").MustBool() {
-		err = errors.New("Cloudflare: 登录似乎有问题")
+		err = errors.New("Cloudflare: 身份认证似乎有问题")
 		return
 	}
 	records, err := jsonObj.Get("result").Array()
