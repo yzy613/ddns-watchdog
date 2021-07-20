@@ -28,7 +28,11 @@
 ## 客户端
 
 ### 用法
-- `./ddns-watchdog-client -i 0123` 有选择地初始化配置文件，可以组合使用 (例`./ddns-watchdog-client -i 01`)
+- `./ddns-watchdog-client -i 0123` 有选择地初始化配置文件，可以组合使用
+    #### 此示例展示仅初始化客户端和 DNSPod 的配置文件
+    ```bash
+    ./ddns-watchdog-client -i 01
+    ```
     #### 代码参考表
     ```
     0 -> client.json
