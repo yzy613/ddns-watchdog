@@ -30,7 +30,7 @@
 ### 用法
 - `./ddns-watchdog-client -i 0123` 有选择地初始化配置文件，可以组合使用
     #### 此示例展示仅初始化客户端和 DNSPod 的配置文件
-    ```bash
+    ```
     ./ddns-watchdog-client -i 01
     ```
     #### 代码参考表
@@ -56,26 +56,26 @@
 ### 初始客户端配置文件
 ```json
 {
-	"api_url": {
-		"ipv4": "https://yzyweb.cn/ddns-watchdog",
-		"ipv6": "https://yzyweb.cn/ddns-watchdog6",
-		"version": "https://yzyweb.cn/ddns-watchdog"
-	},
-	"enable": {
-		"ipv4": false,
-		"ipv6": false,
-		"network_card": false
-	},
-	"network_card": {
-		"ipv4": "",
-		"ipv6": ""
-	},
-	"services": {
-		"dnspod": false,
-		"alidns": false,
-		"cloudflare": false
-	},
-	"check_cycle_minutes": 0
+    "api_url": {
+        "ipv4": "https://yzyweb.cn/ddns-watchdog",
+        "ipv6": "https://yzyweb.cn/ddns-watchdog6",
+        "version": "https://yzyweb.cn/ddns-watchdog"
+    },
+    "enable": {
+        "ipv4": false,
+        "ipv6": false,
+        "network_card": false
+    },
+    "network_card": {
+        "ipv4": "",
+        "ipv6": ""
+    },
+    "services": {
+        "dnspod": false,
+        "alidns": false,
+        "cloudflare": false
+    },
+    "check_cycle_minutes": 0
 }
 ```
 
@@ -140,10 +140,10 @@
     ##### 初始 DNSPod 配置文件
     ```json
     {
-	    "id": "在 https://console.dnspod.cn/account/token/token 获取",
-	    "token": "在 https://console.dnspod.cn/account/token/token 获取",
-	    "domain": "example.com",
-	    "sub_domain": {
+        "id": "在 https://console.dnspod.cn/account/token/token 获取",
+        "token": "在 https://console.dnspod.cn/account/token/token 获取",
+        "domain": "example.com",
+        "sub_domain": {
             "a": "A记录子域名",
             "aaaa": "AAAA记录子域名"
         }
