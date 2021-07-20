@@ -21,7 +21,7 @@
 ## 准备工作
 - 拥有 (公网动态) IPv6 地址或 (公网动态) IPv4 地址
 
-- 拥有一个能申请编辑解析记录 Token 的域名 (若没有，可以前往 DNSPod 阿里云或其他提供商购买域名)
+- 拥有一个能申请修改 DNS 记录 Token 的域名 (若没有，可以前往 DNSPod 阿里云或其他提供商购买域名)
 
 - 域名的 DNS 服务器指向 [支持的服务商](https://github.com/yzy613/ddns-watchdog#%E6%94%AF%E6%8C%81%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%95%86)
 
@@ -49,7 +49,7 @@
 
 - `./ddns-watchdog-client -U` 卸载服务 (仅限有 systemd 的 Linux 使用)
 
-- `./ddns-watchdog-client -f` 强制检查 DNS 解析记录
+- `./ddns-watchdog-client -f` 强制检查 DNS 记录值
 
 - `./ddns-watchdog-client -v` 查看当前版本并检查更新
 
@@ -114,9 +114,9 @@
 
 - 若需配置不同域名的 ddns-watchdog，可以结合 `-c string` 启动参数配置多种配置文件 (可搭配 `-i` 启动参数初始化配置文件)
 
-- 如果域名解析更新成功，那么程序工作正常，可以在 `./conf/client.json` 启用 `check_cycle_minutes` 进行定期检查 (单位：分钟)(默认为 0，意为不启用定期检查)
+- 如果 DNS 记录值更新成功，那么程序工作正常，可以在 `./conf/client.json` 启用 `check_cycle_minutes` 进行定期检查 (单位：分钟)(默认为 0，意为不启用定期检查)
 
-- 注意：ddns-watchdog 设计了 IP 地址本地比对机制，以防止频繁访问 API 导致封禁。若手动修改了解析记录，会导致无法及时更新 (可搭配 `-f` 启动参数强制检查 DNS 解析记录以跳过本地比对机制)
+- 注意：ddns-watchdog 设计了 IP 地址本地比对机制，以防止频繁访问 API 导致封禁。若手动修改了 DNS 记录值，会导致无法及时更新 (可搭配 `-f` 启动参数强制检查 DNS 记录值以跳过本地比对机制)
 
 - Enjoy it! (觉得好用可以点一个 star 哦 `:-)` )
 
@@ -135,7 +135,7 @@
 
 - 打开配置文件 `./conf/dnspod.json` 填入你的 `id, token, domain, sub_domain` 并重新启动
 
-- 支持同一个域名的 A 和 AAAA 记录的子域名同时更新解析
+- 支持同一个域名的 A 和 AAAA 记录的子域名同时更新记录值
 
     ##### 初始 DNSPod 配置文件
     ```json
@@ -155,7 +155,7 @@
 
 - 打开配置文件 `./conf/alidns.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
 
-- 支持同一个域名的 A 和 AAAA 记录的子域名同时更新解析
+- 支持同一个域名的 A 和 AAAA 记录的子域名同时更新记录值
 
     ##### 初始 AliDNS 配置文件
     ```json
@@ -175,7 +175,7 @@
 
 - 打开配置文件 `./conf/cloudflare.json` 填入你的 `zone_id, api_token, domain` 并重新启动
 
-- 支持同一个域名的 A 和 AAAA 记录的子域名同时更新解析
+- 支持同一个域名的 A 和 AAAA 记录的子域名同时更新内容
 
     ##### 初始 Cloudflare 配置文件
     ```json
