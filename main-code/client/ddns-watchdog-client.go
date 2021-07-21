@@ -23,7 +23,7 @@ var (
 
 func main() {
 	// 初始化并处理 flag
-	exit, err := runInitProcess()
+	exit, err := runFlag()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,7 +52,7 @@ func main() {
 	}
 }
 
-func runInitProcess() (exit bool, err error) {
+func runFlag() (exit bool, err error) {
 	flag.Parse()
 	// 加载自定义配置文件路径
 	if *confPath != "" {
@@ -94,6 +94,7 @@ func runInitProcess() (exit bool, err error) {
 	}
 
 	// 加载客户端配置
+	// 不得不放在这个地方，因为有下面的检查版本
 	err = client.Conf.LoadConf()
 	if err != nil {
 		return
@@ -104,12 +105,6 @@ func runInitProcess() (exit bool, err error) {
 		client.Conf.CheckLatestVersion()
 		exit = true
 		return
-	}
-
-	// 检查启用 ddns
-	if !client.Conf.Services.DNSPod && !client.Conf.Services.AliDNS && !client.Conf.Services.Cloudflare {
-		err = errors.New("请打开客户端配置文件 " + client.ConfPath + client.ConfFileName + " 启用需要使用的服务并重新启动")
-		exit = true
 	}
 	return
 }

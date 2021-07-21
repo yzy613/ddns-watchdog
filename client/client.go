@@ -26,6 +26,16 @@ func (conf *clientConf) InitConf() (msg string, err error) {
 
 func (conf *clientConf) LoadConf() (err error) {
 	err = common.LoadAndUnmarshal(ConfPath+ConfFileName, &conf)
+	// 检查启用 IP 类型
+	if !conf.Enable.IPv4 && !conf.Enable.IPv6 {
+		err = errors.New("请打开客户端配置文件 " + ConfPath + ConfFileName + " 启用需要使用的 IP 类型并重新启动")
+		return
+	}
+	// 检查启用服务
+	if !conf.Services.DNSPod && !conf.Services.AliDNS && !conf.Services.Cloudflare {
+		err = errors.New("请打开客户端配置文件 " + ConfPath + ConfFileName + " 启用需要使用的服务并重新启动")
+		return
+	}
 	return
 }
 
