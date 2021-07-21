@@ -1,7 +1,7 @@
 package common
 
 const (
-	LocalVersion      = "1.4.0"
+	LocalVersion      = "1.4.1"
 	DefaultAPIUrl     = "https://yzyweb.cn/ddns-watchdog"
 	DefaultIPv6APIUrl = "https://yzyweb.cn/ddns-watchdog6"
 	ProjectUrl        = "https://github.com/yzy613/ddns-watchdog"
