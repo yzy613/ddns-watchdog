@@ -26,7 +26,6 @@
 - 域名的 DNS 服务器指向 [支持的服务商](https://github.com/yzy613/ddns-watchdog#%E6%94%AF%E6%8C%81%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%95%86)
 
 ## 客户端
-
 ### 用法
 - `./ddns-watchdog-client -i 0123` 有选择地初始化配置文件，可以组合使用
     #### 此示例展示仅初始化客户端和 DNSPod 的配置文件
