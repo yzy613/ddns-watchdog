@@ -267,6 +267,7 @@ func (ws *WindowsService) Execute(args []string, r <-chan svc.ChangeRequest, cha
 	tick := runTick
 	waitCheckDone := make(chan bool, 1)
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
+	elog.Info(1, fmt.Sprintf("服务 %s 启动成功！", client.WindowsServiceName))
 	if client.Conf.CheckCycleMinutes <= 0 {
 		changes <- svc.Status{State: svc.StopPending}
 		go asyncCheck(waitCheckDone)
@@ -283,7 +284,6 @@ loop:
 				changes <- c.CurrentStatus
 			case svc.Stop, svc.Shutdown:
 				changes <- svc.Status{State: svc.StopPending}
-				elog.Info(0, "服务已停止！")
 				break loop
 			case svc.Pause:
 				changes <- svc.Status{State: svc.Paused, Accepts: cmdsAccepted}
@@ -293,12 +293,12 @@ loop:
 				tick = runTick
 				go asyncCheck(waitCheckDone)
 				<-waitCheckDone
-				elog.Info(2, "动态域名解析更新成功！")
+				elog.Info(3, "动态域名解析更新成功！")
 			default:
-				elog.Error(1, fmt.Sprintf("无法识别的控制命令 #%d", c))
+				elog.Error(2, fmt.Sprintf("无法识别的控制命令 #%d", c))
 			}
 		case <-tick.C:
-			elog.Info(2, "动态域名解析更新成功！")
+			elog.Info(3, "动态域名解析更新成功！")
 			go asyncCheck(waitCheckDone)
 			<-waitCheckDone
 		}
@@ -319,16 +319,16 @@ func runService(name string, isDebug bool) {
 	}
 	defer elog.Close()
 
-	elog.Info(0, fmt.Sprintf("服务 %s 正在启动中……", name))
+	elog.Info(1, fmt.Sprintf("服务 %s 正在启动中……", name))
 	run := svc.Run
 	if isDebug {
-		elog.Warning(0, fmt.Sprintf("服务 %s 将以调试模式运行！", name))
+		elog.Warning(1, fmt.Sprintf("服务 %s 将以调试模式运行！", name))
 		run = debug.Run
 	}
 	err = run(name, &WindowsService{})
 	if err != nil {
-		elog.Error(0, fmt.Sprintf("服务 %s 启动失败: %v", name, err))
+		elog.Error(1, fmt.Sprintf("服务 %s 启动失败: %v", name, err))
 		return
 	}
-	elog.Info(0, fmt.Sprintf("服务 %s 已停止！", name))
+	elog.Info(1, fmt.Sprintf("服务 %s 已停止！", name))
 }
