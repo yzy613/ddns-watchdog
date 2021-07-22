@@ -268,10 +268,11 @@ func (ws *WindowsService) Execute(args []string, r <-chan svc.ChangeRequest, cha
 	waitCheckDone := make(chan bool, 1)
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
 	elog.Info(1, fmt.Sprintf("服务 %s 启动成功！", client.WindowsServiceName))
+	go asyncCheck(waitCheckDone)
+	<-waitCheckDone
+	elog.Info(3, "动态域名解析更新成功！")
 	if client.Conf.CheckCycleMinutes <= 0 {
 		changes <- svc.Status{State: svc.StopPending}
-		go asyncCheck(waitCheckDone)
-		<-waitCheckDone
 		changes <- svc.Status{State: svc.Stopped}
 		return
 	}
