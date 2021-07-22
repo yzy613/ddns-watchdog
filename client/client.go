@@ -3,14 +3,22 @@ package client
 import (
 	"encoding/json"
 	"errors"
-	"github.com/yzy613/ddns-watchdog/common"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/yzy613/ddns-watchdog/common"
+	"golang.org/x/sys/windows"
+	"golang.org/x/sys/windows/registry"
+	"golang.org/x/sys/windows/svc/eventlog"
+	"golang.org/x/sys/windows/svc/mgr"
 )
 
 func (conf *clientConf) InitConf() (msg string, err error) {
@@ -29,21 +37,114 @@ func (conf *clientConf) LoadConf() (err error) {
 	// 检查启用 IP 类型
 	if !conf.Enable.IPv4 && !conf.Enable.IPv6 {
 		err = errors.New("请打开客户端配置文件 " + ConfPath + ConfFileName + " 启用需要使用的 IP 类型并重新启动")
-		return
 	}
 	// 检查启用服务
 	if !conf.Services.DNSPod && !conf.Services.AliDNS && !conf.Services.Cloudflare {
 		err = errors.New("请打开客户端配置文件 " + ConfPath + ConfFileName + " 启用需要使用的服务并重新启动")
-		return
 	}
 	return
 }
 
-func Install() (err error) {
+func exePath() (path string, err error) { // 获取可执行文件路径
+	confPath, err := filepath.Abs(ConfPath)
+	if err != nil {
+		return "", err
+	}
+	prog := os.Args[0]
+	path, err = filepath.Abs(prog)
+	if err != nil {
+		return "", err
+	}
+	fi, err := os.Stat(path)
+	if err == nil {
+		if !fi.Mode().IsDir() {
+			return `"` + path + `" -s -c "` + confPath + `"`, nil
+		}
+		err = errors.New(path + " 是一个目录！")
+	}
+	if filepath.Ext(path) == "" {
+		path += ".exe"
+		fi, err := os.Stat(path)
+		if err == nil {
+			if !fi.Mode().IsDir() {
+				return `"` + path + `" -s -c "` + confPath + `"`, nil
+			}
+			return path, errors.New(path + " 是一个目录！")
+		}
+	}
+	path = `"` + path + `" -s -c "` + confPath + `"`
+	return
+}
+
+const WindowsServiceName string = "DDNS-Watchdog-Client"
+
+func Install() (err error) { // 安装服务
+
 	if common.IsWindows() {
-		log.Println("Windows 暂不支持安装到系统")
+		// 安装 Windows 服务
+		exepath, err := exePath()
+		if err != nil {
+			return err
+		}
+		m, err := mgr.Connect()
+		if err != nil {
+			return err
+		}
+		defer m.Disconnect()
+		s, err := m.OpenService(WindowsServiceName)
+		if err == nil {
+			s.Close()
+			return fmt.Errorf("服务 %s 已存在！", WindowsServiceName)
+		}
+		config := mgr.Config{
+			DisplayName:      "DDNS-Watchdog 动态域名解析客户端",
+			Description:      "动态域名解析客户端 DDNS-Watchdog 的服务。",
+			ServiceType:      windows.SERVICE_WIN32_OWN_PROCESS,
+			StartType:        windows.SERVICE_AUTO_START,
+			ErrorControl:     windows.SERVICE_ERROR_NORMAL,
+			ServiceStartName: "NT AUTHORITY\\NetworkService",
+		}
+		s, err = m.CreateService(WindowsServiceName, exepath, config)
+		if err != nil {
+			return err
+		}
+		defer s.Close()
+		recoveryActions := []mgr.RecoveryAction{
+			{
+				Type:  windows.SC_ACTION_RESTART,
+				Delay: (5 * time.Minute),
+			},
+			{
+				Type:  windows.SC_ACTION_RESTART,
+				Delay: (5 * time.Minute),
+			},
+			{
+				Type:  windows.SC_ACTION_NONE,
+				Delay: (5 * time.Minute),
+			},
+		}
+		err = s.SetRecoveryActions(recoveryActions, 2*86400)
+		if err != nil {
+			s.Delete()
+			return fmt.Errorf("设置错误处理程序时发生错误：%s", err)
+		}
+		err = eventlog.InstallAsEventCreate(WindowsServiceName, eventlog.Error|eventlog.Warning|eventlog.Info)
+		if err != nil {
+			s.Delete()
+			return fmt.Errorf("调用 SetupEventLogSource() 时发生错误：%s", err)
+		}
+		key, err := registry.OpenKey(registry.LOCAL_MACHINE, `SYSTEM\CurrentControlSet\Services\`+WindowsServiceName, registry.ALL_ACCESS)
+		if err != nil {
+			return fmt.Errorf("服务被不完全安装，问题出现在二次写入注册表过程中，请尝试重新安装服务！信息：%s", err)
+		}
+		err = key.SetStringValue(`ImagePath`, exepath)
+		if err != nil {
+			return fmt.Errorf("服务被不完全安装，问题出现在二次写入注册表过程中，请尝试重新安装服务！信息：%s", err)
+		}
+		fmt.Printf("服务 %s 安装成功！", WindowsServiceName)
+		return nil
 	} else {
-		// 注册系统服务
+		// 注册 Linux 系统服务
 		serviceContent := []byte(
 			"[Unit]\n" +
 				"Description=" + RunningName + " Service\n" +
@@ -66,13 +167,34 @@ func Install() (err error) {
 
 func Uninstall() (err error) {
 	if common.IsWindows() {
-		log.Println("Windows 暂不支持安装到系统")
+		// 删除 Windows 服务
+		m, err := mgr.Connect()
+		if err != nil {
+			return err
+		}
+		defer m.Disconnect()
+		s, err := m.OpenService(WindowsServiceName)
+		if err != nil {
+			err = errors.New("此程序尚未被安装为服务！")
+			return err
+		}
+		defer s.Close()
+		err = s.Delete()
+		if err != nil {
+			return err
+		}
+		err = eventlog.Remove(WindowsServiceName)
+		if err != nil {
+			return fmt.Errorf("调用 RemoveEventLogSource() 时发生错误：%s", err)
+		}
+		fmt.Printf("服务 %s 删除成功！", WindowsServiceName)
+		return nil
 	} else {
 		err = os.Remove(InstallPath)
 		if err != nil {
 			return
 		}
-		log.Println("卸载服务成功")
+		log.Println("删除服务成功！")
 		log.Println("若要完全删除，请移步到 " + RunningPath + " 和 " + ConfPath + " 完全删除")
 	}
 	return

@@ -3,9 +3,15 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/yzy613/ddns-watchdog/client"
+	"fmt"
 	"log"
 	"time"
+
+	"github.com/yzy613/ddns-watchdog/client"
+
+	"golang.org/x/sys/windows/svc"
+	"golang.org/x/sys/windows/svc/debug"
+	"golang.org/x/sys/windows/svc/eventlog"
 )
 
 var (
@@ -13,6 +19,8 @@ var (
 	uninstallOption = flag.Bool("U", false, "卸载服务")
 	enforcement     = flag.Bool("f", false, "强制检查 DNS 解析记录")
 	version         = flag.Bool("v", false, "查看当前版本并检查更新")
+	runAsService    = flag.Bool("s", false, "以 Windows 服务模式运行（请不要自行添加此参数！）")
+	debugMode       = flag.Bool("d", false, "在以 Windows 服务模式运行时开启调试模式（请不要自行添加此参数！）")
 	initOption      = flag.String("i", "", "有选择地初始化配置文件，可以组合使用 (例 01)\n"+
 		"0 -> "+client.ConfFileName+"\n"+
 		"1 -> "+client.DNSPodConfFileName+"\n"+
@@ -37,19 +45,24 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// 周期循环
-	waitCheckDone := make(chan bool, 1)
-	if client.Conf.CheckCycleMinutes <= 0 {
-		go asyncCheck(waitCheckDone)
-		<-waitCheckDone
+	if *runAsService { // Windows 服务模式
+		runService(client.WindowsServiceName, *debugMode)
 	} else {
-		cycle := time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
-		for {
+		waitCheckDone := make(chan bool, 1)
+		if client.Conf.CheckCycleMinutes <= 0 {
 			go asyncCheck(waitCheckDone)
 			<-waitCheckDone
-			<-cycle.C
+		} else {
+			cycle := time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
+			for {
+				go asyncCheck(waitCheckDone)
+				<-waitCheckDone
+				<-cycle.C
+			}
 		}
 	}
+	// 周期循环
+
 }
 
 func runFlag() (exit bool, err error) {
@@ -239,4 +252,83 @@ func asyncCloudflare(ipv4, ipv6 string, done chan bool) {
 		log.Println(row)
 	}
 	done <- true
+}
+
+// Windows 服务
+var elog debug.Log
+
+type WindowsService struct{}
+
+func (ws *WindowsService) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
+	const cmdsAccepted = svc.AcceptPauseAndContinue | svc.AcceptShutdown | svc.AcceptStop
+	changes <- svc.Status{State: svc.StartPending}
+	runTick := time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
+	pauseTick := time.NewTicker(17280 * time.Hour)
+	tick := runTick
+	waitCheckDone := make(chan bool, 1)
+	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
+	if client.Conf.CheckCycleMinutes <= 0 {
+		changes <- svc.Status{State: svc.StopPending}
+		go asyncCheck(waitCheckDone)
+		<-waitCheckDone
+		changes <- svc.Status{State: svc.Stopped}
+		return
+	}
+loop:
+	for {
+		select {
+		case c := <-r:
+			switch c.Cmd {
+			case svc.Interrogate:
+				changes <- c.CurrentStatus
+			case svc.Stop, svc.Shutdown:
+				changes <- svc.Status{State: svc.StopPending}
+				elog.Info(0, "服务已停止！")
+				break loop
+			case svc.Pause:
+				changes <- svc.Status{State: svc.Paused, Accepts: cmdsAccepted}
+				tick = pauseTick
+			case svc.Continue:
+				changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
+				tick = runTick
+				go asyncCheck(waitCheckDone)
+				<-waitCheckDone
+				elog.Info(2, "动态域名解析更新成功！")
+			default:
+				elog.Error(1, fmt.Sprintf("无法识别的控制命令 #%d", c))
+			}
+		case <-tick.C:
+			elog.Info(2, "动态域名解析更新成功！")
+			go asyncCheck(waitCheckDone)
+			<-waitCheckDone
+		}
+	}
+	changes <- svc.Status{State: svc.Stopped}
+	return
+}
+
+func runService(name string, isDebug bool) {
+	var err error
+	if isDebug {
+		elog = debug.New(name)
+	} else {
+		elog, err = eventlog.Open(name)
+		if err != nil {
+			return
+		}
+	}
+	defer elog.Close()
+
+	elog.Info(0, fmt.Sprintf("服务 %s 正在启动中……", name))
+	run := svc.Run
+	if isDebug {
+		elog.Warning(0, fmt.Sprintf("服务 %s 将以调试模式运行！", name))
+		run = debug.Run
+	}
+	err = run(name, &WindowsService{})
+	if err != nil {
+		elog.Error(0, fmt.Sprintf("服务 %s 启动失败: %v", name, err))
+		return
+	}
+	elog.Info(0, fmt.Sprintf("服务 %s 已停止！", name))
 }
