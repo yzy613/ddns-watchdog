@@ -32,6 +32,28 @@ func (conf *clientConf) InitConf() (msg string, err error) {
 	return
 }
 
+func CheckConfFile() (err error) {
+	path := ConfPath + ConfFileName
+	fi, err := os.Stat(path)
+	if err == nil {
+		if !fi.Mode().IsDir() {
+			return nil
+		}
+		err = errors.New("客户端配置文件异常或不存在！")
+	}
+	if filepath.Ext(path) == "" {
+		path += ".exe"
+		fi, err := os.Stat(path)
+		if err == nil {
+			if !fi.Mode().IsDir() {
+				return nil
+			}
+		}
+		return errors.New("客户端配置文件异常或不存在！")
+	}
+	return
+}
+
 func (conf *clientConf) LoadConf() (err error) {
 	err = common.LoadAndUnmarshal(ConfPath+ConfFileName, &conf)
 	// 检查启用 IP 类型
@@ -79,9 +101,11 @@ func exePath() (path string, err error) { // 获取可执行文件路径
 const WindowsServiceName string = "DDNS-Watchdog-Client"
 
 func Install() (err error) { // 安装服务
-
-	if common.IsWindows() {
-		// 安装 Windows 服务
+	if common.IsWindows() { // 安装 Windows 服务
+		err := CheckConfFile() // 判断配置文件是否存在
+		if err != nil {
+			return err
+		}
 		exepath, err := exePath()
 		if err != nil {
 			return err

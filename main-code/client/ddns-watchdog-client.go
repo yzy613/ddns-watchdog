@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/yzy613/ddns-watchdog/client"
+	"github.com/yzy613/ddns-watchdog/common"
 
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/debug"
@@ -46,7 +47,11 @@ func main() {
 	}
 
 	if *runAsService { // Windows 服务模式
-		runService(client.WindowsServiceName, *debugMode)
+		if common.IsWindows() { // 是 Windows 系统
+			runService(client.WindowsServiceName, *debugMode)
+		} else { // 不是 Windows 系统
+			log.Fatal("请不要手动传入 -s 参数！")
+		}
 	} else {
 		waitCheckDone := make(chan bool, 1)
 		if client.Conf.CheckCycleMinutes <= 0 {
