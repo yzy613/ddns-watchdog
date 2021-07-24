@@ -10,9 +10,9 @@ import (
 	"github.com/yzy613/ddns-watchdog/client"
 	"github.com/yzy613/ddns-watchdog/common"
 
-	"golang.org/x/sys/windows/svc"
-	"golang.org/x/sys/windows/svc/debug"
-	"golang.org/x/sys/windows/svc/eventlog"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc/debug"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc/eventlog"
 )
 
 var (

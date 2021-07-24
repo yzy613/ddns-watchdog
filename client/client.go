@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/yzy613/ddns-watchdog/common"
-	"golang.org/x/sys/windows"
-	"golang.org/x/sys/windows/registry"
-	"golang.org/x/sys/windows/svc/eventlog"
-	"golang.org/x/sys/windows/svc/mgr"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/registry"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc/eventlog"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc/mgr"
 )
 
 func (conf *clientConf) InitConf() (msg string, err error) {
