@@ -6,7 +6,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"golang.org/x/sys/windows"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows"
 )
 
 var _ unsafe.Pointer

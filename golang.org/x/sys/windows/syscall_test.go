@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"testing"
 
-	"golang.org/x/sys/windows"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows"
 )
 
 func testSetGetenv(t *testing.T, key, value string) {

@@ -520,7 +520,7 @@ func main() {
 	}
 	imp := ""
 	if pack != "unix" {
-		imp = "import \"golang.org/x/sys/unix\"\n"
+		imp = "import \"github.com/yzy613/ddns-watchdog/golang.org/x/sys/unix\"\n"
 
 	}
 

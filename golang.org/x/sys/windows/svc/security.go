@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"golang.org/x/sys/windows"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows"
 )
 
 func allocSid(subAuth0 uint32) (*windows.SID, error) {

@@ -11,8 +11,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"golang.org/x/sys/windows/svc/eventlog"
-	"golang.org/x/sys/windows/svc/mgr"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc/eventlog"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc/mgr"
 )
 
 func exePath() (string, error) {

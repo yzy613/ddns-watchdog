@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	"golang.org/x/sys/cpu"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/cpu"
 )
 
 func TestAMD64minimalFeatures(t *testing.T) {

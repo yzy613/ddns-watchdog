@@ -10,7 +10,7 @@ import (
 	errorspkg "errors"
 	"unsafe"
 
-	"golang.org/x/sys/internal/unsafeheader"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/internal/unsafeheader"
 )
 
 // EscapeArg rewrites command line argument s as prescribed

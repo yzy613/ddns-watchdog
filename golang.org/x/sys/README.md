@@ -1,14 +1,14 @@
 # sys
 
-[![Go Reference](https://pkg.go.dev/badge/golang.org/x/sys.svg)](https://pkg.go.dev/golang.org/x/sys)
+[![Go Reference](https://pkg.go.dev/badge/github.com/yzy613/ddns-watchdog/golang.org/x/sys.svg)](https://pkg.go.dev/github.com/yzy613/ddns-watchdog/golang.org/x/sys)
 
 This repository holds supplemental Go packages for low-level interactions with
 the operating system.
 
 ## Download/Install
 
-The easiest way to install is to run `go get -u golang.org/x/sys`. You can
-also manually git clone the repository to `$GOPATH/src/golang.org/x/sys`.
+The easiest way to install is to run `go get -u github.com/yzy613/ddns-watchdog/golang.org/x/sys`. You can
+also manually git clone the repository to `$GOPATH/src/github.com/yzy613/ddns-watchdog/golang.org/x/sys`.
 
 ## Report Issues / Send Patches
 

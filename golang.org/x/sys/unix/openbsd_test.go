@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"golang.org/x/sys/unix"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/unix"
 )
 
 type testProc struct {

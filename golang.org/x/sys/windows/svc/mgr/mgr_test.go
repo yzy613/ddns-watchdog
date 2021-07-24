@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/sys/windows/svc/mgr"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc/mgr"
 )
 
 func TestOpenLanManServer(t *testing.T) {

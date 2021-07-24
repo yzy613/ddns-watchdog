@@ -9,7 +9,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"golang.org/x/sys/cpu"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/cpu"
 )
 
 var s390xTests = []struct {

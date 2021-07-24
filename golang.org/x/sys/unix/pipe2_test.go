@@ -10,7 +10,7 @@ package unix_test
 import (
 	"testing"
 
-	"golang.org/x/sys/unix"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/unix"
 )
 
 func TestPipe2(t *testing.T) {

@@ -9,7 +9,7 @@ package eventlog_test
 import (
 	"testing"
 
-	"golang.org/x/sys/windows/svc/eventlog"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc/eventlog"
 )
 
 func TestLog(t *testing.T) {

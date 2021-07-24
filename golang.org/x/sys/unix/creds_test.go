@@ -13,7 +13,7 @@ import (
 	"os"
 	"testing"
 
-	"golang.org/x/sys/unix"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/unix"
 )
 
 // TestSCMCredentials tests the sending and receiving of credentials

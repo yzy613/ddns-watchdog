@@ -6,4 +6,4 @@
 
 package registry
 
-//go:generate go run golang.org/x/sys/windows/mkwinsyscall -output zsyscall_windows.go syscall.go
+//go:generate go run github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/mkwinsyscall -output zsyscall_windows.go syscall.go

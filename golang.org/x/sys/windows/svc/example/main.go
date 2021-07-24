@@ -20,7 +20,7 @@ import (
 	"os"
 	"strings"
 
-	"golang.org/x/sys/windows/svc"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc"
 )
 
 func usage(errmsg string) {

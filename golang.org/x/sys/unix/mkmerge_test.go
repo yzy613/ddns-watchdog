@@ -31,9 +31,9 @@ func TestImports(t *testing.T) {
 			{`"go/ast"`, "ast"},
 			{`moo "go/format"`, "moo"},
 			{`. "go/token"`, "."},
-			{`"golang.org/x/sys/unix"`, "unix"},
-			{`nix "golang.org/x/sys/unix"`, "nix"},
-			{`_ "golang.org/x/sys/unix"`, "_"},
+			{`"github.com/yzy613/ddns-watchdog/golang.org/x/sys/unix"`, "unix"},
+			{`nix "github.com/yzy613/ddns-watchdog/golang.org/x/sys/unix"`, "nix"},
+			{`_ "github.com/yzy613/ddns-watchdog/golang.org/x/sys/unix"`, "_"},
 		}
 
 		for _, c := range cases {

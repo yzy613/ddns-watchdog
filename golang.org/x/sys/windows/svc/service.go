@@ -14,8 +14,8 @@ import (
 	"syscall"
 	"unsafe"
 
-	"golang.org/x/sys/internal/unsafeheader"
-	"golang.org/x/sys/windows"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/internal/unsafeheader"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows"
 )
 
 // State describes service execution state (Stopped, Running and so on).

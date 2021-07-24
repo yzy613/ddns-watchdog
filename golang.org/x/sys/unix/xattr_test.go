@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	"golang.org/x/sys/unix"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/unix"
 )
 
 func TestXattr(t *testing.T) {

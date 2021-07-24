@@ -16,7 +16,7 @@ import (
 	"unicode/utf16"
 	"unsafe"
 
-	"golang.org/x/sys/internal/unsafeheader"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/internal/unsafeheader"
 )
 
 type Handle uintptr

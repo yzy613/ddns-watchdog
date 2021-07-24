@@ -17,8 +17,8 @@ import (
 	"unicode/utf16"
 	"unsafe"
 
-	"golang.org/x/sys/internal/unsafeheader"
-	"golang.org/x/sys/windows"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/internal/unsafeheader"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows"
 )
 
 // Mgr is used to manage Windows service.

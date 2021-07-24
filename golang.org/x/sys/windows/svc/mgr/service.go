@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"unsafe"
 
-	"golang.org/x/sys/windows"
-	"golang.org/x/sys/windows/svc"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/svc"
 )
 
 // TODO(brainman): Use EnumDependentServices to enumerate dependent services.

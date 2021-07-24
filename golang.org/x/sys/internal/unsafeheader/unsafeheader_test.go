@@ -10,7 +10,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"golang.org/x/sys/internal/unsafeheader"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/internal/unsafeheader"
 )
 
 // TestTypeMatchesReflectType ensures that the name and layout of the

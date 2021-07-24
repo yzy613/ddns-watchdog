@@ -11,7 +11,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"golang.org/x/sys/unix"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/unix"
 )
 
 func TestStatvfs(t *testing.T) {

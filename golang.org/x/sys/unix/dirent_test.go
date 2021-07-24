@@ -20,7 +20,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"golang.org/x/sys/unix"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/unix"
 )
 
 func TestDirent(t *testing.T) {

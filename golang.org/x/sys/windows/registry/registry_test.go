@@ -15,7 +15,7 @@ import (
 	"time"
 	"unsafe"
 
-	"golang.org/x/sys/windows/registry"
+	"github.com/yzy613/ddns-watchdog/golang.org/x/sys/windows/registry"
 )
 
 func randKeyName(prefix string) string {
