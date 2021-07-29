@@ -44,6 +44,10 @@ func Install() (err error) {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
 		// 注册系统服务
+		if Conf.CheckCycleMinutes == 0 {
+			err = errors.New("设置一下 "+ConfPath + ConfFileName+" 的 check_cycle_minutes 吧")
+			return
+		}
 		serviceContent := []byte(
 			"[Unit]\n" +
 				"Description=" + RunningName + " Service\n" +
