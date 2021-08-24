@@ -64,18 +64,18 @@ type subdomain struct {
 type dnspodConf struct {
 	Id           string    `json:"id"`
 	Token        string    `json:"token"`
-	Domain    string    `json:"domain"`
-	SubDomain subdomain `json:"sub_domain"`
-	RecordId  string    `json:"-"`
+	Domain       string    `json:"domain"`
+	SubDomain    subdomain `json:"sub_domain"`
+	RecordId     string    `json:"-"`
 	RecordLineId string    `json:"-"`
 }
 
 type aliDNSConf struct {
 	AccessKeyId     string    `json:"accesskey_id"`
 	AccessKeySecret string    `json:"accesskey_secret"`
-	Domain    string    `json:"domain"`
-	SubDomain subdomain `json:"sub_domain"`
-	RecordId  string    `json:"-"`
+	Domain          string    `json:"domain"`
+	SubDomain       subdomain `json:"sub_domain"`
+	RecordId        string    `json:"-"`
 }
 
 type cloudflareConf struct {
