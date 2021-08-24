@@ -1,6 +1,8 @@
 package client
 
-import "github.com/yzy613/ddns-watchdog/common"
+import (
+	"ddns-watchdog/internal/common"
+)
 
 const (
 	RunningName            = "ddns-watchdog-client"
@@ -62,18 +64,18 @@ type subdomain struct {
 type dnspodConf struct {
 	Id           string    `json:"id"`
 	Token        string    `json:"token"`
-	Domain       string    `json:"domain"`
-	SubDomain    subdomain `json:"sub_domain"`
-	RecordId     string    `json:"-"`
+	Domain    string    `json:"domain"`
+	SubDomain subdomain `json:"sub_domain"`
+	RecordId  string    `json:"-"`
 	RecordLineId string    `json:"-"`
 }
 
 type aliDNSConf struct {
 	AccessKeyId     string    `json:"accesskey_id"`
 	AccessKeySecret string    `json:"accesskey_secret"`
-	Domain          string    `json:"domain"`
-	SubDomain       subdomain `json:"sub_domain"`
-	RecordId        string    `json:"-"`
+	Domain    string    `json:"domain"`
+	SubDomain subdomain `json:"sub_domain"`
+	RecordId  string    `json:"-"`
 }
 
 type cloudflareConf struct {

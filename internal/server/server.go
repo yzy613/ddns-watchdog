@@ -1,9 +1,9 @@
 package server
 
 import (
+	"ddns-watchdog/internal/common"
 	"encoding/json"
 	"fmt"
-	"github.com/yzy613/ddns-watchdog/common"
 	"io/ioutil"
 	"log"
 	"net/http"

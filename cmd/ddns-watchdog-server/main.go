@@ -1,10 +1,10 @@
 package main
 
 import (
+	"ddns-watchdog/internal/common"
+	"ddns-watchdog/internal/server"
 	"encoding/json"
 	"flag"
-	"github.com/yzy613/ddns-watchdog/common"
-	"github.com/yzy613/ddns-watchdog/server"
 	"io"
 	"log"
 	"net/http"

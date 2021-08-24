@@ -1,6 +1,8 @@
 package server
 
-import "github.com/yzy613/ddns-watchdog/common"
+import (
+	"ddns-watchdog/internal/common"
+)
 
 const (
 	RunningName  = "ddns-watchdog-server"

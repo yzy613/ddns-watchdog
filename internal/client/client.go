@@ -1,9 +1,9 @@
 package client
 
 import (
+	"ddns-watchdog/internal/common"
 	"encoding/json"
 	"errors"
-	"github.com/yzy613/ddns-watchdog/common"
 	"io/ioutil"
 	"log"
 	"net"
@@ -45,7 +45,7 @@ func Install() (err error) {
 	} else {
 		// 注册系统服务
 		if Conf.CheckCycleMinutes == 0 {
-			err = errors.New("设置一下 "+ConfPath + ConfFileName+" 的 check_cycle_minutes 吧")
+			err = errors.New("设置一下 "+ ConfPath + ConfFileName +" 的 check_cycle_minutes 吧")
 			return
 		}
 		serviceContent := []byte(

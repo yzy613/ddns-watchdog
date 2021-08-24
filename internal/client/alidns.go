@@ -1,9 +1,9 @@
 package client
 
 import (
+	"ddns-watchdog/internal/common"
 	"errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
-	"github.com/yzy613/ddns-watchdog/common"
 )
 
 func (adc *aliDNSConf) InitConf() (msg string, err error) {

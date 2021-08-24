@@ -1,6 +1,3 @@
 .idea
-conf*
-*.gz
-*.7z
-*.exe
 build
+test

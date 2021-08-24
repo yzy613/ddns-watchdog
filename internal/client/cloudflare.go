@@ -1,10 +1,10 @@
 package client
 
 import (
+	"ddns-watchdog/internal/common"
 	"encoding/json"
 	"errors"
 	"github.com/bitly/go-simplejson"
-	"github.com/yzy613/ddns-watchdog/common"
 	"io/ioutil"
 	"net/http"
 	"strings"

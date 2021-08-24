@@ -1,9 +1,9 @@
 package main
 
 import (
+	"ddns-watchdog/internal/client"
 	"errors"
 	"flag"
-	"github.com/yzy613/ddns-watchdog/client"
 	"log"
 	"time"
 )
