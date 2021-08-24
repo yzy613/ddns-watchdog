@@ -14,7 +14,7 @@ go:
 script:
   - chmod +x ./build.sh && ./build.sh
 
-# 发布前触发 节约时间
+# 发布前触发 (Travis-CI 现按运行时间计算使用，注释以缩短运行时间)
 #before_deploy:
 #  - chmod +x ./build.sh && ./build.sh
 
