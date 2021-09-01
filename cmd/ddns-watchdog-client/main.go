@@ -75,6 +75,20 @@ func runFlag() (exit bool, err error) {
 		return
 	}
 
+	// 加载客户端配置
+	// 不得不放在这个地方，因为有下面的检查版本和安装 / 卸载服务
+	err = client.Conf.LoadConf()
+	if err != nil {
+		return
+	}
+
+	// 检查版本
+	if *version {
+		client.Conf.CheckLatestVersion()
+		exit = true
+		return
+	}
+
 	// 安装 / 卸载服务
 	switch {
 	case *installOption:
@@ -89,20 +103,6 @@ func runFlag() (exit bool, err error) {
 		if err != nil {
 			return
 		}
-		exit = true
-		return
-	}
-
-	// 加载客户端配置
-	// 不得不放在这个地方，因为有下面的检查版本
-	err = client.Conf.LoadConf()
-	if err != nil {
-		return
-	}
-
-	// 检查版本
-	if *version {
-		client.Conf.CheckLatestVersion()
 		exit = true
 		return
 	}
