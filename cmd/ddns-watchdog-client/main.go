@@ -193,13 +193,13 @@ func asyncCheck(done chan bool) {
 		}
 		waitServicesDone := make(chan bool, servicesCount)
 		if client.Conf.Services.DNSPod {
-			go asyncDNSPod(ipv4, ipv6, waitServicesDone)
+			go asyncServiceInterface(ipv4, ipv6, client.Dpc.Run, waitServicesDone)
 		}
 		if client.Conf.Services.AliDNS {
-			go asyncAliDNS(ipv4, ipv6, waitServicesDone)
+			go asyncServiceInterface(ipv4, ipv6, client.Adc.Run, waitServicesDone)
 		}
 		if client.Conf.Services.Cloudflare {
-			go asyncCloudflare(ipv4, ipv6, waitServicesDone)
+			go asyncServiceInterface(ipv4, ipv6, client.Cfc.Run, waitServicesDone)
 		}
 		for i := 0; i < servicesCount; i++ {
 			<-waitServicesDone
@@ -208,30 +208,8 @@ func asyncCheck(done chan bool) {
 	done <- true
 }
 
-func asyncDNSPod(ipv4, ipv6 string, done chan bool) {
-	msg, err := client.Dpc.Run(client.Conf.Enable, ipv4, ipv6)
-	for _, row := range err {
-		log.Println(row)
-	}
-	for _, row := range msg {
-		log.Println(row)
-	}
-	done <- true
-}
-
-func asyncAliDNS(ipv4, ipv6 string, done chan bool) {
-	msg, err := client.Adc.Run(client.Conf.Enable, ipv4, ipv6)
-	for _, row := range err {
-		log.Println(row)
-	}
-	for _, row := range msg {
-		log.Println(row)
-	}
-	done <- true
-}
-
-func asyncCloudflare(ipv4, ipv6 string, done chan bool) {
-	msg, err := client.Cfc.Run(client.Conf.Enable, ipv4, ipv6)
+func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServerCallback, done chan bool) {
+	msg, err := callback(client.Conf.Enable, ipv4, ipv6)
 	for _, row := range err {
 		log.Println(row)
 	}

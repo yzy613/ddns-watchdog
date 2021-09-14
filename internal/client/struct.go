@@ -91,3 +91,6 @@ type cloudflareUpdateRequest struct {
 	Content string `json:"content"`
 	Ttl     int    `json:"ttl"`
 }
+
+// AsyncServerCallback 异步服务回调函数类型
+type AsyncServerCallback func(enabledServices enable, ipv4, ipv6 string) (msg []string, errs []error)
