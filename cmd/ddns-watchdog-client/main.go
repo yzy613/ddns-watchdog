@@ -208,7 +208,7 @@ func asyncCheck(done chan bool) {
 	done <- true
 }
 
-func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServerCallback, done chan bool) {
+func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServiceCallback, done chan bool) {
 	msg, err := callback(client.Conf.Enable, ipv4, ipv6)
 	for _, row := range err {
 		log.Println(row)
