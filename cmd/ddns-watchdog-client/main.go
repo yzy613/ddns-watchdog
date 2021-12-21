@@ -42,17 +42,12 @@ func main() {
 	}
 
 	// 周期循环
-	wg := sync.WaitGroup{}
 	if client.Conf.CheckCycleMinutes <= 0 {
-		wg.Add(1)
-		go asyncCheck(&wg)
-		wg.Wait()
+		check()
 	} else {
 		cycle := time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
 		for {
-			wg.Add(1)
-			go asyncCheck(&wg)
-			wg.Wait()
+			check()
 			<-cycle.C
 		}
 	}
@@ -189,8 +184,7 @@ func runLoadConf() (err error) {
 	return
 }
 
-func asyncCheck(wg *sync.WaitGroup) {
-	defer wg.Done()
+func check() {
 	// 获取 IP
 	ipv4, ipv6, err := client.GetOwnIP(client.Conf.Enable, client.Conf.APIUrl, client.Conf.NetworkCard)
 	if err != nil {
@@ -206,26 +200,26 @@ func asyncCheck(wg *sync.WaitGroup) {
 		if ipv6 != client.Conf.LatestIPv6 {
 			client.Conf.LatestIPv6 = ipv6
 		}
-		servicesWg := sync.WaitGroup{}
+		wg := sync.WaitGroup{}
 		if client.Conf.Services.DNSPod {
-			servicesWg.Add(1)
+			wg.Add(1)
 		}
 		if client.Conf.Services.AliDNS {
-			servicesWg.Add(1)
+			wg.Add(1)
 		}
 		if client.Conf.Services.Cloudflare {
-			servicesWg.Add(1)
+			wg.Add(1)
 		}
 		if client.Conf.Services.DNSPod {
-			go asyncServiceInterface(ipv4, ipv6, client.Dpc.Run, &servicesWg)
+			go asyncServiceInterface(ipv4, ipv6, client.Dpc.Run, &wg)
 		}
 		if client.Conf.Services.AliDNS {
-			go asyncServiceInterface(ipv4, ipv6, client.Adc.Run, &servicesWg)
+			go asyncServiceInterface(ipv4, ipv6, client.Adc.Run, &wg)
 		}
 		if client.Conf.Services.Cloudflare {
-			go asyncServiceInterface(ipv4, ipv6, client.Cfc.Run, &servicesWg)
+			go asyncServiceInterface(ipv4, ipv6, client.Cfc.Run, &wg)
 		}
-		servicesWg.Wait()
+		wg.Wait()
 	}
 }
 
