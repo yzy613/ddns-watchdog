@@ -90,7 +90,7 @@ func (cfc *cloudflareConf) GetParseRecord(domain, recordType string) (recordIP s
 		return
 	}
 	if err2 := jsonObj.Get("error").MustString(); err2 != "" {
-		err = errors.New(err2)
+		err = errors.New("Cloudflare: " + err2)
 		return
 	}
 	if !jsonObj.Get("success").MustBool() {

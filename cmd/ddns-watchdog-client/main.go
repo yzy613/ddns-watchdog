@@ -4,7 +4,10 @@ import (
 	"ddns-watchdog/internal/client"
 	"errors"
 	"flag"
+	"fmt"
 	"log"
+	"sort"
+	"sync"
 	"time"
 )
 
@@ -18,7 +21,8 @@ var (
 		"1 -> "+client.DNSPodConfFileName+"\n"+
 		"2 -> "+client.AliDNSConfFileName+"\n"+
 		"3 -> "+client.CloudflareConfFileName)
-	confPath = flag.String("c", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
+	confPath             = flag.String("c", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
+	printNetworkCardInfo = flag.Bool("n", false, "输出网卡信息")
 )
 
 func main() {
@@ -38,15 +42,17 @@ func main() {
 	}
 
 	// 周期循环
-	waitCheckDone := make(chan bool, 1)
+	wg := sync.WaitGroup{}
 	if client.Conf.CheckCycleMinutes <= 0 {
-		go asyncCheck(waitCheckDone)
-		<-waitCheckDone
+		wg.Add(1)
+		go asyncCheck(&wg)
+		wg.Wait()
 	} else {
 		cycle := time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
 		for {
-			go asyncCheck(waitCheckDone)
-			<-waitCheckDone
+			wg.Add(1)
+			go asyncCheck(&wg)
+			wg.Wait()
 			<-cycle.C
 		}
 	}
@@ -54,6 +60,25 @@ func main() {
 
 func runFlag() (exit bool, err error) {
 	flag.Parse()
+	// 打印网卡信息
+	if *printNetworkCardInfo {
+		ncr, err2 := client.NetworkCardRespond()
+		if err2 != nil {
+			err = err2
+			return
+		}
+		var arr []string
+		for key, _ := range ncr {
+			arr = append(arr, key)
+		}
+		sort.Strings(arr)
+		for _, key := range arr {
+			fmt.Printf("%v\n\t%v\n", key, ncr[key])
+		}
+		exit = true
+		return
+	}
+
 	// 加载自定义配置文件路径
 	if *confPath != "" {
 		tempStr := *confPath
@@ -164,12 +189,12 @@ func runLoadConf() (err error) {
 	return
 }
 
-func asyncCheck(done chan bool) {
+func asyncCheck(wg *sync.WaitGroup) {
+	defer wg.Done()
 	// 获取 IP
 	ipv4, ipv6, err := client.GetOwnIP(client.Conf.Enable, client.Conf.APIUrl, client.Conf.NetworkCard)
 	if err != nil {
 		log.Println(err)
-		done <- true
 		return
 	}
 
@@ -181,34 +206,31 @@ func asyncCheck(done chan bool) {
 		if ipv6 != client.Conf.LatestIPv6 {
 			client.Conf.LatestIPv6 = ipv6
 		}
-		servicesCount := 0
+		servicesWg := sync.WaitGroup{}
 		if client.Conf.Services.DNSPod {
-			servicesCount++
+			servicesWg.Add(1)
 		}
 		if client.Conf.Services.AliDNS {
-			servicesCount++
+			servicesWg.Add(1)
 		}
 		if client.Conf.Services.Cloudflare {
-			servicesCount++
+			servicesWg.Add(1)
 		}
-		waitServicesDone := make(chan bool, servicesCount)
 		if client.Conf.Services.DNSPod {
-			go asyncServiceInterface(ipv4, ipv6, client.Dpc.Run, waitServicesDone)
+			go asyncServiceInterface(ipv4, ipv6, client.Dpc.Run, &servicesWg)
 		}
 		if client.Conf.Services.AliDNS {
-			go asyncServiceInterface(ipv4, ipv6, client.Adc.Run, waitServicesDone)
+			go asyncServiceInterface(ipv4, ipv6, client.Adc.Run, &servicesWg)
 		}
 		if client.Conf.Services.Cloudflare {
-			go asyncServiceInterface(ipv4, ipv6, client.Cfc.Run, waitServicesDone)
+			go asyncServiceInterface(ipv4, ipv6, client.Cfc.Run, &servicesWg)
 		}
-		for i := 0; i < servicesCount; i++ {
-			<-waitServicesDone
-		}
+		servicesWg.Wait()
 	}
-	done <- true
 }
 
-func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServiceCallback, done chan bool) {
+func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServiceCallback, wg *sync.WaitGroup) {
+	defer wg.Done()
 	msg, err := callback(client.Conf.Enable, ipv4, ipv6)
 	for _, row := range err {
 		log.Println(row)
@@ -216,5 +238,4 @@ func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServiceCallba
 	for _, row := range msg {
 		log.Println(row)
 	}
-	done <- true
 }
