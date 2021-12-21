@@ -4,6 +4,7 @@ import (
 	"ddns-watchdog/internal/common"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -91,9 +92,9 @@ func NetworkCardRespond() (map[string]string, error) {
 	}
 
 	for _, i := range interfaces {
-		ipAddr, err := i.Addrs()
-		if err != nil {
-			return nil, err
+		ipAddr, err2 := i.Addrs()
+		if err2 != nil {
+			return nil, err2
 		}
 		for j, addrAndMask := range ipAddr {
 			// 分离 IP 和子网掩码
@@ -147,14 +148,16 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 				apiUrl.IPv4 = common.DefaultAPIUrl
 			}
 			res, err2 := http.Get(apiUrl.IPv4)
-			err = err2
-			if err != nil {
+			if err2 != nil {
+				err = err2
 				return
 			}
-			defer res.Body.Close()
+			defer func(Body io.ReadCloser) {
+				err = Body.Close()
+			}(res.Body)
 			recvJson, err2 := ioutil.ReadAll(res.Body)
-			err = err2
-			if err != nil {
+			if err2 != nil {
+				err = err2
 				return
 			}
 			var ipInfo common.PublicInfo
@@ -185,14 +188,16 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 				apiUrl.IPv6 = common.DefaultIPv6APIUrl
 			}
 			res, err2 := http.Get(apiUrl.IPv6)
-			err = err2
-			if err != nil {
+			if err2 != nil {
+				err = err2
 				return
 			}
-			defer res.Body.Close()
+			defer func(Body io.ReadCloser) {
+				err = Body.Close()
+			}(res.Body)
 			recvJson, err2 := ioutil.ReadAll(res.Body)
-			err = err2
-			if err != nil {
+			if err2 != nil {
+				err = err2
 				return
 			}
 			var ipInfo common.PublicInfo
@@ -217,7 +222,9 @@ func (conf clientConf) GetLatestVersion() string {
 	if err != nil {
 		return "N/A (请检查网络连接)"
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+	}(res.Body)
 	recvJson, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return "N/A (数据包错误)"

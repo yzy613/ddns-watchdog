@@ -4,6 +4,7 @@ import (
 	"ddns-watchdog/internal/common"
 	"errors"
 	"github.com/bitly/go-simplejson"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -159,14 +160,18 @@ func postman(url, src string) (dst []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-	defer req.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+	}(req.Body)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("User-Agent", RunningName+"/"+common.LocalVersion+" ()")
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+	}(res.Body)
 	dst, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, err

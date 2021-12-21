@@ -203,20 +203,14 @@ func check() {
 		wg := sync.WaitGroup{}
 		if client.Conf.Services.DNSPod {
 			wg.Add(1)
-		}
-		if client.Conf.Services.AliDNS {
-			wg.Add(1)
-		}
-		if client.Conf.Services.Cloudflare {
-			wg.Add(1)
-		}
-		if client.Conf.Services.DNSPod {
 			go asyncServiceInterface(ipv4, ipv6, client.Dpc.Run, &wg)
 		}
 		if client.Conf.Services.AliDNS {
+			wg.Add(1)
 			go asyncServiceInterface(ipv4, ipv6, client.Adc.Run, &wg)
 		}
 		if client.Conf.Services.Cloudflare {
+			wg.Add(1)
 			go asyncServiceInterface(ipv4, ipv6, client.Cfc.Run, &wg)
 		}
 		wg.Wait()

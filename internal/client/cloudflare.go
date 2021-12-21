@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/bitly/go-simplejson"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -79,7 +80,9 @@ func (cfc *cloudflareConf) GetParseRecord(domain, recordType string) (recordIP s
 	if err != nil {
 		return
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+	}(res.Body)
 	recvJson, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return
@@ -129,14 +132,18 @@ func (cfc cloudflareConf) UpdateParseRecord(ipAddr, recordType, domain string) (
 	if err != nil {
 		return
 	}
-	defer req.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+	}(req.Body)
 	req.Header.Set("Authorization", "Bearer "+cfc.APIToken)
 	req.Header.Set("Content-Type", "application/json")
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+	}(res.Body)
 	recvJson, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return

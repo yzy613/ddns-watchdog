@@ -4,6 +4,7 @@ import (
 	"ddns-watchdog/internal/common"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,13 +12,15 @@ import (
 	"strings"
 )
 
-func (conf ServerConf) GetLatestVersion() string {
+func (conf ServerConf) GetLatestVersion() (str string) {
 	if !conf.IsRoot {
 		res, err := http.Get(conf.RootServerAddr)
 		if err != nil {
 			return "N/A (请检查网络连接)"
 		}
-		defer res.Body.Close()
+		defer func(Body io.ReadCloser) {
+			str = Body.Close().Error()
+		}(res.Body)
 		recvJson, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			return "N/A (数据包错误)"

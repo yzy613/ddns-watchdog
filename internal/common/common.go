@@ -45,7 +45,9 @@ func CopyFile(srcPath, dstPath string) (err error) {
 	if err != nil {
 		return
 	}
-	defer srcFile.Close()
+	defer func(srcFile *os.File) {
+		err = srcFile.Close()
+	}(srcFile)
 	dirSplit := strings.Split(dstPath, "/")
 	dirPath := ""
 	if dirPathLen := len(dirSplit); dirPathLen > 1 {
@@ -57,7 +59,7 @@ func CopyFile(srcPath, dstPath string) (err error) {
 			dirSplit = dirSplit[1:]
 			dirPath = "/"
 		}
-		if dirPathLen := len(dirSplit); dirPathLen > 1 {
+		if dirPathLen = len(dirSplit); dirPathLen > 1 {
 			for i := 0; i < dirPathLen-1; i++ {
 				dirPath = dirPath + dirSplit[i] + "/"
 			}
@@ -71,7 +73,9 @@ func CopyFile(srcPath, dstPath string) (err error) {
 	if err != nil {
 		return
 	}
-	defer dstFile.Close()
+	defer func(dstFile *os.File) {
+		err = dstFile.Close()
+	}(dstFile)
 	buf := make([]byte, 1024)
 	for {
 		n, err := srcFile.Read(buf)
