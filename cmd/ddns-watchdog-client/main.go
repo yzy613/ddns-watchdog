@@ -68,7 +68,7 @@ func runFlag() (exit bool, err error) {
 			return
 		}
 		var arr []string
-		for key, _ := range ncr {
+		for key := range ncr {
 			arr = append(arr, key)
 		}
 		sort.Strings(arr)
