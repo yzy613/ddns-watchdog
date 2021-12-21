@@ -32,12 +32,12 @@ func (adc *aliDNSConf) LoadConf() (err error) {
 func (adc aliDNSConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs []error) {
 	if enabled.IPv4 && adc.SubDomain.A != "" {
 		// 获取解析记录
-		recordIP, err := adc.GetParseRecord(adc.SubDomain.A, "A")
+		recordIP, err := adc.getParseRecord(adc.SubDomain.A, "A")
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv4 {
 			// 更新解析记录
-			err = adc.UpdateParseRecord(ipv4, "A", adc.SubDomain.A)
+			err = adc.updateParseRecord(ipv4, "A", adc.SubDomain.A)
 			if err != nil {
 				errs = append(errs, err)
 			} else {
@@ -47,12 +47,12 @@ func (adc aliDNSConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs
 	}
 	if enabled.IPv6 && adc.SubDomain.AAAA != "" {
 		// 获取解析记录
-		recordIP, err := adc.GetParseRecord(adc.SubDomain.AAAA, "AAAA")
+		recordIP, err := adc.getParseRecord(adc.SubDomain.AAAA, "AAAA")
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv6 {
 			// 更新解析记录
-			err = adc.UpdateParseRecord(ipv6, "AAAA", adc.SubDomain.AAAA)
+			err = adc.updateParseRecord(ipv6, "AAAA", adc.SubDomain.AAAA)
 			if err != nil {
 				errs = append(errs, err)
 			} else {
@@ -63,7 +63,7 @@ func (adc aliDNSConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs
 	return
 }
 
-func (adc *aliDNSConf) GetParseRecord(subDomain, recordType string) (recordIP string, err error) {
+func (adc *aliDNSConf) getParseRecord(subDomain, recordType string) (recordIP string, err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", adc.AccessKeyId, adc.AccessKeySecret)
 	if err != nil {
 		return
@@ -94,7 +94,7 @@ func (adc *aliDNSConf) GetParseRecord(subDomain, recordType string) (recordIP st
 	return
 }
 
-func (adc aliDNSConf) UpdateParseRecord(ipAddr, recordType, subDomain string) (err error) {
+func (adc aliDNSConf) updateParseRecord(ipAddr, recordType, subDomain string) (err error) {
 	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", adc.AccessKeyId, adc.AccessKeySecret)
 	if err != nil {
 		return

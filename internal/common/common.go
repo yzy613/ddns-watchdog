@@ -3,7 +3,6 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -39,62 +38,7 @@ func IsDirExistAndCreate(dirPath string) (err error) {
 	return
 }
 
-// [存档状态]
-func CopyFile(srcPath, dstPath string) (err error) {
-	srcFile, err := os.Open(srcPath)
-	if err != nil {
-		return
-	}
-	defer func(srcFile *os.File) {
-		err = srcFile.Close()
-	}(srcFile)
-	dirSplit := strings.Split(dstPath, "/")
-	dirPath := ""
-	if dirPathLen := len(dirSplit); dirPathLen > 1 {
-		switch dirSplit[0] {
-		case ".":
-			dirSplit = dirSplit[1:]
-			dirPath = "./"
-		case "":
-			dirSplit = dirSplit[1:]
-			dirPath = "/"
-		}
-		if dirPathLen = len(dirSplit); dirPathLen > 1 {
-			for i := 0; i < dirPathLen-1; i++ {
-				dirPath = dirPath + dirSplit[i] + "/"
-			}
-			err = os.MkdirAll(dirPath, 0750)
-			if err != nil {
-				return
-			}
-		}
-	}
-	dstFile, err := os.OpenFile(dstPath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0600)
-	if err != nil {
-		return
-	}
-	defer func(dstFile *os.File) {
-		err = dstFile.Close()
-	}(dstFile)
-	buf := make([]byte, 1024)
-	for {
-		n, err := srcFile.Read(buf)
-		if err != nil {
-			if err == io.EOF {
-				break
-			} else {
-				return err
-			}
-		}
-		_, err = dstFile.Write(buf[:n])
-		if err != nil {
-			return err
-		}
-	}
-	return
-}
-
-// dst 参数要加 & 才能修改原变量
+// LoadAndUnmarshal dst 参数要加 & 才能修改原变量
 func LoadAndUnmarshal(filePath string, dst interface{}) (err error) {
 	_, err = os.Stat(filePath)
 	if err != nil {
