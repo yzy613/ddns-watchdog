@@ -19,9 +19,9 @@ func (conf ServerConf) GetLatestVersion() (str string) {
 			return "N/A (请检查网络连接)"
 		}
 		defer func(Body io.ReadCloser) {
-			t := Body.Close().Error()
-			if t != "" {
-				str = t
+			err = Body.Close()
+			if err != nil {
+				str = err.Error()
 			}
 		}(res.Body)
 		recvJson, err := ioutil.ReadAll(res.Body)
