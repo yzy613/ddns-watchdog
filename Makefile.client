@@ -18,6 +18,7 @@ darwin: darwin-amd64 darwin-arm64
 
 .PHONY: check
 check:
+	@chmod +x $(SCRIPT_PATH)/checkDir.sh
 	@$(SCRIPT_PATH)/checkDir.sh $(OUTPUT_PATH)
 
 .PHONY: thirdparty-upgrade
