@@ -12,7 +12,9 @@ go:
 
 # 每次 Git 提交后触发
 script:
-  - chmod +x ./build.sh && ./build.sh
+  #- chmod +x ./build.sh && ./build.sh
+  - make -f Makefile.client
+  - make -f Makefile.server 
 
 # 发布前触发 (Travis-CI 现按运行时间计算使用，注释以缩短运行时间)
 #before_deploy:
@@ -25,24 +27,20 @@ deploy:
   token: ${TOKEN}
   cleanup: false
   file:
-    - build/ddns-watchdog-client.linux-amd64.tar.gz
-    - build/ddns-watchdog-client.windows-amd64.tar.gz
-    - build/ddns-watchdog-client.darwin-amd64.tar.gz
-    - build/ddns-watchdog-client.linux-mips64le.tar.gz
-    - build/ddns-watchdog-client.linux-mips64.tar.gz
-    - build/ddns-watchdog-client.linux-mipsle.tar.gz
-    - build/ddns-watchdog-client.linux-mips.tar.gz
-    - build/ddns-watchdog-client.linux-arm64.tar.gz
-    - build/ddns-watchdog-client.linux-arm_v7.tar.gz
-    - build/ddns-watchdog-server.linux-amd64.tar.gz
-    - build/ddns-watchdog-server.windows-amd64.tar.gz
-    - build/ddns-watchdog-server.darwin-amd64.tar.gz
-    - build/ddns-watchdog-server.linux-mips64le.tar.gz
-    - build/ddns-watchdog-server.linux-mips64.tar.gz
-    - build/ddns-watchdog-server.linux-mipsle.tar.gz
-    - build/ddns-watchdog-server.linux-mips.tar.gz
-    - build/ddns-watchdog-server.linux-arm64.tar.gz
-    - build/ddns-watchdog-server.linux-arm_v7.tar.gz
+    - ddns-watchdog-client.darwin-amd64.tar.gz
+    - ddns-watchdog-client.darwin-arm64.tar.gz
+    - ddns-watchdog-client.linux-amd64.tar.gz
+    - ddns-watchdog-client.linux-arm64.tar.gz
+    - ddns-watchdog-client.linux-armv7.tar.gz
+    - ddns-watchdog-client.windows-amd64.tar.gz
+    - ddns-watchdog-client.windows-arm64.tar.gz
+    - ddns-watchdog-server.darwin-amd64.tar.gz
+    - ddns-watchdog-server.darwin-arm64.tar.gz
+    - ddns-watchdog-server.linux-amd64.tar.gz
+    - ddns-watchdog-server.linux-arm64.tar.gz
+    - ddns-watchdog-server.linux-armv7.tar.gz
+    - ddns-watchdog-server.windows-amd64.tar.gz
+    - ddns-watchdog-server.windows-arm64.tar.gz
   on:
     tags: true
     all_branches: true

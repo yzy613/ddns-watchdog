@@ -142,9 +142,9 @@
 
 - 在 Windows 上
 
-    1. [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-startup-script.bat) 一键运行程序并回显程序返回的信息 (需与 ddns-watchdog-client.exe 同一文件夹)
+    1. [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/scripts/run/ddns-watchdog-client-startup-script.bat) 一键运行程序并回显程序返回的信息 (需与 ddns-watchdog-client.exe 同一文件夹)
 
-    2. [ddns-watchdog-client-nohup.vbs](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-nohup.vbs) 不弹出运行窗口，在后台静默运行 (需与 ddns-watchdog-client.exe 同一文件夹)
+    2. [ddns-watchdog-client-nohup.vbs](https://github.com/yzy613/ddns-watchdog/blob/master/scripts/run/ddns-watchdog-client-nohup.vbs) 不弹出运行窗口，在后台静默运行 (需与 ddns-watchdog-client.exe 同一文件夹)
 
     3. `Win`+`R` 后键入 `shell:startup` 会打开开机启动文件夹，将快捷方式粘贴在此处，即可进行开机启动 (或把 ddns-watchdog-client-nohup.vbs 的快捷方式粘贴在此处，进行开机启动后台静默运行)
 
