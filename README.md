@@ -36,13 +36,13 @@
 
     此示例展示仅初始化客户端和 DNSPod 的配置文件
 
-    ```
+    ```bash
     ./ddns-watchdog-client -i 01
     ```
 
     代码参考表
 
-    ```
+    ```bash
     0 -> client.json
     1 -> dnspod.json
     2 -> alidns.json
