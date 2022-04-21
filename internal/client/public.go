@@ -13,6 +13,15 @@ import (
 	"strings"
 )
 
+var (
+	installPath       = "/etc/systemd/system/" + RunningName + ".service"
+	ConfDirectoryName = "conf"
+	Conf              = clientConf{}
+	Dpc               = dnspodConf{}
+	Adc               = aliDNSConf{}
+	Cfc               = cloudflareConf{}
+)
+
 type subdomain struct {
 	A    string `json:"a"`
 	AAAA string `json:"aaaa"`
@@ -45,7 +54,7 @@ func Install() (err error) {
 				"RestartSec=2\n\n" +
 				"[Install]\n" +
 				"WantedBy=multi-user.target\n")
-		err = os.WriteFile(InstallPath, serviceContent, 0664)
+		err = os.WriteFile(installPath, serviceContent, 0664)
 		if err != nil {
 			return err
 		}
@@ -62,7 +71,7 @@ func Uninstall() (err error) {
 		if err != nil {
 			return err
 		}
-		err = os.Remove(InstallPath)
+		err = os.Remove(installPath)
 		if err != nil {
 			return err
 		}

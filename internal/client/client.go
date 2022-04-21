@@ -14,15 +14,6 @@ const (
 	NetworkCardFileName = "network_card.json"
 )
 
-var (
-	InstallPath       = "/etc/systemd/system/" + RunningName + ".service"
-	ConfDirectoryName = "conf"
-	Conf              = clientConf{}
-	Dpc               = dnspodConf{}
-	Adc               = aliDNSConf{}
-	Cfc               = cloudflareConf{}
-)
-
 type apiUrl struct {
 	IPv4    string `json:"ipv4"`
 	IPv6    string `json:"ipv6"`
