@@ -35,6 +35,6 @@ jobs:
       uses: alexellis/upload-assets@0.3.0
       if: startsWith(github.event.ref, 'refs/tags/v')
       env:
-        GITHUB_TOKEN: ${{ GH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
         asset_paths: '["./build/*"]'
