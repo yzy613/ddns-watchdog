@@ -28,12 +28,9 @@ jobs:
     - name: Build server
       run: make -f Makefile.server
 
-    - name: Debug
-      run: echo ${{ github.event.ref }} ${{ github.ref }}
-
     - name: Upload release assets
       uses: alexellis/upload-assets@0.3.0
-      if: startsWith(github.event.ref, 'refs/tags/v')
+      if: startsWith(github.ref, 'refs/tags/v')
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
