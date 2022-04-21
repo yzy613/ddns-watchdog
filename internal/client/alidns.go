@@ -6,6 +6,16 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 )
 
+const AliDNSConfFileName = "alidns.json"
+
+type aliDNSConf struct {
+	AccessKeyId     string    `json:"accesskey_id"`
+	AccessKeySecret string    `json:"accesskey_secret"`
+	Domain          string    `json:"domain"`
+	SubDomain       subdomain `json:"sub_domain"`
+	RecordId        string    `json:"-"`
+}
+
 func (adc *aliDNSConf) InitConf() (msg string, err error) {
 	*adc = aliDNSConf{}
 	adc.AccessKeyId = "在 https://ram.console.aliyun.com/users 获取"
@@ -13,18 +23,18 @@ func (adc *aliDNSConf) InitConf() (msg string, err error) {
 	adc.Domain = "example.com"
 	adc.SubDomain.A = "A记录子域名"
 	adc.SubDomain.AAAA = "AAAA记录子域名"
-	err = common.MarshalAndSave(adc, ConfPath+AliDNSConfFileName)
-	msg = "初始化 " + ConfPath + AliDNSConfFileName
+	err = common.MarshalAndSave(adc, ConfDirectoryName+"/"+AliDNSConfFileName)
+	msg = "初始化 " + ConfDirectoryName + "/" + AliDNSConfFileName
 	return
 }
 
 func (adc *aliDNSConf) LoadConf() (err error) {
-	err = common.LoadAndUnmarshal(ConfPath+AliDNSConfFileName, &adc)
+	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+AliDNSConfFileName, &adc)
 	if err != nil {
 		return
 	}
 	if adc.AccessKeyId == "" || adc.AccessKeySecret == "" || adc.Domain == "" || (adc.SubDomain.A == "" && adc.SubDomain.AAAA == "") {
-		err = errors.New("请打开配置文件 " + ConfPath + AliDNSConfFileName + " 检查你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
+		err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + AliDNSConfFileName + " 检查你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
 	}
 	return
 }

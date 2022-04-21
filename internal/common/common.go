@@ -3,20 +3,31 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 )
 
-func GetRunningPath() (path string) {
-	path, _ = filepath.Abs(filepath.Dir(os.Args[0]))
-	tempStr := strings.ReplaceAll(path, "\\", "/")
-	if tempStr[len(tempStr)-1:] != "/" {
-		tempStr = tempStr + "/"
+const (
+	LocalVersion      = "1.4.4"
+	DefaultAPIUrl     = "https://yzyweb.cn/ddns-watchdog"
+	DefaultIPv6APIUrl = "https://yzyweb.cn/ddns-watchdog6"
+	ProjectUrl        = "https://github.com/yzy613/ddns-watchdog"
+)
+
+type PublicInfo struct {
+	IP      string `json:"ip"`
+	Version string `json:"latest_version"`
+}
+
+func FormatDirectoryPath(srcPath string) (dstPath string) {
+	if length := len(srcPath); srcPath[length-1:] == "/" {
+		dstPath = srcPath[0 : length-1]
+	} else {
+		dstPath = srcPath
 	}
-	return tempStr
+	return
 }
 
 func IsWindows() bool {
@@ -39,12 +50,12 @@ func IsDirExistAndCreate(dirPath string) (err error) {
 }
 
 // LoadAndUnmarshal dst 参数要加 & 才能修改原变量
-func LoadAndUnmarshal(filePath string, dst interface{}) (err error) {
+func LoadAndUnmarshal(filePath string, dst any) (err error) {
 	_, err = os.Stat(filePath)
 	if err != nil {
 		return
 	}
-	jsonContent, err := ioutil.ReadFile(filePath)
+	jsonContent, err := os.ReadFile(filePath)
 	if err != nil {
 		return
 	}
@@ -55,7 +66,7 @@ func LoadAndUnmarshal(filePath string, dst interface{}) (err error) {
 	return
 }
 
-func MarshalAndSave(content interface{}, filePath string) (err error) {
+func MarshalAndSave(content any, filePath string) (err error) {
 	err = IsDirExistAndCreate(filepath.Dir(filePath))
 	if err != nil {
 		return
@@ -64,7 +75,7 @@ func MarshalAndSave(content interface{}, filePath string) (err error) {
 	if err != nil {
 		return
 	}
-	err = ioutil.WriteFile(filePath, jsonContent, 0600)
+	err = os.WriteFile(filePath, jsonContent, 0600)
 	if err != nil {
 		return
 	}

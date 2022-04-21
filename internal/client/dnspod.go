@@ -5,10 +5,20 @@ import (
 	"errors"
 	"github.com/bitly/go-simplejson"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
+
+const DNSPodConfFileName = "dnspod.json"
+
+type dnspodConf struct {
+	Id           string    `json:"id"`
+	Token        string    `json:"token"`
+	Domain       string    `json:"domain"`
+	SubDomain    subdomain `json:"sub_domain"`
+	RecordId     string    `json:"-"`
+	RecordLineId string    `json:"-"`
+}
 
 func (dpc *dnspodConf) InitConf() (msg string, err error) {
 	*dpc = dnspodConf{}
@@ -17,18 +27,18 @@ func (dpc *dnspodConf) InitConf() (msg string, err error) {
 	dpc.Domain = "example.com"
 	dpc.SubDomain.A = "A记录子域名"
 	dpc.SubDomain.AAAA = "AAAA记录子域名"
-	err = common.MarshalAndSave(dpc, ConfPath+DNSPodConfFileName)
-	msg = "初始化 " + ConfPath + DNSPodConfFileName
+	err = common.MarshalAndSave(dpc, ConfDirectoryName+"/"+DNSPodConfFileName)
+	msg = "初始化 " + ConfDirectoryName + "/" + DNSPodConfFileName
 	return
 }
 
-func (dpc *dnspodConf) LoadCOnf() (err error) {
-	err = common.LoadAndUnmarshal(ConfPath+DNSPodConfFileName, &dpc)
+func (dpc *dnspodConf) LoadConf() (err error) {
+	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+DNSPodConfFileName, &dpc)
 	if err != nil {
 		return
 	}
 	if dpc.Id == "" || dpc.Token == "" || dpc.Domain == "" || (dpc.SubDomain.A == "" && dpc.SubDomain.AAAA == "") {
-		err = errors.New("请打开配置文件 " + ConfPath + DNSPodConfFileName + " 检查你的 id, token, domain, sub_domain 并重新启动")
+		err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + DNSPodConfFileName + " 检查你的 id, token, domain, sub_domain 并重新启动")
 	}
 	return
 }
@@ -98,7 +108,7 @@ func (dpc *dnspodConf) getParseRecord(subDomain, recordType string) (recordIP st
 		return
 	}
 	for _, value := range records {
-		element := value.(map[string]interface{})
+		element := value.(map[string]any)
 		if element["name"].(string) == subDomain {
 			dpc.RecordId = element["id"].(string)
 			recordIP = element["value"].(string)
@@ -168,7 +178,7 @@ func postman(url, src string) (dst []byte, err error) {
 	}(req.Body)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("User-Agent", RunningName+"/"+common.LocalVersion+" ()")
-	res, err := httpClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -177,8 +187,8 @@ func postman(url, src string) (dst []byte, err error) {
 		if t != nil {
 			err = t
 		}
-	}(res.Body)
-	dst, err = ioutil.ReadAll(res.Body)
+	}(resp.Body)
+	dst, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

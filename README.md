@@ -32,7 +32,7 @@
 
 ### 用法
 
-- `./ddns-watchdog-client -i 0123` 有选择地初始化配置文件，可以组合使用
+- `./ddns-watchdog-client -i 0123` 有选择地初始化配置文件并退出，可以组合使用
 
     此示例展示仅初始化客户端和 DNSPod 的配置文件
 
@@ -51,17 +51,17 @@
 
 - `./ddns-watchdog-client` 使用默认配置文件路径 `./conf` 运行
 
-- `./ddns-watchdog-client -n` 输出网卡信息
+- `./ddns-watchdog-client -n` 输出网卡信息并退出
 
 - `./ddns-watchdog-client -c string` 指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)
 
-- `./ddns-watchdog-client -I` 安装服务 (仅限有 systemd 的 Linux 使用)
+- `./ddns-watchdog-client -I` 安装服务并退出 (仅限有 systemd 的 Linux 使用)
 
-- `./ddns-watchdog-client -U` 卸载服务 (仅限有 systemd 的 Linux 使用)
+- `./ddns-watchdog-client -U` 卸载服务并退出 (仅限有 systemd 的 Linux 使用)
 
 - `./ddns-watchdog-client -f` 强制检查解析记录值
 
-- `./ddns-watchdog-client -v` 查看当前版本并检查更新
+- `./ddns-watchdog-client -v` 查看当前版本并检查更新后退出
 
 ### 初始客户端配置文件
 
@@ -223,17 +223,17 @@
 
 ### 服务端 用法
 
-- `./ddns-watchdog-server -I` 安装服务 (已经包含 `-i` 启动参数)
+- `./ddns-watchdog-server -I` 安装服务并退出 (已经包含 `-i` 启动参数)
 
 - `./ddns-watchdog-server -c string` 指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)
 
-- `./ddns-watchdog-server -i` 初始化配置文件
+- `./ddns-watchdog-server -i` 初始化配置文件并退出
 
 - `systemctl start ddns-watchdog-server` 启动服务
 
-- `./ddns-watchdog-server -U` 卸载服务
+- `./ddns-watchdog-server -U` 卸载服务并退出
 
-- `./ddns-watchdog-server -v` 查看当前版本并检查更新
+- `./ddns-watchdog-server -v` 查看当前版本并检查更新后退出
 
 ## 安装
 

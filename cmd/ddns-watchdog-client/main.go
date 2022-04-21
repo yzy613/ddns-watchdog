@@ -2,6 +2,7 @@ package main
 
 import (
 	"ddns-watchdog/internal/client"
+	"ddns-watchdog/internal/common"
 	"errors"
 	"flag"
 	"fmt"
@@ -12,17 +13,17 @@ import (
 )
 
 var (
-	installOption   = flag.Bool("I", false, "安装服务")
-	uninstallOption = flag.Bool("U", false, "卸载服务")
+	installOption   = flag.Bool("I", false, "安装服务并退出")
+	uninstallOption = flag.Bool("U", false, "卸载服务并退出")
 	enforcement     = flag.Bool("f", false, "强制检查 DNS 解析记录")
-	version         = flag.Bool("v", false, "查看当前版本并检查更新")
-	initOption      = flag.String("i", "", "有选择地初始化配置文件，可以组合使用 (例 01)\n"+
+	version         = flag.Bool("v", false, "查看当前版本并检查更新后退出")
+	initOption      = flag.String("i", "", "有选择地初始化配置文件并退出，可以组合使用 (例 01)\n"+
 		"0 -> "+client.ConfFileName+"\n"+
 		"1 -> "+client.DNSPodConfFileName+"\n"+
 		"2 -> "+client.AliDNSConfFileName+"\n"+
 		"3 -> "+client.CloudflareConfFileName)
 	confPath             = flag.String("c", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
-	printNetworkCardInfo = flag.Bool("n", false, "输出网卡信息")
+	printNetworkCardInfo = flag.Bool("n", false, "输出网卡信息并退出")
 )
 
 func main() {
@@ -76,11 +77,7 @@ func runFlag() (exit bool, err error) {
 
 	// 加载自定义配置文件路径
 	if *confPath != "" {
-		tempStr := *confPath
-		if tempStr[len(tempStr)-1:] != "/" {
-			tempStr = tempStr + "/"
-		}
-		client.ConfPath = tempStr
+		client.ConfDirectoryName = common.FormatDirectoryPath(*confPath)
 	}
 
 	// 有选择地初始化配置文件
@@ -164,7 +161,7 @@ func runInitConf(event string) error {
 
 func runLoadConf() (err error) {
 	if client.Conf.Services.DNSPod {
-		err = client.Dpc.LoadCOnf()
+		err = client.Dpc.LoadConf()
 		if err != nil {
 			return
 		}

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -14,14 +13,26 @@ import (
 	"strings"
 )
 
+type subdomain struct {
+	A    string `json:"a"`
+	AAAA string `json:"aaaa"`
+}
+
+// AsyncServiceCallback 异步服务回调函数类型
+type AsyncServiceCallback func(enabledServices enable, ipv4, ipv6 string) (msg []string, errs []error)
+
 func Install() (err error) {
 	if common.IsWindows() {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
 		// 注册系统服务
 		if Conf.CheckCycleMinutes == 0 {
-			err = errors.New("设置一下 " + ConfPath + ConfFileName + " 的 check_cycle_minutes 吧")
+			err = errors.New("设置一下 " + ConfDirectoryName + "/" + ConfFileName + " 的 check_cycle_minutes 吧")
 			return
+		}
+		wd, err := os.Getwd()
+		if err != nil {
+			return err
 		}
 		serviceContent := []byte(
 			"[Unit]\n" +
@@ -29,14 +40,14 @@ func Install() (err error) {
 				"After=network.target\n\n" +
 				"[Service]\n" +
 				"Type=simple\n" +
-				"ExecStart=" + RunningPath + RunningName + " -c " + ConfPath +
+				"ExecStart=" + wd + "/" + RunningName + " -c " + ConfDirectoryName +
 				"\nRestart=on-failure\n" +
 				"RestartSec=2\n\n" +
 				"[Install]\n" +
 				"WantedBy=multi-user.target\n")
-		err = ioutil.WriteFile(InstallPath, serviceContent, 0664)
+		err = os.WriteFile(InstallPath, serviceContent, 0664)
 		if err != nil {
-			return
+			return err
 		}
 		log.Println("可以使用 systemctl 控制 " + RunningName + " 服务了")
 	}
@@ -47,12 +58,16 @@ func Uninstall() (err error) {
 	if common.IsWindows() {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
+		wd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
 		err = os.Remove(InstallPath)
 		if err != nil {
-			return
+			return err
 		}
 		log.Println("卸载服务成功")
-		log.Println("若要完全删除，请移步到 " + RunningPath + " 和 " + ConfPath + " 完全删除")
+		log.Println("若要完全删除，请移步到 " + wd + " 和 " + ConfDirectoryName + " 完全删除")
 	}
 	return
 }
@@ -90,12 +105,12 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 		if err != nil {
 			return
 		}
-		err = common.MarshalAndSave(ncr, ConfPath+NetworkCardFileName)
+		err = common.MarshalAndSave(ncr, ConfDirectoryName+"/"+NetworkCardFileName)
 		if err != nil {
 			return
 		}
-		err = errors.New("请打开 " + ConfPath + NetworkCardFileName + " 选择网卡填入 " +
-			ConfPath + ConfFileName + " 的 network_card")
+		err = errors.New("请打开 " + ConfDirectoryName + "/" + NetworkCardFileName + " 选择网卡填入 " +
+			ConfDirectoryName + "/" + ConfFileName + " 的 network_card")
 		return
 	}
 
@@ -121,7 +136,7 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 			if apiUrl.IPv4 == "" {
 				apiUrl.IPv4 = common.DefaultAPIUrl
 			}
-			res, err2 := http.Get(apiUrl.IPv4)
+			resp, err2 := http.Get(apiUrl.IPv4)
 			if err2 != nil {
 				err = err2
 				return
@@ -131,8 +146,8 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 				if t != nil {
 					err = t
 				}
-			}(res.Body)
-			recvJson, err2 := ioutil.ReadAll(res.Body)
+			}(resp.Body)
+			recvJson, err2 := io.ReadAll(resp.Body)
 			if err2 != nil {
 				err = err2
 				return
@@ -164,7 +179,7 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 			if apiUrl.IPv6 == "" {
 				apiUrl.IPv6 = common.DefaultIPv6APIUrl
 			}
-			res, err2 := http.Get(apiUrl.IPv6)
+			resp, err2 := http.Get(apiUrl.IPv6)
 			if err2 != nil {
 				err = err2
 				return
@@ -174,8 +189,8 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 				if t != nil {
 					err = t
 				}
-			}(res.Body)
-			recvJson, err2 := ioutil.ReadAll(res.Body)
+			}(resp.Body)
+			recvJson, err2 := io.ReadAll(resp.Body)
 			if err2 != nil {
 				err = err2
 				return

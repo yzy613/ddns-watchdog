@@ -1,5 +1,5 @@
-BINARY_NAME = ddns-watchdog-server
-CODE_FILE = ./cmd/ddns-watchdog-server/main.go
+BINARY_NAME = ddns-watchdog-client
+CODE_FILE = ./cmd/ddns-watchdog-client/main.go
 OUTPUT_PATH = ./build
 SCRIPT_PATH = ./scripts/make
 LDFLAGS = "-w -s"

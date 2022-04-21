@@ -1,6 +1,6 @@
 module ddns-watchdog
 
-go 1.17
+go 1.18
 
 require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1393

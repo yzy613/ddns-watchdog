@@ -5,16 +5,31 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 )
 
+const (
+	RunningName  = "ddns-watchdog-server"
+	ConfFileName = "server.json"
+)
+
+var (
+	InstallPath       = "/etc/systemd/system/" + RunningName + ".service"
+	ConfDirectoryName = "conf"
+)
+
+type ServerConf struct {
+	Port           string `json:"port"`
+	IsRoot         bool   `json:"is_root"`
+	RootServerAddr string `json:"root_server_addr"`
+}
+
 func (conf ServerConf) GetLatestVersion() (str string) {
 	if !conf.IsRoot {
-		res, err := http.Get(conf.RootServerAddr)
+		resp, err := http.Get(conf.RootServerAddr)
 		if err != nil {
 			return "N/A (请检查网络连接)"
 		}
@@ -23,8 +38,8 @@ func (conf ServerConf) GetLatestVersion() (str string) {
 			if err != nil {
 				str = err.Error()
 			}
-		}(res.Body)
-		recvJson, err := ioutil.ReadAll(res.Body)
+		}(resp.Body)
+		recvJson, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return "N/A (数据包错误)"
 		}
@@ -52,9 +67,9 @@ func (conf ServerConf) CheckLatestVersion() {
 }
 
 func GetClientIP(req *http.Request) (ipAddr string) {
-	ipAddr = req.Header.Get("X-Real-IP")
+	ipAddr = req.Header.Get("X-Forwarded-For")
 	if ipAddr == "" {
-		ipAddr = req.Header.Get("X-Forwarded-For")
+		ipAddr = req.Header.Get("X-Real-IP")
 	}
 	if ipAddr == "" {
 		// 把 port 从 ip:port 分离
@@ -84,20 +99,24 @@ func Install() (err error) {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
 		// 注册系统服务
+		wd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
 		serviceContent := []byte(
 			"[Unit]\n" +
 				"Description=" + RunningName + " Service\n" +
 				"After=network.target\n\n" +
 				"[Service]\n" +
 				"Type=simple\n" +
-				"ExecStart=" + RunningPath + RunningName + " -c " + ConfPath +
+				"ExecStart=" + wd + "/" + RunningName + " -c " + ConfDirectoryName +
 				"\nRestart=on-failure\n" +
 				"RestartSec=2\n\n" +
 				"[Install]\n" +
 				"WantedBy=multi-user.target\n")
-		err = ioutil.WriteFile(InstallPath, serviceContent, 0664)
+		err = os.WriteFile(InstallPath, serviceContent, 0664)
 		if err != nil {
-			return
+			return err
 
 		}
 		log.Println("可以使用 systemctl 控制 " + RunningName + " 服务了")
@@ -109,12 +128,16 @@ func Uninstall() (err error) {
 	if common.IsWindows() {
 		log.Println("Windows 暂不支持安装到系统")
 	} else {
+		wd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
 		err = os.Remove(InstallPath)
 		if err != nil {
-			return
+			return err
 		}
 		log.Println("卸载服务成功")
-		log.Println("若要完全删除，请移步到 " + RunningPath + " 和 " + ConfPath + " 完全删除")
+		log.Println("若要完全删除，请移步到 " + wd + " 和 " + ConfDirectoryName + " 完全删除")
 	}
 	return
 }
