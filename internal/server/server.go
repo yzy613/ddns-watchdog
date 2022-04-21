@@ -21,10 +21,17 @@ var (
 	ConfDirectoryName = "conf"
 )
 
+type TLSConf struct {
+	Enable   bool   `json:"enable"`
+	CertFile string `json:"cert_file"`
+	KeyFile  string `json:"key_file"`
+}
+
 type ServerConf struct {
-	Port           string `json:"port"`
-	IsRoot         bool   `json:"is_root"`
-	RootServerAddr string `json:"root_server_addr"`
+	Port           string  `json:"port"`
+	IsRoot         bool    `json:"is_root"`
+	RootServerAddr string  `json:"root_server_addr"`
+	TLS            TLSConf `json:"tls"`
 }
 
 func (conf ServerConf) GetLatestVersion() (str string) {
@@ -68,6 +75,9 @@ func (conf ServerConf) CheckLatestVersion() {
 
 func GetClientIP(req *http.Request) (ipAddr string) {
 	ipAddr = req.Header.Get("X-Forwarded-For")
+	if ipAddr != "" && strings.Contains(ipAddr, ", ") {
+		ipAddr = strings.Split(ipAddr, ", ")[0]
+	}
 	if ipAddr == "" {
 		ipAddr = req.Header.Get("X-Real-IP")
 	}

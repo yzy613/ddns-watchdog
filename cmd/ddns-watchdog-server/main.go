@@ -86,21 +86,28 @@ func main() {
 	http.HandleFunc("/", ddnsServerHandler)
 
 	// 启动监听
-	log.Println("Work on", conf.Port)
-	err = http.ListenAndServe(conf.Port, nil)
+	if conf.TLS.Enable {
+		log.Println("Work on", conf.Port, "with TLS")
+		err = http.ListenAndServeTLS(conf.Port, server.ConfDirectoryName+"/"+conf.TLS.CertFile, server.ConfDirectoryName+"/"+conf.TLS.KeyFile, nil)
+	} else {
+		log.Println("Work on", conf.Port)
+		err = http.ListenAndServe(conf.Port, nil)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func RunInit() (err error) {
-	conf := server.ServerConf{}
-	conf.Port = ":10032"
-	conf.IsRoot = false
-	conf.RootServerAddr = "https://yzyweb.cn/ddns-watchdog"
+	conf := server.ServerConf{
+		Port:           ":10032",
+		IsRoot:         false,
+		RootServerAddr: "https://yzyweb.cn/ddns-watchdog",
+	}
 	err = common.MarshalAndSave(conf, server.ConfDirectoryName+"/"+server.ConfFileName)
 	if err != nil {
 		return
 	}
+	log.Println("初始化 " + server.ConfDirectoryName + "/" + server.ConfFileName)
 	return
 }
