@@ -13,6 +13,7 @@
 
 [![Language](https://img.shields.io/badge/language-Go-00acd7)](https://golang.org)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/yzy613/ddns-watchdog/?ref=repository-badge)
+[![.github/workflows/go.yml](https://github.com/yzy613/ddns-watchdog/actions/workflows/go.yml/badge.svg)](https://github.com/yzy613/ddns-watchdog/actions/workflows/go.yml)
 [![Releases](https://img.shields.io/github/v/release/yzy613/ddns-watchdog)](https://github.com/yzy613/ddns-watchdog/releases)
 [![Downloads](https://img.shields.io/github/downloads/yzy613/ddns-watchdog/total)](https://github.com/yzy613/ddns-watchdog/releases)
 [![ClickDownload](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/ddns-watchdog/releases)
