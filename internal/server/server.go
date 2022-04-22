@@ -3,6 +3,7 @@ package server
 import (
 	"ddns-watchdog/internal/common"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -75,18 +76,19 @@ func (conf ServerConf) CheckLatestVersion() {
 
 func GetClientIP(req *http.Request) (ipAddr string) {
 	ipAddr = req.Header.Get("X-Forwarded-For")
-	if ipAddr != "" && strings.Contains(ipAddr, ", ") {
-		ipAddr = strings.Split(ipAddr, ", ")[0]
+	if ipAddr != "" && strings.Contains(ipAddr, ",") {
+		// 如果只取第零个切片，这行其实可有可无
+		//ipAddr = strings.ReplaceAll(ipAddr, " ", "")
+		ipAddr = strings.Split(ipAddr, ",")[0]
 	}
 	if ipAddr == "" {
 		ipAddr = req.Header.Get("X-Real-IP")
 	}
 	if ipAddr == "" {
-		// 把 port 从 ip:port 分离
+		// 只保留 ip:port 的 ip
 		if strings.Contains(req.RemoteAddr, "[") {
 			// IPv6
-			ipAddr = strings.Split(req.RemoteAddr, "]:")[0]
-			ipAddr = ipAddr + "]"
+			ipAddr = strings.Split(req.RemoteAddr[1:], "]:")[0]
 		} else {
 			// IPv4
 			ipAddr = strings.Split(req.RemoteAddr, ":")[0]
@@ -94,11 +96,7 @@ func GetClientIP(req *http.Request) (ipAddr string) {
 	}
 
 	// IPv6 转格式 和 :: 解压
-	switch {
-	case strings.Contains(ipAddr, "["):
-		ipAddr = strings.Split(ipAddr[1:], "]")[0]
-		ipAddr = common.DecodeIPv6(ipAddr)
-	case strings.Contains(ipAddr, ":"):
+	if strings.Contains(ipAddr, ":") {
 		ipAddr = common.DecodeIPv6(ipAddr)
 	}
 	return
@@ -106,7 +104,7 @@ func GetClientIP(req *http.Request) (ipAddr string) {
 
 func Install() (err error) {
 	if common.IsWindows() {
-		log.Println("Windows 暂不支持安装到系统")
+		err = errors.New("windows 暂不支持安装到系统")
 	} else {
 		// 注册系统服务
 		wd, err := os.Getwd()
@@ -119,7 +117,8 @@ func Install() (err error) {
 				"After=network.target\n\n" +
 				"[Service]\n" +
 				"Type=simple\n" +
-				"ExecStart=" + wd + "/" + RunningName + " -c " + ConfDirectoryName +
+				"WorkingDirectory=" + wd +
+				"\nExecStart=" + wd + "/" + RunningName + " -c " + ConfDirectoryName +
 				"\nRestart=on-failure\n" +
 				"RestartSec=2\n\n" +
 				"[Install]\n" +
@@ -136,7 +135,7 @@ func Install() (err error) {
 
 func Uninstall() (err error) {
 	if common.IsWindows() {
-		log.Println("Windows 暂不支持安装到系统")
+		err = errors.New("windows 暂不支持安装到系统")
 	} else {
 		wd, err := os.Getwd()
 		if err != nil {

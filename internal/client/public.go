@@ -32,7 +32,7 @@ type AsyncServiceCallback func(enabledServices enable, ipv4, ipv6 string) (msg [
 
 func Install() (err error) {
 	if common.IsWindows() {
-		log.Println("Windows 暂不支持安装到系统")
+		err = errors.New("windows 暂不支持安装到系统")
 	} else {
 		// 注册系统服务
 		if Conf.CheckCycleMinutes == 0 {
@@ -49,7 +49,8 @@ func Install() (err error) {
 				"After=network.target\n\n" +
 				"[Service]\n" +
 				"Type=simple\n" +
-				"ExecStart=" + wd + "/" + RunningName + " -c " + ConfDirectoryName +
+				"WorkingDirectory=" + wd +
+				"\nExecStart=" + wd + "/" + RunningName + " -c " + ConfDirectoryName +
 				"\nRestart=on-failure\n" +
 				"RestartSec=2\n\n" +
 				"[Install]\n" +
@@ -65,7 +66,7 @@ func Install() (err error) {
 
 func Uninstall() (err error) {
 	if common.IsWindows() {
-		log.Println("Windows 暂不支持安装到系统")
+		err = errors.New("windows 暂不支持安装到系统")
 	} else {
 		wd, err := os.Getwd()
 		if err != nil {

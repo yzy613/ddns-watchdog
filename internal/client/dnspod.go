@@ -165,7 +165,9 @@ func (dpc dnspodConf) recordModifyRequestInit(ipAddr, recordType, subDomain stri
 }
 
 func postman(url, src string) (dst []byte, err error) {
-	httpClient := &http.Client{}
+	httpClient := &http.Client{
+		Transport: &http.Transport{DisableKeepAlives: true},
+	}
 	req, err := http.NewRequest("POST", url, strings.NewReader(src))
 	if err != nil {
 		return nil, err

@@ -46,9 +46,9 @@
   2 -> alidns.json
   3 -> cloudflare.json
   ```
-- `./ddns-watchdog-client` 使用默认配置文件路径 `./conf` 运行
+- `./ddns-watchdog-client` 使用默认配置文件目录 `./conf` 运行
 - `./ddns-watchdog-client -n` 输出网卡信息并退出
-- `./ddns-watchdog-client -c string` 指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)
+- `./ddns-watchdog-client -c ./conf` 指定配置文件目录为 ./conf (目录有空格请放在双引号中间)
 - `./ddns-watchdog-client -I` 安装服务并退出 (仅限有 systemd 的 Linux 使用)
 - `./ddns-watchdog-client -U` 卸载服务并退出 (仅限有 systemd 的 Linux 使用)
 - `./ddns-watchdog-client -f` 强制检查解析记录值
@@ -108,7 +108,7 @@
    }
    ```
 9. 按照 [支持的服务商](https://github.com/yzy613/ddns-watchdog#%E6%94%AF%E6%8C%81%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%95%86) 进行配置
-10. 若需配置不同域名的 ddns-watchdog，可以结合 `-c string` 启动参数配置多种配置文件 (可搭配 `-i` 启动参数初始化配置文件)
+10. 若需配置不同域名的 ddns-watchdog，可以结合 `-c` 启动参数配置多种配置文件 (可搭配 `-i` 启动参数初始化配置文件)
 11. 如果解析记录值更新成功，那么程序工作正常，可以在 `./conf/client.json` 启用 `check_cycle_minutes` 进行定期检查 (单位：分钟)(默认为 0，意为不启用定期检查)
 12. 注意：ddns-watchdog 设计了 IP 地址本地比对机制，以防止频繁访问 API 导致封禁。若手动修改了解析记录值，会导致无法及时更新 (可搭配 `-f` 启动参数强制检查解析记录值以跳过本地比对机制)
 
@@ -197,7 +197,7 @@
 ### 服务端 用法
 
 - `./ddns-watchdog-server -I` 安装服务并退出 (已经包含 `-i` 启动参数)
-- `./ddns-watchdog-server -c string` 指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)
+- `./ddns-watchdog-server -c ./conf` 指定配置文件目录为 ./conf (目录有空格请放在双引号中间)
 - `./ddns-watchdog-server -i` 初始化配置文件并退出
 - `systemctl start ddns-watchdog-server` 启动服务
 - `./ddns-watchdog-server -U` 卸载服务并退出
