@@ -11,7 +11,7 @@
 
 # ddns-watchdog
 
-[![Language](https://img.shields.io/badge/language-Go-00acd7)](https://golang.org)
+[![Language](https://img.shields.io/badge/language-Go-00acd7)](https://go.dev)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/yzy613/ddns-watchdog/?ref=repository-badge)
 [![.github/workflows/go.yml](https://github.com/yzy613/ddns-watchdog/actions/workflows/go.yml/badge.svg)](https://github.com/yzy613/ddns-watchdog/actions/workflows/go.yml)
 [![Releases](https://img.shields.io/github/v/release/yzy613/ddns-watchdog)](https://github.com/yzy613/ddns-watchdog/releases)
