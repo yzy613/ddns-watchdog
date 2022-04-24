@@ -68,6 +68,7 @@ func main() {
 	}
 
 	ddnsServerHandler := func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Add("Cache-Control", "no-store")
 		info := common.PublicInfo{
 			IP:      server.GetClientIP(req),
 			Version: conf.GetLatestVersion(),
