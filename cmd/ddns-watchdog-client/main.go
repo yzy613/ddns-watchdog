@@ -22,7 +22,7 @@ var (
 		"1 -> "+client.DNSPodConfFileName+"\n"+
 		"2 -> "+client.AliDNSConfFileName+"\n"+
 		"3 -> "+client.CloudflareConfFileName)
-	confPath             = flag.String("c", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
+	confPath             = flag.String("c", "", "指定配置文件目录 (目录有空格请放在双引号中间)")
 	printNetworkCardInfo = flag.Bool("n", false, "输出网卡信息并退出")
 )
 
@@ -75,7 +75,7 @@ func runFlag() (exit bool, err error) {
 		return
 	}
 
-	// 加载自定义配置文件路径
+	// 加载自定义配置文件目录
 	if *confPath != "" {
 		client.ConfDirectoryName = common.FormatDirectoryPath(*confPath)
 	}

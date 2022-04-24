@@ -14,13 +14,13 @@ var (
 	installOption   = flag.Bool("I", false, "安装服务并退出")
 	uninstallOption = flag.Bool("U", false, "卸载服务并退出")
 	version         = flag.Bool("v", false, "查看当前版本并检查更新后退出")
-	confPath        = flag.String("c", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
+	confPath        = flag.String("c", "", "指定配置文件目录 (目录有空格请放在双引号中间)")
 	initOption      = flag.Bool("i", false, "初始化配置文件并退出")
 )
 
 func main() {
 	flag.Parse()
-	// 加载自定义配置文件路径
+	// 加载自定义配置文件目录
 	if *confPath != "" {
 		server.ConfDirectoryName = common.FormatDirectoryPath(*confPath)
 	}
