@@ -3,10 +3,13 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"golang.org/x/sys/windows/svc"
 )
 
 const (
@@ -14,7 +17,23 @@ const (
 	DefaultAPIUrl     = "https://yzyweb.cn/ddns-watchdog"
 	DefaultIPv6APIUrl = "https://yzyweb.cn/ddns-watchdog6"
 	ProjectUrl        = "https://github.com/yzy613/ddns-watchdog"
+	IsWindows         = runtime.GOOS == "windows"
 )
+
+func GetIsWindowsService() bool {
+	if IsWindows {
+		result, err := svc.IsWindowsService()
+		if err != nil {
+			log.Printf("获取是否为 Windows 服务失败，错误信息：%v", err)
+			log.Println()
+		} else {
+			return result
+		}
+	}
+	return false
+}
+
+var IsWindowsService = GetIsWindowsService()
 
 type PublicInfo struct {
 	IP      string `json:"ip"`
@@ -28,14 +47,6 @@ func FormatDirectoryPath(srcPath string) (dstPath string) {
 		dstPath = srcPath
 	}
 	return
-}
-
-func IsWindows() bool {
-	if runtime.GOOS == "windows" {
-		return true
-	} else {
-		return false
-	}
 }
 
 func IsDirExistAndCreate(dirPath string) (err error) {

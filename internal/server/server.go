@@ -103,7 +103,7 @@ func GetClientIP(req *http.Request) (ipAddr string) {
 }
 
 func Install() (err error) {
-	if common.IsWindows() {
+	if common.IsWindows {
 		err = errors.New("windows 暂不支持安装到系统")
 	} else {
 		// 注册系统服务
@@ -134,7 +134,7 @@ func Install() (err error) {
 }
 
 func Uninstall() (err error) {
-	if common.IsWindows() {
+	if common.IsWindows {
 		err = errors.New("windows 暂不支持安装到系统")
 	} else {
 		wd, err := os.Getwd()

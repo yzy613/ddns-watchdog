@@ -10,6 +10,10 @@ import (
 	"sort"
 	"sync"
 	"time"
+
+	"golang.org/x/sys/windows/svc"
+	"golang.org/x/sys/windows/svc/debug"
+	"golang.org/x/sys/windows/svc/eventlog"
 )
 
 var (
@@ -22,8 +26,9 @@ var (
 		"1 -> "+client.DNSPodConfFileName+"\n"+
 		"2 -> "+client.AliDNSConfFileName+"\n"+
 		"3 -> "+client.CloudflareConfFileName)
-	confPath             = flag.String("c", "", "指定配置文件目录 (目录有空格请放在双引号中间)")
+	confPath             = flag.String("c", "conf", "指定配置文件目录 (目录有空格请放在双引号中间)")
 	printNetworkCardInfo = flag.Bool("n", false, "输出网卡信息并退出")
+	serviceDebug         = flag.Bool("d", false, "启用 Windows 服务调试模式（配合 Windows 服务使用，请不要在生产环境中使用！）")
 )
 
 func main() {
@@ -42,16 +47,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// 周期循环
-	if client.Conf.CheckCycleMinutes <= 0 {
-		check()
+	if common.IsWindowsService {
+		runService(*serviceDebug)
 	} else {
-		cycle := time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
-		for {
-			check()
-			<-cycle.C
+		if client.Conf.CheckCycleMinutes <= 0 {
+			check(elog)
+		} else {
+			cycle := time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
+			for {
+				check(elog)
+				<-cycle.C
+			}
 		}
 	}
+	// 周期循环
+
 }
 
 func runFlag() (exit bool, err error) {
@@ -109,7 +119,7 @@ func runFlag() (exit bool, err error) {
 	// 安装 / 卸载服务
 	switch {
 	case *installOption:
-		err = client.Install()
+		err = client.Install(*confPath)
 		if err != nil {
 			return
 		}
@@ -181,11 +191,15 @@ func runLoadConf() (err error) {
 	return
 }
 
-func check() {
+func check(elog debug.Log) {
 	// 获取 IP
 	ipv4, ipv6, err := client.GetOwnIP(client.Conf.Enable, client.Conf.APIUrl, client.Conf.NetworkCard)
 	if err != nil {
-		log.Println(err)
+		if common.IsWindowsService {
+			elog.Error(101, err.Error())
+		} else {
+			log.Println(err)
+		}
 		return
 	}
 
@@ -200,27 +214,113 @@ func check() {
 		wg := sync.WaitGroup{}
 		if client.Conf.Services.DNSPod {
 			wg.Add(1)
-			go asyncServiceInterface(ipv4, ipv6, client.Dpc.Run, &wg)
+			go asyncServiceInterface(ipv4, ipv6, client.Dpc.Run, &wg, elog)
 		}
 		if client.Conf.Services.AliDNS {
 			wg.Add(1)
-			go asyncServiceInterface(ipv4, ipv6, client.Adc.Run, &wg)
+			go asyncServiceInterface(ipv4, ipv6, client.Adc.Run, &wg, elog)
 		}
 		if client.Conf.Services.Cloudflare {
 			wg.Add(1)
-			go asyncServiceInterface(ipv4, ipv6, client.Cfc.Run, &wg)
+			go asyncServiceInterface(ipv4, ipv6, client.Cfc.Run, &wg, elog)
 		}
 		wg.Wait()
 	}
 }
 
-func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServiceCallback, wg *sync.WaitGroup) {
+func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServiceCallback, wg *sync.WaitGroup, elog debug.Log) {
 	defer wg.Done()
 	msg, err := callback(client.Conf.Enable, ipv4, ipv6)
 	for _, row := range err {
-		log.Println(row)
+		if common.IsWindowsService {
+			elog.Error(102, row.Error())
+		} else {
+			log.Println(row)
+		}
 	}
 	for _, row := range msg {
-		log.Println(row)
+		if common.IsWindowsService {
+			elog.Info(100, row)
+		} else {
+			log.Println(row)
+		}
 	}
+}
+
+// Windows 服务
+type WindowsService struct{}
+
+var elog debug.Log
+
+func (ws *WindowsService) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (svcSpecificEC bool, exitCode uint32) {
+	changes <- svc.Status{State: svc.StartPending}
+	var tick = time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
+	changes <- svc.Status{State: svc.Running, Accepts: svc.AcceptPauseAndContinue | svc.AcceptShutdown | svc.AcceptStop}
+	elog.Info(2, fmt.Sprintf("服务 %s 启动成功！", client.RunningName))
+	check(elog)
+	elog.Info(3, "动态域名解析更新完成！")
+	if client.Conf.CheckCycleMinutes <= 0 {
+		changes <- svc.Status{State: svc.StopPending}
+		tick.Stop()
+		changes <- svc.Status{State: svc.Stopped}
+		return
+	}
+loop:
+	for {
+		select {
+		case c := <-r:
+			switch c.Cmd {
+			case svc.Interrogate:
+				changes <- c.CurrentStatus
+			case svc.Stop, svc.Shutdown:
+				changes <- svc.Status{State: svc.StopPending}
+				elog.Info(6, fmt.Sprintf("服务 %s 正在停止……", client.RunningName))
+				tick.Stop()
+				break loop
+			case svc.Pause:
+				tick.Stop()
+				changes <- svc.Status{State: svc.Paused, Accepts: svc.AcceptPauseAndContinue | svc.AcceptShutdown | svc.AcceptStop}
+				elog.Info(4, fmt.Sprintf("服务 %s 已暂停！", client.RunningName))
+			case svc.Continue:
+				tick = time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
+				changes <- svc.Status{State: svc.Running, Accepts: svc.AcceptPauseAndContinue | svc.AcceptShutdown | svc.AcceptStop}
+				elog.Info(5, fmt.Sprintf("服务 %s 已恢复！", client.RunningName))
+				check(elog)
+				elog.Info(3, "动态域名解析更新成功！")
+			default:
+				elog.Error(9, fmt.Sprintf("无法识别的控制命令 #%d", c))
+			}
+		case <-tick.C:
+			elog.Info(3, "动态域名解析更新成功！")
+			check(elog)
+		}
+	}
+	changes <- svc.Status{State: svc.Stopped}
+	return
+}
+
+func runService(isDebug bool) {
+	var err error
+	if isDebug {
+		elog = debug.New(client.RunningName)
+	} else {
+		elog, err = eventlog.Open(client.RunningName)
+		if err != nil {
+			return
+		}
+	}
+
+	defer elog.Close()
+	elog.Info(1, fmt.Sprintf("服务 %s 正在启动中……", client.RunningName))
+	run := svc.Run
+	if isDebug {
+		elog.Warning(50, fmt.Sprintf("服务 %s 将以调试模式运行！", client.RunningName))
+		run = debug.Run
+	}
+	err = run(client.RunningName, &WindowsService{})
+	if err != nil {
+		elog.Error(8, fmt.Sprintf("服务 %s 启动失败，错误信息: %v", client.RunningName, err))
+		return
+	}
+	elog.Info(7, fmt.Sprintf("服务 %s 已停止！", client.RunningName))
 }
