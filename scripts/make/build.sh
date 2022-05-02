@@ -1,9 +1,9 @@
 #!/bin/bash
 
 CLIENT_NAME='ddns-watchdog-client'
-CLIENT_CODE_FILE='./main-code/client/ddns-watchdog-client.go'
+CLIENT_CODE_FILE='./cmd/ddns-watchdog-client/main.go'
 SERVER_NAME='ddns-watchdog-server'
-SERVER_CODE_FILE='./main-code/server/ddns-watchdog-server.go'
+SERVER_CODE_FILE='./cmd/ddns-watchdog-server/main.go'
 OUTPUT_PATH='./build'
 
 # check if the $OUTPUT_PATH folder exists

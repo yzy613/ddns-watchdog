@@ -3,21 +3,31 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 )
 
-func GetRunningPath() (path string) {
-	path, _ = filepath.Abs(filepath.Dir(os.Args[0]))
-	tempStr := strings.ReplaceAll(path, "\\", "/")
-	if tempStr[len(tempStr)-1:] != "/" {
-		tempStr = tempStr + "/"
+const (
+	LocalVersion      = "1.4.5"
+	DefaultAPIUrl     = "https://yzyweb.cn/ddns-watchdog"
+	DefaultIPv6APIUrl = "https://yzyweb.cn/ddns-watchdog6"
+	ProjectUrl        = "https://github.com/yzy613/ddns-watchdog"
+)
+
+type PublicInfo struct {
+	IP      string `json:"ip"`
+	Version string `json:"latest_version"`
+}
+
+func FormatDirectoryPath(srcPath string) (dstPath string) {
+	if length := len(srcPath); srcPath[length-1:] == "/" {
+		dstPath = srcPath[0 : length-1]
+	} else {
+		dstPath = srcPath
 	}
-	return tempStr
+	return
 }
 
 func IsWindows() bool {
@@ -39,64 +49,13 @@ func IsDirExistAndCreate(dirPath string) (err error) {
 	return
 }
 
-// [存档状态]
-func CopyFile(srcPath, dstPath string) (err error) {
-	srcFile, err := os.Open(srcPath)
-	if err != nil {
-		return
-	}
-	defer srcFile.Close()
-	dirSplit := strings.Split(dstPath, "/")
-	dirPath := ""
-	if dirPathLen := len(dirSplit); dirPathLen > 1 {
-		switch dirSplit[0] {
-		case ".":
-			dirSplit = dirSplit[1:]
-			dirPath = "./"
-		case "":
-			dirSplit = dirSplit[1:]
-			dirPath = "/"
-		}
-		if dirPathLen := len(dirSplit); dirPathLen > 1 {
-			for i := 0; i < dirPathLen-1; i++ {
-				dirPath = dirPath + dirSplit[i] + "/"
-			}
-			err = os.MkdirAll(dirPath, 0750)
-			if err != nil {
-				return
-			}
-		}
-	}
-	dstFile, err := os.OpenFile(dstPath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0600)
-	if err != nil {
-		return
-	}
-	defer dstFile.Close()
-	buf := make([]byte, 1024)
-	for {
-		n, err := srcFile.Read(buf)
-		if err != nil {
-			if err == io.EOF {
-				break
-			} else {
-				return err
-			}
-		}
-		_, err = dstFile.Write(buf[:n])
-		if err != nil {
-			return err
-		}
-	}
-	return
-}
-
-// dst 参数要加 & 才能修改原变量
-func LoadAndUnmarshal(filePath string, dst interface{}) (err error) {
+// LoadAndUnmarshal dst 参数要加 & 才能修改原变量
+func LoadAndUnmarshal(filePath string, dst any) (err error) {
 	_, err = os.Stat(filePath)
 	if err != nil {
 		return
 	}
-	jsonContent, err := ioutil.ReadFile(filePath)
+	jsonContent, err := os.ReadFile(filePath)
 	if err != nil {
 		return
 	}
@@ -107,7 +66,7 @@ func LoadAndUnmarshal(filePath string, dst interface{}) (err error) {
 	return
 }
 
-func MarshalAndSave(content interface{}, filePath string) (err error) {
+func MarshalAndSave(content any, filePath string) (err error) {
 	err = IsDirExistAndCreate(filepath.Dir(filePath))
 	if err != nil {
 		return
@@ -116,7 +75,7 @@ func MarshalAndSave(content interface{}, filePath string) (err error) {
 	if err != nil {
 		return
 	}
-	err = ioutil.WriteFile(filePath, jsonContent, 0600)
+	err = os.WriteFile(filePath, jsonContent, 0600)
 	if err != nil {
 		return
 	}

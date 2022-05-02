@@ -1,10 +1,10 @@
 package client
 
 import (
+	"ddns-watchdog/internal/common"
 	"encoding/json"
 	"errors"
-	"github.com/yzy613/ddns-watchdog/common"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -13,51 +13,51 @@ import (
 	"strings"
 )
 
-func (conf *clientConf) InitConf() (msg string, err error) {
-	*conf = clientConf{}
-	conf.APIUrl.IPv4 = common.DefaultAPIUrl
-	conf.APIUrl.IPv6 = common.DefaultIPv6APIUrl
-	conf.APIUrl.Version = common.DefaultAPIUrl
-	conf.CheckCycleMinutes = 0
-	err = common.MarshalAndSave(conf, ConfPath+ConfFileName)
-	msg = "初始化 " + ConfPath + ConfFileName
-	return
+var (
+	installPath       = "/etc/systemd/system/" + RunningName + ".service"
+	ConfDirectoryName = "conf"
+	Conf              = clientConf{}
+	Dpc               = dnspodConf{}
+	Adc               = aliDNSConf{}
+	Cfc               = cloudflareConf{}
+)
+
+type subdomain struct {
+	A    string `json:"a"`
+	AAAA string `json:"aaaa"`
 }
 
-func (conf *clientConf) LoadConf() (err error) {
-	err = common.LoadAndUnmarshal(ConfPath+ConfFileName, &conf)
-	// 检查启用 IP 类型
-	if !conf.Enable.IPv4 && !conf.Enable.IPv6 {
-		err = errors.New("请打开客户端配置文件 " + ConfPath + ConfFileName + " 启用需要使用的 IP 类型并重新启动")
-		return
-	}
-	// 检查启用服务
-	if !conf.Services.DNSPod && !conf.Services.AliDNS && !conf.Services.Cloudflare {
-		err = errors.New("请打开客户端配置文件 " + ConfPath + ConfFileName + " 启用需要使用的服务并重新启动")
-		return
-	}
-	return
-}
+// AsyncServiceCallback 异步服务回调函数类型
+type AsyncServiceCallback func(enabledServices enable, ipv4, ipv6 string) (msg []string, errs []error)
 
 func Install() (err error) {
 	if common.IsWindows() {
-		log.Println("Windows 暂不支持安装到系统")
+		err = errors.New("windows 暂不支持安装到系统")
 	} else {
 		// 注册系统服务
+		if Conf.CheckCycleMinutes == 0 {
+			err = errors.New("设置一下 " + ConfDirectoryName + "/" + ConfFileName + " 的 check_cycle_minutes 吧")
+			return
+		}
+		wd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
 		serviceContent := []byte(
 			"[Unit]\n" +
 				"Description=" + RunningName + " Service\n" +
 				"After=network.target\n\n" +
 				"[Service]\n" +
 				"Type=simple\n" +
-				"ExecStart=" + RunningPath + RunningName + " -c " + ConfPath +
+				"WorkingDirectory=" + wd +
+				"\nExecStart=" + wd + "/" + RunningName + " -c " + ConfDirectoryName +
 				"\nRestart=on-failure\n" +
 				"RestartSec=2\n\n" +
 				"[Install]\n" +
 				"WantedBy=multi-user.target\n")
-		err = ioutil.WriteFile(InstallPath, serviceContent, 0664)
+		err = os.WriteFile(installPath, serviceContent, 0664)
 		if err != nil {
-			return
+			return err
 		}
 		log.Println("可以使用 systemctl 控制 " + RunningName + " 服务了")
 	}
@@ -66,14 +66,18 @@ func Install() (err error) {
 
 func Uninstall() (err error) {
 	if common.IsWindows() {
-		log.Println("Windows 暂不支持安装到系统")
+		err = errors.New("windows 暂不支持安装到系统")
 	} else {
-		err = os.Remove(InstallPath)
+		wd, err := os.Getwd()
 		if err != nil {
-			return
+			return err
+		}
+		err = os.Remove(installPath)
+		if err != nil {
+			return err
 		}
 		log.Println("卸载服务成功")
-		log.Println("若要完全删除，请移步到 " + RunningPath + " 和 " + ConfPath + " 完全删除")
+		log.Println("若要完全删除，请移步到 " + wd + " 和 " + ConfDirectoryName + " 完全删除")
 	}
 	return
 }
@@ -87,9 +91,9 @@ func NetworkCardRespond() (map[string]string, error) {
 	}
 
 	for _, i := range interfaces {
-		ipAddr, err := i.Addrs()
-		if err != nil {
-			return nil, err
+		ipAddr, err2 := i.Addrs()
+		if err2 != nil {
+			return nil, err2
 		}
 		for j, addrAndMask := range ipAddr {
 			// 分离 IP 和子网掩码
@@ -111,12 +115,12 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 		if err != nil {
 			return
 		}
-		err = common.MarshalAndSave(ncr, ConfPath+NetworkCardFileName)
+		err = common.MarshalAndSave(ncr, ConfDirectoryName+"/"+NetworkCardFileName)
 		if err != nil {
 			return
 		}
-		err = errors.New("请打开 " + ConfPath + NetworkCardFileName + " 选择网卡填入 " +
-			ConfPath + ConfFileName + " 的 network_card")
+		err = errors.New("请打开 " + ConfDirectoryName + "/" + NetworkCardFileName + " 选择网卡填入 " +
+			ConfDirectoryName + "/" + ConfFileName + " 的 network_card")
 		return
 	}
 
@@ -142,15 +146,20 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 			if apiUrl.IPv4 == "" {
 				apiUrl.IPv4 = common.DefaultAPIUrl
 			}
-			res, err2 := http.Get(apiUrl.IPv4)
-			err = err2
-			if err != nil {
+			resp, err2 := http.Get(apiUrl.IPv4)
+			if err2 != nil {
+				err = err2
 				return
 			}
-			defer res.Body.Close()
-			recvJson, err2 := ioutil.ReadAll(res.Body)
-			err = err2
-			if err != nil {
+			defer func(Body io.ReadCloser) {
+				t := Body.Close()
+				if t != nil {
+					err = t
+				}
+			}(resp.Body)
+			recvJson, err2 := io.ReadAll(resp.Body)
+			if err2 != nil {
+				err = err2
 				return
 			}
 			var ipInfo common.PublicInfo
@@ -180,15 +189,20 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 			if apiUrl.IPv6 == "" {
 				apiUrl.IPv6 = common.DefaultIPv6APIUrl
 			}
-			res, err2 := http.Get(apiUrl.IPv6)
-			err = err2
-			if err != nil {
+			resp, err2 := http.Get(apiUrl.IPv6)
+			if err2 != nil {
+				err = err2
 				return
 			}
-			defer res.Body.Close()
-			recvJson, err2 := ioutil.ReadAll(res.Body)
-			err = err2
-			if err != nil {
+			defer func(Body io.ReadCloser) {
+				t := Body.Close()
+				if t != nil {
+					err = t
+				}
+			}(resp.Body)
+			recvJson, err2 := io.ReadAll(resp.Body)
+			if err2 != nil {
+				err = err2
 				return
 			}
 			var ipInfo common.PublicInfo
@@ -206,32 +220,4 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 		}
 	}
 	return
-}
-
-func (conf clientConf) GetLatestVersion() string {
-	res, err := http.Get(conf.APIUrl.Version)
-	if err != nil {
-		return "N/A (请检查网络连接)"
-	}
-	defer res.Body.Close()
-	recvJson, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "N/A (数据包错误)"
-	}
-	recv := common.PublicInfo{}
-	err = json.Unmarshal(recvJson, &recv)
-	if err != nil {
-		return "N/A (数据包错误)"
-	}
-	if recv.Version == "" {
-		return "N/A (没有获取到版本信息)"
-	}
-	return recv.Version
-}
-
-func (conf *clientConf) CheckLatestVersion() {
-	if conf.APIUrl.Version == "" {
-		conf.APIUrl.Version = common.DefaultAPIUrl
-	}
-	common.VersionTips(conf.GetLatestVersion())
 }

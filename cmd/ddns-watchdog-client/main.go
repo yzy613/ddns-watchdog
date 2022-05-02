@@ -1,24 +1,29 @@
 package main
 
 import (
+	"ddns-watchdog/internal/client"
+	"ddns-watchdog/internal/common"
 	"errors"
 	"flag"
-	"github.com/yzy613/ddns-watchdog/client"
+	"fmt"
 	"log"
+	"sort"
+	"sync"
 	"time"
 )
 
 var (
-	installOption   = flag.Bool("I", false, "安装服务")
-	uninstallOption = flag.Bool("U", false, "卸载服务")
+	installOption   = flag.Bool("I", false, "安装服务并退出")
+	uninstallOption = flag.Bool("U", false, "卸载服务并退出")
 	enforcement     = flag.Bool("f", false, "强制检查 DNS 解析记录")
-	version         = flag.Bool("v", false, "查看当前版本并检查更新")
-	initOption      = flag.String("i", "", "有选择地初始化配置文件，可以组合使用 (例 01)\n"+
+	version         = flag.Bool("v", false, "查看当前版本并检查更新后退出")
+	initOption      = flag.String("i", "", "有选择地初始化配置文件并退出，可以组合使用 (例 01)\n"+
 		"0 -> "+client.ConfFileName+"\n"+
 		"1 -> "+client.DNSPodConfFileName+"\n"+
 		"2 -> "+client.AliDNSConfFileName+"\n"+
 		"3 -> "+client.CloudflareConfFileName)
-	confPath = flag.String("c", "", "指定配置文件路径 (最好是绝对路径)(路径有空格请放在双引号中间)")
+	confPath             = flag.String("c", "", "指定配置文件目录 (目录有空格请放在双引号中间)")
+	printNetworkCardInfo = flag.Bool("n", false, "输出网卡信息并退出")
 )
 
 func main() {
@@ -38,15 +43,12 @@ func main() {
 	}
 
 	// 周期循环
-	waitCheckDone := make(chan bool, 1)
 	if client.Conf.CheckCycleMinutes <= 0 {
-		go asyncCheck(waitCheckDone)
-		<-waitCheckDone
+		check()
 	} else {
 		cycle := time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
 		for {
-			go asyncCheck(waitCheckDone)
-			<-waitCheckDone
+			check()
 			<-cycle.C
 		}
 	}
@@ -54,13 +56,28 @@ func main() {
 
 func runFlag() (exit bool, err error) {
 	flag.Parse()
-	// 加载自定义配置文件路径
-	if *confPath != "" {
-		tempStr := *confPath
-		if tempStr[len(tempStr)-1:] != "/" {
-			tempStr = tempStr + "/"
+	// 打印网卡信息
+	if *printNetworkCardInfo {
+		ncr, err2 := client.NetworkCardRespond()
+		if err2 != nil {
+			err = err2
+			return
 		}
-		client.ConfPath = tempStr
+		var arr []string
+		for key := range ncr {
+			arr = append(arr, key)
+		}
+		sort.Strings(arr)
+		for _, key := range arr {
+			fmt.Printf("%v\n\t%v\n", key, ncr[key])
+		}
+		exit = true
+		return
+	}
+
+	// 加载自定义配置文件目录
+	if *confPath != "" {
+		client.ConfDirectoryName = common.FormatDirectoryPath(*confPath)
 	}
 
 	// 有选择地初始化配置文件
@@ -71,6 +88,20 @@ func runFlag() (exit bool, err error) {
 				return
 			}
 		}
+		exit = true
+		return
+	}
+
+	// 加载客户端配置
+	// 不得不放在这个地方，因为有下面的检查版本和安装 / 卸载服务
+	err = client.Conf.LoadConf()
+	if err != nil {
+		return
+	}
+
+	// 检查版本
+	if *version {
+		client.Conf.CheckLatestVersion()
 		exit = true
 		return
 	}
@@ -89,20 +120,6 @@ func runFlag() (exit bool, err error) {
 		if err != nil {
 			return
 		}
-		exit = true
-		return
-	}
-
-	// 加载客户端配置
-	// 不得不放在这个地方，因为有下面的检查版本
-	err = client.Conf.LoadConf()
-	if err != nil {
-		return
-	}
-
-	// 检查版本
-	if *version {
-		client.Conf.CheckLatestVersion()
 		exit = true
 		return
 	}
@@ -144,7 +161,7 @@ func runInitConf(event string) error {
 
 func runLoadConf() (err error) {
 	if client.Conf.Services.DNSPod {
-		err = client.Dpc.LoadCOnf()
+		err = client.Dpc.LoadConf()
 		if err != nil {
 			return
 		}
@@ -164,12 +181,11 @@ func runLoadConf() (err error) {
 	return
 }
 
-func asyncCheck(done chan bool) {
+func check() {
 	// 获取 IP
 	ipv4, ipv6, err := client.GetOwnIP(client.Conf.Enable, client.Conf.APIUrl, client.Conf.NetworkCard)
 	if err != nil {
 		log.Println(err)
-		done <- true
 		return
 	}
 
@@ -181,62 +197,30 @@ func asyncCheck(done chan bool) {
 		if ipv6 != client.Conf.LatestIPv6 {
 			client.Conf.LatestIPv6 = ipv6
 		}
-		servicesCount := 0
+		wg := sync.WaitGroup{}
 		if client.Conf.Services.DNSPod {
-			servicesCount++
+			wg.Add(1)
+			go asyncServiceInterface(ipv4, ipv6, client.Dpc.Run, &wg)
 		}
 		if client.Conf.Services.AliDNS {
-			servicesCount++
+			wg.Add(1)
+			go asyncServiceInterface(ipv4, ipv6, client.Adc.Run, &wg)
 		}
 		if client.Conf.Services.Cloudflare {
-			servicesCount++
+			wg.Add(1)
+			go asyncServiceInterface(ipv4, ipv6, client.Cfc.Run, &wg)
 		}
-		waitServicesDone := make(chan bool, servicesCount)
-		if client.Conf.Services.DNSPod {
-			go asyncDNSPod(ipv4, ipv6, waitServicesDone)
-		}
-		if client.Conf.Services.AliDNS {
-			go asyncAliDNS(ipv4, ipv6, waitServicesDone)
-		}
-		if client.Conf.Services.Cloudflare {
-			go asyncCloudflare(ipv4, ipv6, waitServicesDone)
-		}
-		for i := 0; i < servicesCount; i++ {
-			<-waitServicesDone
-		}
+		wg.Wait()
 	}
-	done <- true
 }
 
-func asyncDNSPod(ipv4, ipv6 string, done chan bool) {
-	msg, err := client.Dpc.Run(client.Conf.Enable, ipv4, ipv6)
+func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServiceCallback, wg *sync.WaitGroup) {
+	defer wg.Done()
+	msg, err := callback(client.Conf.Enable, ipv4, ipv6)
 	for _, row := range err {
 		log.Println(row)
 	}
 	for _, row := range msg {
 		log.Println(row)
 	}
-	done <- true
-}
-
-func asyncAliDNS(ipv4, ipv6 string, done chan bool) {
-	msg, err := client.Adc.Run(client.Conf.Enable, ipv4, ipv6)
-	for _, row := range err {
-		log.Println(row)
-	}
-	for _, row := range msg {
-		log.Println(row)
-	}
-	done <- true
-}
-
-func asyncCloudflare(ipv4, ipv6 string, done chan bool) {
-	msg, err := client.Cfc.Run(client.Conf.Enable, ipv4, ipv6)
-	for _, row := range err {
-		log.Println(row)
-	}
-	for _, row := range msg {
-		log.Println(row)
-	}
-	done <- true
 }
