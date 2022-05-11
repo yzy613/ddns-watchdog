@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1573
 	github.com/bitly/go-simplejson v0.5.0
+	github.com/spf13/pflag v1.0.5
 )
 
 require (

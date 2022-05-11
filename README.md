@@ -30,6 +30,22 @@
 
 ### 用法
 
+```bash
+Usage:
+  -c, --conf string    指定配置文件目录 (目录有空格请放在双引号中间)     
+  -f, --force          强制检查 DNS 解析记录                             
+  -i, --init string    有选择地初始化配置文件并退出，可以组合使用 (例 01)
+                       0 -> client.json                                  
+                       1 -> dnspod.json                                  
+                       2 -> alidns.json                                  
+                       3 -> cloudflare.json                              
+  -I, --install        安装服务并退出                                    
+  -n, --network-card   输出网卡信息并退出                                
+  -U, --uninstall      卸载服务并退出                                    
+  -v, --version        查看当前版本并检查更新后退出                      
+pflag: help requested
+```
+
 - `./ddns-watchdog-client -i 0123` 有选择地初始化配置文件并退出，可以组合使用
 
   此示例展示仅初始化客户端和 DNSPod 的配置文件
@@ -196,7 +212,17 @@
 
 ### 服务端 用法
 
-- `./ddns-watchdog-server -I` 安装服务并退出 (已经包含 `-i` 启动参数)
+```bash
+Usage:
+  -c, --conf string   指定配置文件目录 (目录有空格请放在双引号中间)
+  -i, --init          初始化配置文件并退出                         
+  -I, --install       安装服务并退出                               
+  -U, --uninstall     卸载服务并退出                               
+  -v, --version       查看当前版本并检查更新后退出                 
+pflag: help requested
+```
+
+- `./ddns-watchdog-server -I` 安装服务并退出
 - `./ddns-watchdog-server -c ./conf` 指定配置文件目录为 ./conf (目录有空格请放在双引号中间)
 - `./ddns-watchdog-server -i` 初始化配置文件并退出
 - `systemctl start ddns-watchdog-server` 启动服务
