@@ -9,10 +9,19 @@ import (
 )
 
 const (
-	RunningName         = "ddns-watchdog-client"
-	ConfFileName        = "client.json"
-	NetworkCardFileName = "network_card.json"
+	ConfFileName = "client.json"
 )
+
+type client struct {
+	APIUrl            apiUrl        `json:"api_url"`
+	Center            center        `json:"center"`
+	Enable            common.Enable `json:"enable"`
+	NetworkCard       networkCard   `json:"network_card"`
+	Services          service       `json:"services"`
+	CheckCycleMinutes int           `json:"check_cycle_minutes"`
+	LatestIPv4        string        `json:"-"`
+	LatestIPv6        string        `json:"-"`
+}
 
 type apiUrl struct {
 	IPv4    string `json:"ipv4"`
@@ -20,15 +29,16 @@ type apiUrl struct {
 	Version string `json:"version"`
 }
 
-type enable struct {
-	IPv4        bool `json:"ipv4"`
-	IPv6        bool `json:"ipv6"`
-	NetworkCard bool `json:"network_card"`
+type center struct {
+	Enable bool   `json:"enable"`
+	APIUrl string `json:"api_url"`
+	Token  string `json:"token"`
 }
 
 type networkCard struct {
-	IPv4 string `json:"ipv4"`
-	IPv6 string `json:"ipv6"`
+	Enable bool   `json:"enable"`
+	IPv4   string `json:"ipv4"`
+	IPv6   string `json:"ipv6"`
 }
 
 type service struct {
@@ -37,18 +47,8 @@ type service struct {
 	Cloudflare bool `json:"cloudflare"`
 }
 
-type clientConf struct {
-	APIUrl            apiUrl      `json:"api_url"`
-	Enable            enable      `json:"enable"`
-	NetworkCard       networkCard `json:"network_card"`
-	Services          service     `json:"services"`
-	CheckCycleMinutes int         `json:"check_cycle_minutes"`
-	LatestIPv4        string      `json:"-"`
-	LatestIPv6        string      `json:"-"`
-}
-
-func (conf *clientConf) InitConf() (msg string, err error) {
-	*conf = clientConf{}
+func (conf *client) InitConf() (msg string, err error) {
+	*conf = client{}
 	conf.APIUrl.IPv4 = common.DefaultAPIUrl
 	conf.APIUrl.IPv6 = common.DefaultIPv6APIUrl
 	conf.APIUrl.Version = common.DefaultAPIUrl
@@ -58,7 +58,7 @@ func (conf *clientConf) InitConf() (msg string, err error) {
 	return
 }
 
-func (conf *clientConf) LoadConf() (err error) {
+func (conf *client) LoadConf() (err error) {
 	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+ConfFileName, &conf)
 	// 检查启用 IP 类型
 	if !conf.Enable.IPv4 && !conf.Enable.IPv6 {
@@ -73,7 +73,7 @@ func (conf *clientConf) LoadConf() (err error) {
 	return
 }
 
-func (conf clientConf) GetLatestVersion() (str string) {
+func (conf client) GetLatestVersion() (str string) {
 	resp, err := http.Get(conf.APIUrl.Version)
 	if err != nil {
 		return "N/A (请检查网络连接)"
@@ -88,7 +88,7 @@ func (conf clientConf) GetLatestVersion() (str string) {
 	if err != nil {
 		return "N/A (数据包错误)"
 	}
-	recv := common.PublicInfo{}
+	recv := common.GetIPResp{}
 	err = json.Unmarshal(recvJson, &recv)
 	if err != nil {
 		return "N/A (数据包错误)"
@@ -99,7 +99,7 @@ func (conf clientConf) GetLatestVersion() (str string) {
 	return recv.Version
 }
 
-func (conf *clientConf) CheckLatestVersion() {
+func (conf *client) CheckLatestVersion() {
 	if conf.APIUrl.Version == "" {
 		conf.APIUrl.Version = common.DefaultAPIUrl
 	}

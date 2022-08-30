@@ -12,7 +12,7 @@ import (
 
 const CloudflareConfFileName = "cloudflare.json"
 
-type cloudflareConf struct {
+type Cloudflare struct {
 	ZoneID   string    `json:"zone_id"`
 	APIToken string    `json:"api_token"`
 	Domain   subdomain `json:"domain"`
@@ -26,8 +26,8 @@ type cloudflareUpdateRequest struct {
 	Ttl     int    `json:"ttl"`
 }
 
-func (cfc *cloudflareConf) InitConf() (msg string, err error) {
-	*cfc = cloudflareConf{}
+func (cfc *Cloudflare) InitConf() (msg string, err error) {
+	*cfc = Cloudflare{}
 	cfc.APIToken = "在 https://dash.cloudflare.com/profile/api-tokens 获取"
 	cfc.ZoneID = "在你域名页面的右下角有个区域 ID"
 	cfc.Domain.A = "A记录子域名.example.com"
@@ -37,18 +37,24 @@ func (cfc *cloudflareConf) InitConf() (msg string, err error) {
 	return
 }
 
-func (cfc *cloudflareConf) LoadConf() (err error) {
+func (cfc *Cloudflare) LoadConf() (err error) {
 	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+CloudflareConfFileName, &cfc)
 	if err != nil {
 		return
 	}
-	if cfc.ZoneID == "" || cfc.APIToken == "" || (cfc.Domain.A == "" && cfc.Domain.AAAA == "") {
-		err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + CloudflareConfFileName + " 检查你的 zone_id, api_token, domain 并重新启动")
+	if Client.Center.Enable {
+		if cfc.Domain.A == "" && cfc.Domain.AAAA == "" {
+			err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + CloudflareConfFileName + " 检查你的 domain 并重新启动")
+		}
+	} else {
+		if cfc.ZoneID == "" || cfc.APIToken == "" || (cfc.Domain.A == "" && cfc.Domain.AAAA == "") {
+			err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + CloudflareConfFileName + " 检查你的 zone_id, api_token, domain 并重新启动")
+		}
 	}
 	return
 }
 
-func (cfc cloudflareConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, errs []error) {
+func (cfc Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
 	if enabled.IPv4 && cfc.Domain.A != "" {
 		// 获取解析记录
 		recordIP, err := cfc.getParseRecord(cfc.Domain.A, "A")
@@ -82,7 +88,7 @@ func (cfc cloudflareConf) Run(enabled enable, ipv4, ipv6 string) (msg []string, 
 	return
 }
 
-func (cfc *cloudflareConf) getParseRecord(domain, recordType string) (recordIP string, err error) {
+func (cfc *Cloudflare) getParseRecord(domain, recordType string) (recordIP string, err error) {
 	httpClient := &http.Client{
 		Transport: &http.Transport{DisableKeepAlives: true},
 	}
@@ -138,7 +144,7 @@ func (cfc *cloudflareConf) getParseRecord(domain, recordType string) (recordIP s
 	return
 }
 
-func (cfc cloudflareConf) updateParseRecord(ipAddr, recordType, domain string) (err error) {
+func (cfc Cloudflare) updateParseRecord(ipAddr, recordType, domain string) (err error) {
 	httpClient := &http.Client{
 		Transport: &http.Transport{DisableKeepAlives: true},
 	}

@@ -1,13 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"ddns-watchdog/internal/client"
 	"ddns-watchdog/internal/common"
+	"encoding/json"
 	"errors"
 	"fmt"
 	flag "github.com/spf13/pflag"
+	"io"
 	"log"
+	"net/http"
 	"sort"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -27,8 +33,8 @@ var (
 )
 
 func main() {
-	// 初始化并处理 flag
-	exit, err := runFlag()
+	// 处理 flag
+	exit, err := processFlag()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,16 +43,16 @@ func main() {
 	}
 
 	// 加载服务配置
-	err = runLoadConf()
+	err = loadConf()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// 周期循环
-	if client.Conf.CheckCycleMinutes <= 0 {
+	if client.Client.CheckCycleMinutes <= 0 {
 		check()
 	} else {
-		cycle := time.NewTicker(time.Duration(client.Conf.CheckCycleMinutes) * time.Minute)
+		cycle := time.NewTicker(time.Duration(client.Client.CheckCycleMinutes) * time.Minute)
 		for {
 			check()
 			<-cycle.C
@@ -54,7 +60,7 @@ func main() {
 	}
 }
 
-func runFlag() (exit bool, err error) {
+func processFlag() (exit bool, err error) {
 	flag.Parse()
 	// 打印网卡信息
 	if *printNetworkCardInfo {
@@ -83,7 +89,7 @@ func runFlag() (exit bool, err error) {
 	// 有选择地初始化配置文件
 	if *initOption != "" {
 		for _, event := range *initOption {
-			err = runInitConf(string(event))
+			err = initConf(string(event))
 			if err != nil {
 				return
 			}
@@ -94,14 +100,14 @@ func runFlag() (exit bool, err error) {
 
 	// 加载客户端配置
 	// 不得不放在这个地方，因为有下面的检查版本和安装 / 卸载服务
-	err = client.Conf.LoadConf()
+	err = client.Client.LoadConf()
 	if err != nil {
 		return
 	}
 
 	// 检查版本
 	if *version {
-		client.Conf.CheckLatestVersion()
+		client.Client.CheckLatestVersion()
 		exit = true
 		return
 	}
@@ -126,54 +132,42 @@ func runFlag() (exit bool, err error) {
 	return
 }
 
-func runInitConf(event string) error {
+func initConf(event string) (err error) {
+	msg := ""
 	switch event {
 	case "0":
-		msg, err := client.Conf.InitConf()
-		if err != nil {
-			return err
-		}
-		log.Println(msg)
+		msg, err = client.Client.InitConf()
 	case "1":
-		msg, err := client.Dpc.InitConf()
-		if err != nil {
-			return err
-		}
-		log.Println(msg)
+		msg, err = client.DP.InitConf()
 	case "2":
-		msg, err := client.Adc.InitConf()
-		if err != nil {
-			return err
-		}
-		log.Println(msg)
+		msg, err = client.AD.InitConf()
 	case "3":
-		msg, err := client.Cfc.InitConf()
-		if err != nil {
-			return err
-		}
-		log.Println(msg)
+		msg, err = client.Cf.InitConf()
 	default:
-		err := errors.New("你初始化了一个寂寞")
+		err = errors.New("你初始化了一个寂寞")
+	}
+	if err != nil {
 		return err
 	}
-	return nil
+	log.Println(msg)
+	return
 }
 
-func runLoadConf() (err error) {
-	if client.Conf.Services.DNSPod {
-		err = client.Dpc.LoadConf()
+func loadConf() (err error) {
+	if client.Client.Services.DNSPod {
+		err = client.DP.LoadConf()
 		if err != nil {
 			return
 		}
 	}
-	if client.Conf.Services.AliDNS {
-		err = client.Adc.LoadConf()
+	if client.Client.Services.AliDNS {
+		err = client.AD.LoadConf()
 		if err != nil {
 			return
 		}
 	}
-	if client.Conf.Services.Cloudflare {
-		err = client.Cfc.LoadConf()
+	if client.Client.Services.Cloudflare {
+		err = client.Cf.LoadConf()
 		if err != nil {
 			return
 		}
@@ -183,32 +177,48 @@ func runLoadConf() (err error) {
 
 func check() {
 	// 获取 IP
-	ipv4, ipv6, err := client.GetOwnIP(client.Conf.Enable, client.Conf.APIUrl, client.Conf.NetworkCard)
+	ipv4, ipv6, err := client.GetOwnIP(client.Client.Enable, client.Client.APIUrl, client.Client.NetworkCard)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
 	// 进入更新流程
-	if ipv4 != client.Conf.LatestIPv4 || ipv6 != client.Conf.LatestIPv6 || *enforcement {
-		if ipv4 != client.Conf.LatestIPv4 {
-			client.Conf.LatestIPv4 = ipv4
+	if ipv4 != client.Client.LatestIPv4 || ipv6 != client.Client.LatestIPv6 || *enforcement {
+		if ipv4 != client.Client.LatestIPv4 {
+			client.Client.LatestIPv4 = ipv4
 		}
-		if ipv6 != client.Conf.LatestIPv6 {
-			client.Conf.LatestIPv6 = ipv6
+		if ipv6 != client.Client.LatestIPv6 {
+			client.Client.LatestIPv6 = ipv6
 		}
 		wg := sync.WaitGroup{}
-		if client.Conf.Services.DNSPod {
-			wg.Add(1)
-			go asyncServiceInterface(ipv4, ipv6, client.Dpc.Run, &wg)
-		}
-		if client.Conf.Services.AliDNS {
-			wg.Add(1)
-			go asyncServiceInterface(ipv4, ipv6, client.Adc.Run, &wg)
-		}
-		if client.Conf.Services.Cloudflare {
-			wg.Add(1)
-			go asyncServiceInterface(ipv4, ipv6, client.Cfc.Run, &wg)
+		httpClient := &http.Client{}
+		if client.Client.Center.Enable {
+			if client.Client.Services.DNSPod {
+				wg.Add(1)
+				go asyncCenter(ipv4, ipv6, common.DNSPod, client.DP, httpClient, &wg)
+			}
+			if client.Client.Services.AliDNS {
+				wg.Add(1)
+				go asyncCenter(ipv4, ipv6, common.AliDNS, client.AD, httpClient, &wg)
+			}
+			if client.Client.Services.Cloudflare {
+				wg.Add(1)
+				go asyncCenter(ipv4, ipv6, common.Cloudflare, client.Cf, httpClient, &wg)
+			}
+		} else {
+			if client.Client.Services.DNSPod {
+				wg.Add(1)
+				go asyncServiceInterface(ipv4, ipv6, client.DP.Run, &wg)
+			}
+			if client.Client.Services.AliDNS {
+				wg.Add(1)
+				go asyncServiceInterface(ipv4, ipv6, client.AD.Run, &wg)
+			}
+			if client.Client.Services.Cloudflare {
+				wg.Add(1)
+				go asyncServiceInterface(ipv4, ipv6, client.Cf.Run, &wg)
+			}
 		}
 		wg.Wait()
 	}
@@ -216,11 +226,68 @@ func check() {
 
 func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServiceCallback, wg *sync.WaitGroup) {
 	defer wg.Done()
-	msg, err := callback(client.Conf.Enable, ipv4, ipv6)
+	msg, err := callback(client.Client.Enable, ipv4, ipv6)
 	for _, row := range err {
 		log.Println(row)
 	}
 	for _, row := range msg {
 		log.Println(row)
+	}
+}
+
+func asyncCenter(ipv4, ipv6 string, clientType string, gc common.GeneralClient, hc *http.Client, wg *sync.WaitGroup) {
+	defer wg.Done()
+	j, err := json.Marshal(gc)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	reqBody := common.CenterReq{
+		Token:   client.Client.Center.Token,
+		Service: clientType,
+		Enable:  client.Client.Enable,
+		IP: common.IPs{
+			IPv4: ipv4,
+			IPv6: ipv6,
+		},
+		Data: j,
+	}
+	reqJson, err := json.Marshal(reqBody)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	req, err := http.NewRequest("POST", client.Client.Center.APIUrl, bytes.NewReader(reqJson))
+	resp, err := hc.Do(req)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer func(Body io.ReadCloser) {
+		t := Body.Close()
+		if t != nil {
+			err = t
+		}
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		log.Println("The status code returned by the center is " + strconv.Itoa(resp.StatusCode))
+	}
+	respBodyJson, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if len(respBodyJson) > 0 {
+		respBody := common.GeneralResp{}
+		err = json.Unmarshal(respBodyJson, &respBody)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		for _, v := range strings.Split(respBody.Message, "\n") {
+			if v != "" {
+				log.Println(v)
+			}
+		}
 	}
 }

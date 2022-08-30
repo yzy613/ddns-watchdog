@@ -3,114 +3,164 @@ package main
 import (
 	"ddns-watchdog/internal/common"
 	"ddns-watchdog/internal/server"
-	"encoding/json"
+	"errors"
+	"fmt"
 	flag "github.com/spf13/pflag"
-	"io"
 	"log"
 	"net/http"
 )
 
 var (
 	installOption   = flag.BoolP("install", "I", false, "安装服务并退出")
+	addToken        = flag.BoolP("add-token", "a", false, "添加 token 到白名单")
+	generateToken   = flag.BoolP("generate-token", "g", false, "生成 token 并输出")
+	tokenLength     = flag.IntP("token-length", "l", 48, "指定生成 token 的长度")
+	token           = flag.StringP("token", "t", "", "指定 token。长度在 [16,127] 之间，支持 UTF-8 字符")
+	message         = flag.StringP("message", "m", "undefined", "备注 token 信息")
 	uninstallOption = flag.BoolP("uninstall", "U", false, "卸载服务并退出")
 	version         = flag.BoolP("version", "v", false, "查看当前版本并检查更新后退出")
 	confPath        = flag.StringP("conf", "c", "", "指定配置文件目录 (目录有空格请放在双引号中间)")
-	initOption      = flag.BoolP("init", "i", false, "初始化配置文件并退出")
+	initOption      = flag.StringP("init", "i", "", "有选择地初始化配置文件并退出，可以组合使用 (例 01)\n"+
+		"0 -> "+server.ConfFileName+"\n"+
+		"1 -> "+server.WhitelistFileName+"\n"+
+		"2 -> "+server.ServiceConfFileName)
 )
 
 func main() {
-	flag.Parse()
-	// 加载自定义配置文件目录
-	if *confPath != "" {
-		server.ConfDirectoryName = common.FormatDirectoryPath(*confPath)
+	// 处理 flag
+	exit, err := processFlag()
+	if err != nil {
+		log.Fatal(err)
+		return
 	}
-
-	exit := false
-
-	// 初始化配置
-	if *initOption {
-		err := RunInit()
-		if err != nil {
-			log.Fatal(err)
-		}
-		exit = true
-	}
-
-	// 安装 / 卸载服务
-	switch {
-	case *installOption:
-		err := server.Install()
-		if err != nil {
-			log.Fatal(err)
-		}
-		exit = true
-	case *uninstallOption:
-		err := server.Uninstall()
-		if err != nil {
-			log.Fatal(err)
-		}
-		exit = true
-	}
-
 	if exit {
 		return
 	}
 
-	// 进入工作流程
-	// 加载配置
-	conf := server.ServerConf{}
-	err := common.LoadAndUnmarshal(server.ConfDirectoryName+"/"+server.ConfFileName, &conf)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if *version {
-		conf.CheckLatestVersion()
-		return
-	}
-
-	ddnsServerHandler := func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Add("Cache-Control", "no-store")
-		info := common.PublicInfo{
-			IP:      server.GetClientIP(req),
-			Version: conf.GetLatestVersion(),
-		}
-		sendJson, err := json.Marshal(info)
+	// 加载白名单
+	if server.Srv.CenterService {
+		err = server.Service.LoadConf()
 		if err != nil {
 			log.Fatal(err)
 		}
-		_, err = io.WriteString(w, string(sendJson))
-		if err != nil {
-			log.Fatal(err)
-		}
+		// 路由绑定函数
+		http.HandleFunc(server.Srv.Route.Center, server.RespCenterReq)
 	}
 
-	// 路径绑定处理变量
-	http.HandleFunc("/", ddnsServerHandler)
+	// 路由绑定函数
+	http.HandleFunc(server.Srv.Route.GetIP, server.RespGetIPReq)
 
 	// 启动监听
-	if conf.TLS.Enable {
-		log.Println("Work on", conf.Port, "with TLS")
-		err = http.ListenAndServeTLS(conf.Port, server.ConfDirectoryName+"/"+conf.TLS.CertFile, server.ConfDirectoryName+"/"+conf.TLS.KeyFile, nil)
+	if server.Srv.TLS.Enable {
+		log.Println("Work on", server.Srv.ServerAddr, "with TLS")
+		err = http.ListenAndServeTLS(server.Srv.ServerAddr, server.ConfDirectoryName+"/"+server.Srv.TLS.CertFile, server.ConfDirectoryName+"/"+server.Srv.TLS.KeyFile, nil)
 	} else {
-		log.Println("Work on", conf.Port)
-		err = http.ListenAndServe(conf.Port, nil)
+		log.Println("Work on", server.Srv.ServerAddr)
+		err = http.ListenAndServe(server.Srv.ServerAddr, nil)
 	}
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func RunInit() (err error) {
-	conf := server.ServerConf{
-		Port:           ":10032",
-		IsRoot:         false,
-		RootServerAddr: "https://yzyweb.cn/ddns-watchdog",
+func processFlag() (exit bool, err error) {
+	flag.Parse()
+	if *confPath != "" {
+		server.ConfDirectoryName = common.FormatDirectoryPath(*confPath)
 	}
-	err = common.MarshalAndSave(conf, server.ConfDirectoryName+"/"+server.ConfFileName)
-	if err != nil {
+
+	// 初始化配置
+	if *initOption != "" {
+		for _, event := range *initOption {
+			err = initConf(string(event))
+			if err != nil {
+				return
+			}
+		}
+		exit = true
 		return
 	}
-	log.Println("初始化 " + server.ConfDirectoryName + "/" + server.ConfFileName)
+
+	// 加载配置
+	err = server.Srv.LoadConf()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 版本信息
+	if *version {
+		server.Srv.CheckLatestVersion()
+		exit = true
+		return
+	}
+
+	// 安装 / 卸载服务
+	switch {
+	case *installOption:
+		err = server.Install()
+		if err != nil {
+			return
+		}
+		exit = true
+		return
+	case *uninstallOption:
+		err = server.Uninstall()
+		if err != nil {
+			return
+		}
+		exit = true
+		return
+	}
+
+	currentToken := ""
+	// 获取 token
+	switch {
+	case *token != "":
+		currentToken = *token
+	case *generateToken:
+		length := *tokenLength
+		if length < 16 {
+			length = 16
+		}
+		if length > 127 {
+			length = 127
+		}
+		currentToken = server.GenerateToken(length)
+		fmt.Printf("Token: %v\nMessage: %v\n", currentToken, *message)
+		exit = true
+	}
+
+	// 添加 token 到白名单
+	if *addToken {
+		if currentToken == "" || len(currentToken) < 16 || len(currentToken) > 127 {
+			err = errors.New("token 不符合要求")
+		} else {
+			err = server.AddTokenToWhitelist(currentToken, *message)
+		}
+		if err != nil {
+			return
+		}
+		exit = true
+		fmt.Printf("Added %v(%v) to whitelist.\n", currentToken, *message)
+	}
+	return
+}
+
+func initConf(event string) (err error) {
+	msg := ""
+	switch event {
+	case "0":
+		msg, err = server.Srv.InitConf()
+	case "1":
+		msg, err = server.InitWhitelist()
+	case "2":
+		msg, err = server.Service.InitConf()
+	default:
+		err = errors.New("你初始化了一个寂寞")
+	}
+	if err != nil {
+		return err
+	}
+	log.Println(msg)
 	return
 }

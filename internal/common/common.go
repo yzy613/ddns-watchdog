@@ -10,15 +10,44 @@ import (
 )
 
 const (
-	LocalVersion      = "1.4.6"
+	LocalVersion      = "1.5.0 prerelease"
 	DefaultAPIUrl     = "https://yzyweb.cn/ddns-watchdog"
 	DefaultIPv6APIUrl = "https://yzyweb.cn/ddns-watchdog6"
 	ProjectUrl        = "https://github.com/yzy613/ddns-watchdog"
+	DNSPod            = "DNSPod"
+	AliDNS            = "AliDNS"
+	Cloudflare        = "Cloudflare"
 )
 
-type PublicInfo struct {
+type Enable struct {
+	IPv4 bool `json:"ipv4"`
+	IPv6 bool `json:"ipv6"`
+}
+
+type GeneralClient interface {
+	Run(Enable, string, string) ([]string, []error)
+}
+
+type GetIPResp struct {
 	IP      string `json:"ip"`
 	Version string `json:"latest_version"`
+}
+
+type CenterReq struct {
+	Token   string `json:"token"`
+	Service string `json:"service"`
+	Enable  Enable `json:"enable"`
+	IP      IPs    `json:"ip"`
+	Data    []byte `json:"data"`
+}
+
+type IPs struct {
+	IPv4 string `json:"ipv4"`
+	IPv6 string `json:"ipv6"`
+}
+
+type GeneralResp struct {
+	Message string `json:"message"`
 }
 
 func FormatDirectoryPath(srcPath string) (dstPath string) {

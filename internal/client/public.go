@@ -13,29 +13,28 @@ import (
 	"strings"
 )
 
-var (
-	installPath       = "/etc/systemd/system/" + RunningName + ".service"
-	ConfDirectoryName = "conf"
-	Conf              = clientConf{}
-	Dpc               = dnspodConf{}
-	Adc               = aliDNSConf{}
-	Cfc               = cloudflareConf{}
+const (
+	RunningName         = "ddns-watchdog-client"
+	NetworkCardFileName = "network_card.json"
 )
 
-type subdomain struct {
-	A    string `json:"a"`
-	AAAA string `json:"aaaa"`
-}
+var (
+	ConfDirectoryName = "conf"
+	Client            = client{}
+	DP                = DNSPod{}
+	AD                = AliDNS{}
+	Cf                = Cloudflare{}
+)
 
 // AsyncServiceCallback 异步服务回调函数类型
-type AsyncServiceCallback func(enabledServices enable, ipv4, ipv6 string) (msg []string, errs []error)
+type AsyncServiceCallback func(enabledServices common.Enable, ipv4, ipv6 string) (msg []string, errs []error)
 
 func Install() (err error) {
 	if common.IsWindows() {
 		err = errors.New("windows 暂不支持安装到系统")
 	} else {
 		// 注册系统服务
-		if Conf.CheckCycleMinutes == 0 {
+		if Client.CheckCycleMinutes == 0 {
 			err = errors.New("设置一下 " + ConfDirectoryName + "/" + ConfFileName + " 的 check_cycle_minutes 吧")
 			return
 		}
@@ -107,10 +106,10 @@ func NetworkCardRespond() (map[string]string, error) {
 	return networkCardInfo, nil
 }
 
-func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string, err error) {
+func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string, err error) {
 	ncr := make(map[string]string)
 	// 若需网卡信息，则获取网卡信息并提供给用户
-	if enabled.NetworkCard && nc.IPv4 == "" && nc.IPv6 == "" {
+	if nc.Enable && nc.IPv4 == "" && nc.IPv6 == "" {
 		ncr, err = NetworkCardRespond()
 		if err != nil {
 			return
@@ -125,7 +124,7 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 	}
 
 	// 若需网卡信息，则获取网卡信息
-	if enabled.NetworkCard && (nc.IPv4 != "" || nc.IPv6 != "") {
+	if nc.Enable && (nc.IPv4 != "" || nc.IPv6 != "") {
 		ncr, err = NetworkCardRespond()
 		if err != nil {
 			return
@@ -135,7 +134,7 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 	// 启用 IPv4
 	if enabled.IPv4 {
 		// 启用网卡 IPv4
-		if enabled.NetworkCard && nc.IPv4 != "" {
+		if nc.Enable && nc.IPv4 != "" {
 			ipv4 = ncr[nc.IPv4]
 			if ipv4 == "" {
 				err = errors.New("IPv4 选择了不存在的网卡")
@@ -162,7 +161,7 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 				err = err2
 				return
 			}
-			var ipInfo common.PublicInfo
+			var ipInfo common.GetIPResp
 			err = json.Unmarshal(recvJson, &ipInfo)
 			if err != nil {
 				return
@@ -178,7 +177,7 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 	// 启用 IPv6
 	if enabled.IPv6 {
 		// 启用网卡 IPv6
-		if enabled.NetworkCard && nc.IPv6 != "" {
+		if nc.Enable && nc.IPv6 != "" {
 			ipv6 = ncr[nc.IPv6]
 			if ipv6 == "" {
 				err = errors.New("IPv6 选择了不存在的网卡")
@@ -205,7 +204,7 @@ func GetOwnIP(enabled enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string,
 				err = err2
 				return
 			}
-			var ipInfo common.PublicInfo
+			var ipInfo common.GetIPResp
 			err = json.Unmarshal(recvJson, &ipInfo)
 			if err != nil {
 				return
