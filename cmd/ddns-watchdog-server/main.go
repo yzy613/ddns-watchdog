@@ -8,6 +8,7 @@ import (
 	flag "github.com/spf13/pflag"
 	"log"
 	"net/http"
+	"time"
 )
 
 var (
@@ -50,13 +51,21 @@ func main() {
 	// 路由绑定函数
 	http.HandleFunc(server.Srv.Route.GetIP, server.RespGetIPReq)
 
+	// 设置超时参数
+	httpSrv := http.Server{
+		Addr:              server.Srv.ServerAddr,
+		ReadHeaderTimeout: 3 * time.Second,
+		WriteTimeout:      5 * time.Second,
+		IdleTimeout:       2 * time.Second,
+	}
+
 	// 启动监听
 	if server.Srv.TLS.Enable {
 		log.Println("Work on", server.Srv.ServerAddr, "with TLS")
-		err = http.ListenAndServeTLS(server.Srv.ServerAddr, server.ConfDirectoryName+"/"+server.Srv.TLS.CertFile, server.ConfDirectoryName+"/"+server.Srv.TLS.KeyFile, nil)
+		err = httpSrv.ListenAndServeTLS(server.ConfDirectoryName+"/"+server.Srv.TLS.CertFile, server.ConfDirectoryName+"/"+server.Srv.TLS.KeyFile)
 	} else {
 		log.Println("Work on", server.Srv.ServerAddr)
-		err = http.ListenAndServe(server.Srv.ServerAddr, nil)
+		err = httpSrv.ListenAndServe()
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -84,7 +93,7 @@ func processFlag() (exit bool, err error) {
 	// 加载配置
 	err = server.Srv.LoadConf()
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
 	// 版本信息

@@ -54,7 +54,7 @@ func Install() (err error) {
 				"RestartSec=2\n\n" +
 				"[Install]\n" +
 				"WantedBy=multi-user.target\n")
-		err = os.WriteFile(installPath, serviceContent, 0664)
+		err = os.WriteFile(installPath, serviceContent, 0600)
 		if err != nil {
 			return err
 		}

@@ -10,13 +10,14 @@ import (
 )
 
 func RespGetIPReq(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Cache-Control", "no-cache")
+
 	// 判断请求方法
 	if req.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	w.Header().Add("Cache-Control", "no-store")
 	info := common.GetIPResp{
 		IP:      GetClientIP(req),
 		Version: Srv.GetLatestVersion(),
@@ -36,6 +37,8 @@ func RespGetIPReq(w http.ResponseWriter, req *http.Request) {
 }
 
 func RespCenterReq(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Cache-Control", "no-cache")
+	
 	// 判断请求方法
 	if req.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -66,6 +69,8 @@ func RespCenterReq(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	// 模拟客户端
 	var msg []string

@@ -1,14 +1,14 @@
 package server
 
 import (
+	"crypto/rand"
 	"ddns-watchdog/internal/common"
 	"errors"
 	"log"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"os"
 	"strings"
-	"time"
 )
 
 const (
@@ -25,10 +25,14 @@ var (
 
 func GenerateToken(length int) (token string) {
 	const letter = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	bigInt := new(big.Int).SetInt64(int64(len(letter)))
 	b := make([]byte, length)
-	rand.Seed(time.Now().Unix())
 	for i := range b {
-		b[i] = letter[rand.Intn(len(letter))]
+		bigNum, err := rand.Int(rand.Reader, bigInt)
+		if err != nil {
+			return
+		}
+		b[i] = letter[bigNum.Int64()]
 	}
 	token = string(b)
 	return
@@ -111,7 +115,7 @@ func Install() (err error) {
 				"RestartSec=2\n\n" +
 				"[Install]\n" +
 				"WantedBy=multi-user.target\n")
-		err = os.WriteFile(InstallPath, serviceContent, 0664)
+		err = os.WriteFile(InstallPath, serviceContent, 0600)
 		if err != nil {
 			return err
 
