@@ -99,11 +99,9 @@ func processFlag() (exit bool, err error) {
 		currentToken = *token
 	case *generateToken:
 		length := *tokenLength
-		if length < 16 {
-			length = 16
-		}
-		if length > 127 {
-			length = 127
+		if length < 16 || length > 127 {
+			err = errors.New("生成 token 的长度不符合要求")
+			return
 		}
 		currentToken = server.GenerateToken(length)
 		fmt.Printf("Token: %v\nMessage: %v\n", currentToken, *message)
