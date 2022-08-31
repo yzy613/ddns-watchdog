@@ -18,7 +18,7 @@
 [![Downloads](https://img.shields.io/github/downloads/yzy613/ddns-watchdog/total)](https://github.com/yzy613/ddns-watchdog/releases)
 [![ClickDownload](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/ddns-watchdog/releases)
 
-现已支持 DNSPod AliDNS(阿里云 DNS) Cloudflare，支持 IPv4 IPv6 双栈，支持使用网卡 IP 地址
+现已支持 DNSPod AliDNS(阿里云 DNS) Cloudflare，支持 IPv4 IPv6 双栈，支持使用网卡 IP 地址。支持自建中心节点代理客户端修改域名解析记录。
 
 ## 准备工作
 
@@ -32,17 +32,18 @@
 
 ```bash
 Usage:
-  -c, --conf string    指定配置文件目录 (目录有空格请放在双引号中间)     
-  -f, --force          强制检查 DNS 解析记录                             
+  -c, --conf string    指定配置文件目录 (目录有空格请放在双引号中间)
+  -f, --force          强制检查 DNS 解析记录
   -i, --init string    有选择地初始化配置文件并退出，可以组合使用 (例 01)
-                       0 -> client.json                                  
-                       1 -> dnspod.json                                  
-                       2 -> alidns.json                                  
-                       3 -> cloudflare.json                              
-  -I, --install        安装服务并退出                                    
-  -n, --network-card   输出网卡信息并退出                                
-  -U, --uninstall      卸载服务并退出                                    
-  -v, --version        查看当前版本并检查更新后退出                      
+                       0 -> client.json
+                       1 -> dnspod.json
+                       2 -> alidns.json
+                       3 -> cloudflare.json
+  -k, --insecure       使用 https 链接时不检查 TLS 证书合法性
+  -I, --install        安装服务并退出
+  -n, --network-card   输出网卡信息并退出
+  -U, --uninstall      卸载服务并退出
+  -v, --version        查看当前版本并检查更新后退出
 pflag: help requested
 ```
 
@@ -74,26 +75,31 @@ pflag: help requested
 
 ```json
 {
-    "api_url": {
-        "ipv4": "https://yzyweb.cn/ddns-watchdog",
-        "ipv6": "https://yzyweb.cn/ddns-watchdog6",
-        "version": "https://yzyweb.cn/ddns-watchdog"
-    },
-    "enable": {
-        "ipv4": false,
-        "ipv6": false,
-        "network_card": false
-    },
-    "network_card": {
-        "ipv4": "",
-        "ipv6": ""
-    },
-    "services": {
-        "dnspod": false,
-        "alidns": false,
-        "cloudflare": false
-    },
-    "check_cycle_minutes": 0
+  "api_url": {
+    "ipv4": "https://yzyweb.cn/ddns-watchdog",
+    "ipv6": "https://yzyweb.cn/ddns-watchdog6",
+    "version": "https://yzyweb.cn/ddns-watchdog"
+  },
+  "center": {
+    "enable": false,
+    "api_url": "",
+    "token": ""
+  },
+  "enable": {
+    "ipv4": false,
+    "ipv6": false
+  },
+  "network_card": {
+    "enable": false,
+    "ipv4": "",
+    "ipv6": ""
+  },
+  "services": {
+    "dnspod": false,
+    "alidns": false,
+    "cloudflare": false
+  },
+  "check_cycle_minutes": 0
 }
 ```
 
@@ -108,21 +114,20 @@ pflag: help requested
 7. 若需使用网卡的 IP 地址，请在 `./conf/client.json` 修改 `enable`->`network_card` 为 `true` 并运行一次程序自动获取网卡信息，从 `./conf/network_card.json` 里面选择网卡填入 `./conf/client.json` 的 `network_card`
 8. 若 `./conf/client.json` 的 `network_card`->`ipv4` 或 `ipv6` 为空，对应 IP 地址将从 API 获取
 
-   此示例展示 IPv4 从 API 获取，IPv6 从 example 网卡获取
-
-   ```json
-   {
-       "enable": {
-           "ipv4": true,
-           "ipv6": true,
-           "network_card": true
-       },
-       "network_card": {
-           "ipv4": "",
-           "ipv6": "example"
-       }
-   }
-   ```
+    此示例展示 IPv4 从 API 获取，IPv6 从 example 网卡获取
+    ```json
+    {
+      "enable": {
+        "ipv4": true,
+        "ipv6": true
+      },
+      "network_card": {
+        "enable": true,
+        "ipv4": "",
+        "ipv6": "example"
+      }
+    }
+    ```
 9. 按照 [支持的服务商](https://github.com/yzy613/ddns-watchdog#%E6%94%AF%E6%8C%81%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%95%86) 进行配置
 10. 若需配置不同域名的 ddns-watchdog，可以结合 `-c` 启动参数配置多种配置文件 (可搭配 `-i` 启动参数初始化配置文件)
 11. 如果解析记录值更新成功，那么程序工作正常，可以在 `./conf/client.json` 启用 `check_cycle_minutes` 进行定期检查 (单位：分钟)(默认为 0，意为不启用定期检查)
@@ -153,13 +158,13 @@ pflag: help requested
 
   ```json
   {
-      "id": "在 https://console.dnspod.cn/account/token/token 获取",
-      "token": "在 https://console.dnspod.cn/account/token/token 获取",
-      "domain": "example.com",
-      "sub_domain": {
-          "a": "A记录子域名",
-          "aaaa": "AAAA记录子域名"
-      }
+    "id": "在 https://console.dnspod.cn/account/token/token 获取",
+    "token": "在 https://console.dnspod.cn/account/token/token 获取",
+    "domain": "example.com",
+    "sub_domain": {
+      "a": "A记录子域名",
+      "aaaa": "AAAA记录子域名"
+    }
   }
   ```
 
@@ -173,13 +178,13 @@ pflag: help requested
 
   ```json
   {
-      "accesskey_id": "在 https://ram.console.aliyun.com/users 获取",
-      "accesskey_secret": "在 https://ram.console.aliyun.com/users 获取",
-      "domain": "example.com",
-      "sub_domain": {
-          "a": "A记录子域名",
-          "aaaa": "AAAA记录子域名"
-      }
+    "accesskey_id": "在 https://ram.console.aliyun.com/users 获取",
+    "accesskey_secret": "在 https://ram.console.aliyun.com/users 获取",
+    "domain": "example.com",
+    "sub_domain": {
+      "a": "A记录子域名",
+      "aaaa": "AAAA记录子域名"
+    }
   }
   ```
 
@@ -193,12 +198,12 @@ pflag: help requested
 
   ```json
   {
-      "zone_id": "在你域名页面的右下角有个区域 ID",
-      "api_token": "在 https://dash.cloudflare.com/profile/api-tokens 获取",
-      "domain": {
-          "a": "A记录子域名.example.com",
-          "aaaa": "AAAA记录子域名.example.com"
-      }
+    "zone_id": "在你域名页面的右下角有个区域 ID",
+    "api_token": "在 https://dash.cloudflare.com/profile/api-tokens 获取",
+    "domain": {
+      "a": "A记录子域名.example.com",
+      "aaaa": "AAAA记录子域名.example.com"
+    }
   }
   ```
 
@@ -206,7 +211,7 @@ pflag: help requested
 
 - 请在 [Issues](https://github.com/yzy613/ddns-watchdog/issues) 提出 Issue 或者在 [Pull requests](https://github.com/yzy613/ddns-watchdog/pulls) Pull request (感激不尽)
 
-## 服务端 (普通用户不会用到，请略过)
+## 服务端
 
 返回 Json 格式的客户端 IP 地址 (支持 IPv4 IPv6 双栈)
 
@@ -214,20 +219,73 @@ pflag: help requested
 
 ```bash
 Usage:
-  -c, --conf string   指定配置文件目录 (目录有空格请放在双引号中间)
-  -i, --init          初始化配置文件并退出                         
-  -I, --install       安装服务并退出                               
-  -U, --uninstall     卸载服务并退出                               
-  -v, --version       查看当前版本并检查更新后退出                 
+  -a, --add-token          添加 token 到白名单
+  -c, --conf string        指定配置文件目录 (目录有空格请放在双引号中间)
+  -g, --generate-token     生成 token 并输出
+  -i, --init string        有选择地初始化配置文件并退出，可以组合使用 (例 01)
+                           0 -> server.json
+                           1 -> whitelist.json
+                           2 -> services.json
+  -k, --insecure           使用 https 链接时不检查 TLS 证书合法性
+  -I, --install            安装服务并退出
+  -m, --message string     备注 token 信息 (default "undefined")
+  -t, --token string       指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)
+  -l, --token-length int   指定生成 token 的长度 (default 48)
+  -U, --uninstall          卸载服务并退出
+  -v, --version            查看当前版本并检查更新后退出
 pflag: help requested
 ```
 
+- `./ddns-watchdog-server -a -g -m string` 生成 token 并备注信息再加入白名单
+- `./ddns-watchdog-server -a -t string -m string` 指定 token 并备注信息再加入白名单
 - `./ddns-watchdog-server -I` 安装服务并退出
-- `./ddns-watchdog-server -c ./conf` 指定配置文件目录为 ./conf (目录有空格请放在双引号中间)
-- `./ddns-watchdog-server -i` 初始化配置文件并退出
+- `./ddns-watchdog-server -c conf` 指定配置文件目录为 conf (目录有空格请放在双引号中间)
+- `./ddns-watchdog-server -i 012` 初始化所有配置文件并退出
 - `systemctl start ddns-watchdog-server` 启动服务
 - `./ddns-watchdog-server -U` 卸载服务并退出
 - `./ddns-watchdog-server -v` 查看当前版本并检查更新后退出
+
+### 初始服务端配置文件
+
+```json
+{
+  "server_addr": ":10032",
+  "is_root_server": false,
+  "root_server_url": "https://yzyweb.cn/ddns-watchdog",
+  "center_service": false,
+  "route": {
+    "get_ip": "/",
+    "center": "/center"
+  },
+  "tls": {
+    "enable": false,
+    "cert_file": "",
+    "key_file": ""
+  }
+}
+```
+
+### 初始服务配置文件
+
+```json
+{
+  "dnspod": {
+    "enable": false,
+    "id": "",
+    "token": ""
+  },
+  "alidns": {
+    "enable": false,
+    "accesskey_id": "",
+    "accesskey_secret": ""
+  },
+  "cloudflare": {
+    "enable": false,
+    "zone_id": "",
+    "api_token": ""
+  }
+}
+```
 
 ## 安装
 

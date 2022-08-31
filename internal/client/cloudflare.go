@@ -89,9 +89,7 @@ func (cfc Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []strin
 }
 
 func (cfc *Cloudflare) getParseRecord(domain, recordType string) (recordIP string, err error) {
-	httpClient := &http.Client{
-		Transport: &http.Transport{DisableKeepAlives: true},
-	}
+	httpClient := getGeneralHttpClient()
 	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records?name=" + domain
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -145,9 +143,7 @@ func (cfc *Cloudflare) getParseRecord(domain, recordType string) (recordIP strin
 }
 
 func (cfc Cloudflare) updateParseRecord(ipAddr, recordType, domain string) (err error) {
-	httpClient := &http.Client{
-		Transport: &http.Transport{DisableKeepAlives: true},
-	}
+	httpClient := getGeneralHttpClient()
 	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records/" + cfc.DomainID
 	reqData := cloudflareUpdateRequest{
 		Type:    recordType,

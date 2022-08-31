@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"ddns-watchdog/internal/client"
 	"ddns-watchdog/internal/common"
 	"encoding/json"
@@ -30,6 +31,7 @@ var (
 		"3 -> "+client.CloudflareConfFileName)
 	confPath             = flag.StringP("conf", "c", "", "指定配置文件目录 (目录有空格请放在双引号中间)")
 	printNetworkCardInfo = flag.BoolP("network-card", "n", false, "输出网卡信息并退出")
+	insecure             = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
 )
 
 func main() {
@@ -129,6 +131,10 @@ func processFlag() (exit bool, err error) {
 		exit = true
 		return
 	}
+
+	if *insecure {
+		client.HttpsInsecure = *insecure
+	}
 	return
 }
 
@@ -192,7 +198,14 @@ func check() {
 			client.Client.LatestIPv6 = ipv6
 		}
 		wg := sync.WaitGroup{}
-		httpClient := &http.Client{}
+		// 创建 http 客户端
+		httpClient := &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: client.HttpsInsecure,
+				},
+			},
+		}
 		if client.Client.Center.Enable {
 			if client.Client.Services.DNSPod {
 				wg.Add(1)
@@ -242,6 +255,8 @@ func asyncCenter(ipv4, ipv6 string, clientType string, gc common.GeneralClient, 
 		log.Println(err)
 		return
 	}
+
+	// 构造请求 body
 	reqBody := common.CenterReq{
 		Token:   client.Client.Center.Token,
 		Service: clientType,
@@ -257,6 +272,8 @@ func asyncCenter(ipv4, ipv6 string, clientType string, gc common.GeneralClient, 
 		log.Println(err)
 		return
 	}
+
+	// 发送请求
 	req, err := http.NewRequest("POST", client.Client.Center.APIUrl, bytes.NewReader(reqJson))
 	resp, err := hc.Do(req)
 	if err != nil {
@@ -269,6 +286,8 @@ func asyncCenter(ipv4, ipv6 string, clientType string, gc common.GeneralClient, 
 			err = t
 		}
 	}(resp.Body)
+	
+	// 处理结果
 	if resp.StatusCode != http.StatusOK {
 		log.Println("The status code returned by the center is " + strconv.Itoa(resp.StatusCode))
 	}

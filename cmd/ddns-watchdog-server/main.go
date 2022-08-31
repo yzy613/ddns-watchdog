@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ddns-watchdog/internal/client"
 	"ddns-watchdog/internal/common"
 	"ddns-watchdog/internal/server"
 	"errors"
@@ -16,7 +17,7 @@ var (
 	addToken        = flag.BoolP("add-token", "a", false, "添加 token 到白名单")
 	generateToken   = flag.BoolP("generate-token", "g", false, "生成 token 并输出")
 	tokenLength     = flag.IntP("token-length", "l", 48, "指定生成 token 的长度")
-	token           = flag.StringP("token", "t", "", "指定 token。长度在 [16,127] 之间，支持 UTF-8 字符")
+	token           = flag.StringP("token", "t", "", "指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)")
 	message         = flag.StringP("message", "m", "undefined", "备注 token 信息")
 	uninstallOption = flag.BoolP("uninstall", "U", false, "卸载服务并退出")
 	version         = flag.BoolP("version", "v", false, "查看当前版本并检查更新后退出")
@@ -25,6 +26,7 @@ var (
 		"0 -> "+server.ConfFileName+"\n"+
 		"1 -> "+server.WhitelistFileName+"\n"+
 		"2 -> "+server.ServiceConfFileName)
+	insecure = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
 )
 
 func main() {
@@ -151,6 +153,10 @@ func processFlag() (exit bool, err error) {
 		}
 		exit = true
 		fmt.Printf("Added %v(%v) to whitelist.\n", currentToken, *message)
+	}
+
+	if *insecure {
+		client.HttpsInsecure = *insecure
 	}
 	return
 }
