@@ -47,7 +47,7 @@ Usage:
 pflag: help requested
 ```
 
-- `./ddns-watchdog-client -i 0123` 有选择地初始化配置文件并退出，可以组合使用
+- `./ddns-watchdog-client -i 0123` 初始化所有配置文件并退出
 
   此示例展示仅初始化客户端和 DNSPod 的配置文件
 
@@ -63,9 +63,9 @@ pflag: help requested
   2 -> alidns.json
   3 -> cloudflare.json
   ```
-- `./ddns-watchdog-client` 使用默认配置文件目录 `./conf` 运行
+- `./ddns-watchdog-client` 使用默认配置文件目录 `conf` 运行
 - `./ddns-watchdog-client -n` 输出网卡信息并退出
-- `./ddns-watchdog-client -c ./conf` 指定配置文件目录为 ./conf (目录有空格请放在双引号中间)
+- `./ddns-watchdog-client -c conf` 指定配置文件目录为 conf (目录有空格请放在双引号中间)
 - `./ddns-watchdog-client -I` 安装服务并退出 (仅限有 systemd 的 Linux 使用)
 - `./ddns-watchdog-client -U` 卸载服务并退出 (仅限有 systemd 的 Linux 使用)
 - `./ddns-watchdog-client -f` 强制检查解析记录值
