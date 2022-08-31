@@ -92,37 +92,6 @@ func processFlag() (exit bool, err error) {
 		return
 	}
 
-	// 加载配置
-	err = server.Srv.LoadConf()
-	if err != nil {
-		return
-	}
-
-	// 版本信息
-	if *version {
-		server.Srv.CheckLatestVersion()
-		exit = true
-		return
-	}
-
-	// 安装 / 卸载服务
-	switch {
-	case *installOption:
-		err = server.Install()
-		if err != nil {
-			return
-		}
-		exit = true
-		return
-	case *uninstallOption:
-		err = server.Uninstall()
-		if err != nil {
-			return
-		}
-		exit = true
-		return
-	}
-
 	currentToken := ""
 	// 获取 token
 	switch {
@@ -153,6 +122,42 @@ func processFlag() (exit bool, err error) {
 		}
 		exit = true
 		fmt.Printf("Added %v(%v) to whitelist.\n", currentToken, *message)
+	}
+
+	// 若无必要，不加载配置
+	if exit {
+		return
+	}
+
+	// 加载配置
+	err = server.Srv.LoadConf()
+	if err != nil {
+		return
+	}
+
+	// 版本信息
+	if *version {
+		server.Srv.CheckLatestVersion()
+		exit = true
+		return
+	}
+
+	// 安装 / 卸载服务
+	switch {
+	case *installOption:
+		err = server.Install()
+		if err != nil {
+			return
+		}
+		exit = true
+		return
+	case *uninstallOption:
+		err = server.Uninstall()
+		if err != nil {
+			return
+		}
+		exit = true
+		return
 	}
 
 	if *insecure {
