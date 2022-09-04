@@ -16,6 +16,7 @@ func getGeneralHttpClient() *http.Client {
 			DisableKeepAlives: true,
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: HttpsInsecure,
+				MinVersion:         tls.VersionTLS12,
 			},
 		},
 	}

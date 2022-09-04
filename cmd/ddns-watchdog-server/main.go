@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"ddns-watchdog/internal/client"
 	"ddns-watchdog/internal/common"
 	"ddns-watchdog/internal/server"
@@ -57,12 +58,15 @@ func main() {
 	// 路由绑定函数
 	http.HandleFunc(server.Srv.Route.GetIP, server.RespGetIPReq)
 
-	// 设置超时参数
+	// 设置超时参数和最低 TLS 版本
 	httpSrv := http.Server{
 		Addr:              server.Srv.ServerAddr,
 		ReadHeaderTimeout: 3 * time.Second,
 		WriteTimeout:      5 * time.Second,
 		IdleTimeout:       2 * time.Second,
+		TLSConfig: &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		},
 	}
 
 	// 启动监听

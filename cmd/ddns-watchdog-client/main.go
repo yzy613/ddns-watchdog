@@ -237,6 +237,7 @@ func accessCenter(ipv4, ipv6 string) {
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: client.HttpsInsecure,
+				MinVersion:         tls.VersionTLS12,
 			},
 		},
 	}
