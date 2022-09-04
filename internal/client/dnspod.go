@@ -12,12 +12,12 @@ import (
 const DNSPodConfFileName = "dnspod.json"
 
 type DNSPod struct {
-	ID           string    `json:"id"`
-	Token        string    `json:"token"`
-	Domain       string    `json:"domain"`
-	SubDomain    subdomain `json:"sub_domain"`
-	RecordId     string    `json:"-"`
-	RecordLineId string    `json:"-"`
+	ID           string           `json:"id"`
+	Token        string           `json:"token"`
+	Domain       string           `json:"domain"`
+	SubDomain    common.Subdomain `json:"sub_domain"`
+	RecordId     string           `json:"-"`
+	RecordLineId string           `json:"-"`
 }
 
 func (dpc *DNSPod) InitConf() (msg string, err error) {
@@ -37,14 +37,8 @@ func (dpc *DNSPod) LoadConf() (err error) {
 	if err != nil {
 		return
 	}
-	if Client.Center.Enable {
-		if dpc.Domain == "" || (dpc.SubDomain.A == "" && dpc.SubDomain.AAAA == "") {
-			err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + DNSPodConfFileName + " 检查你的 domain, sub_domain 并重新启动")
-		}
-	} else {
-		if dpc.ID == "" || dpc.Token == "" || dpc.Domain == "" || (dpc.SubDomain.A == "" && dpc.SubDomain.AAAA == "") {
-			err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + DNSPodConfFileName + " 检查你的 id, token, domain, sub_domain 并重新启动")
-		}
+	if dpc.ID == "" || dpc.Token == "" || dpc.Domain == "" || (dpc.SubDomain.A == "" && dpc.SubDomain.AAAA == "") {
+		err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + DNSPodConfFileName + " 检查你的 id, token, domain, sub_domain 并重新启动")
 	}
 	return
 }

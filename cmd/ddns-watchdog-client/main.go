@@ -160,22 +160,24 @@ func initConf(event string) (err error) {
 }
 
 func loadConf() (err error) {
-	if client.Client.Services.DNSPod {
-		err = client.DP.LoadConf()
-		if err != nil {
-			return
+	if !client.Client.Center.Enable {
+		if client.Client.Services.DNSPod {
+			err = client.DP.LoadConf()
+			if err != nil {
+				return
+			}
 		}
-	}
-	if client.Client.Services.AliDNS {
-		err = client.AD.LoadConf()
-		if err != nil {
-			return
+		if client.Client.Services.AliDNS {
+			err = client.AD.LoadConf()
+			if err != nil {
+				return
+			}
 		}
-	}
-	if client.Client.Services.Cloudflare {
-		err = client.Cf.LoadConf()
-		if err != nil {
-			return
+		if client.Client.Services.Cloudflare {
+			err = client.Cf.LoadConf()
+			if err != nil {
+				return
+			}
 		}
 	}
 	return
@@ -198,27 +200,8 @@ func check() {
 			client.Client.LatestIPv6 = ipv6
 		}
 		wg := sync.WaitGroup{}
-		// 创建 http 客户端
-		httpClient := &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: client.HttpsInsecure,
-				},
-			},
-		}
 		if client.Client.Center.Enable {
-			if client.Client.Services.DNSPod {
-				wg.Add(1)
-				go asyncCenter(ipv4, ipv6, common.DNSPod, client.DP, httpClient, &wg)
-			}
-			if client.Client.Services.AliDNS {
-				wg.Add(1)
-				go asyncCenter(ipv4, ipv6, common.AliDNS, client.AD, httpClient, &wg)
-			}
-			if client.Client.Services.Cloudflare {
-				wg.Add(1)
-				go asyncCenter(ipv4, ipv6, common.Cloudflare, client.Cf, httpClient, &wg)
-			}
+			accessCenter(ipv4, ipv6)
 		} else {
 			if client.Client.Services.DNSPod {
 				wg.Add(1)
@@ -248,24 +231,24 @@ func asyncServiceInterface(ipv4, ipv6 string, callback client.AsyncServiceCallba
 	}
 }
 
-func asyncCenter(ipv4, ipv6 string, clientType string, gc common.GeneralClient, hc *http.Client, wg *sync.WaitGroup) {
-	defer wg.Done()
-	j, err := json.Marshal(gc)
-	if err != nil {
-		log.Println(err)
-		return
+func accessCenter(ipv4, ipv6 string) {
+	// 创建 http 客户端
+	hc := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: client.HttpsInsecure,
+			},
+		},
 	}
 
 	// 构造请求 body
 	reqBody := common.CenterReq{
-		Token:   client.Client.Center.Token,
-		Service: clientType,
-		Enable:  client.Client.Enable,
+		Token:  client.Client.Center.Token,
+		Enable: client.Client.Enable,
 		IP: common.IPs{
 			IPv4: ipv4,
 			IPv6: ipv6,
 		},
-		Data: j,
 	}
 	reqJson, err := json.Marshal(reqBody)
 	if err != nil {
@@ -286,7 +269,7 @@ func asyncCenter(ipv4, ipv6 string, clientType string, gc common.GeneralClient, 
 			err = t
 		}
 	}(resp.Body)
-	
+
 	// 处理结果
 	if resp.StatusCode != http.StatusOK {
 		log.Println("The status code returned by the center is " + strconv.Itoa(resp.StatusCode))

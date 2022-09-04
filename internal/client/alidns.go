@@ -9,11 +9,11 @@ import (
 const AliDNSConfFileName = "alidns.json"
 
 type AliDNS struct {
-	AccessKeyId     string    `json:"accesskey_id"`
-	AccessKeySecret string    `json:"accesskey_secret"`
-	Domain          string    `json:"domain"`
-	SubDomain       subdomain `json:"sub_domain"`
-	RecordId        string    `json:"-"`
+	AccessKeyId     string           `json:"accesskey_id"`
+	AccessKeySecret string           `json:"accesskey_secret"`
+	Domain          string           `json:"domain"`
+	SubDomain       common.Subdomain `json:"sub_domain"`
+	RecordId        string           `json:"-"`
 }
 
 func (ad *AliDNS) InitConf() (msg string, err error) {
@@ -33,14 +33,8 @@ func (ad *AliDNS) LoadConf() (err error) {
 	if err != nil {
 		return
 	}
-	if Client.Center.Enable {
-		if ad.Domain == "" || (ad.SubDomain.A == "" && ad.SubDomain.AAAA == "") {
-			err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + AliDNSConfFileName + " 检查你的 domain, sub_domain 并重新启动")
-		}
-	} else {
-		if ad.AccessKeyId == "" || ad.AccessKeySecret == "" || ad.Domain == "" || (ad.SubDomain.A == "" && ad.SubDomain.AAAA == "") {
-			err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + AliDNSConfFileName + " 检查你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
-		}
+	if ad.AccessKeyId == "" || ad.AccessKeySecret == "" || ad.Domain == "" || (ad.SubDomain.A == "" && ad.SubDomain.AAAA == "") {
+		err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + AliDNSConfFileName + " 检查你的 accesskey_id, accesskey_secret, domain, sub_domain 并重新启动")
 	}
 	return
 }

@@ -66,7 +66,7 @@ func (conf *client) LoadConf() (err error) {
 		return
 	}
 	// 检查启用服务
-	if !conf.Services.DNSPod && !conf.Services.AliDNS && !conf.Services.Cloudflare {
+	if !conf.Center.Enable && !conf.Services.DNSPod && !conf.Services.AliDNS && !conf.Services.Cloudflare {
 		err = errors.New("请打开客户端配置文件 " + ConfDirectoryName + "/" + ConfFileName + " 启用需要使用的服务并重新启动")
 		return
 	}

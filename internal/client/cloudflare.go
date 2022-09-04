@@ -13,10 +13,10 @@ import (
 const CloudflareConfFileName = "cloudflare.json"
 
 type Cloudflare struct {
-	ZoneID   string    `json:"zone_id"`
-	APIToken string    `json:"api_token"`
-	Domain   subdomain `json:"domain"`
-	DomainID string    `json:"-"`
+	ZoneID   string           `json:"zone_id"`
+	APIToken string           `json:"api_token"`
+	Domain   common.Subdomain `json:"domain"`
+	DomainID string           `json:"-"`
 }
 
 type cloudflareUpdateRequest struct {
@@ -42,14 +42,8 @@ func (cfc *Cloudflare) LoadConf() (err error) {
 	if err != nil {
 		return
 	}
-	if Client.Center.Enable {
-		if cfc.Domain.A == "" && cfc.Domain.AAAA == "" {
-			err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + CloudflareConfFileName + " 检查你的 domain 并重新启动")
-		}
-	} else {
-		if cfc.ZoneID == "" || cfc.APIToken == "" || (cfc.Domain.A == "" && cfc.Domain.AAAA == "") {
-			err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + CloudflareConfFileName + " 检查你的 zone_id, api_token, domain 并重新启动")
-		}
+	if cfc.ZoneID == "" || cfc.APIToken == "" || (cfc.Domain.A == "" && cfc.Domain.AAAA == "") {
+		err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + CloudflareConfFileName + " 检查你的 zone_id, api_token, domain 并重新启动")
 	}
 	return
 }

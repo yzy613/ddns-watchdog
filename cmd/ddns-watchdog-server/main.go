@@ -13,20 +13,24 @@ import (
 )
 
 var (
+	confPath        = flag.StringP("conf", "c", "", "指定配置文件目录 (目录有空格请放在双引号中间)")
 	installOption   = flag.BoolP("install", "I", false, "安装服务并退出")
-	addToken        = flag.BoolP("add-token", "a", false, "添加 token 到白名单")
-	generateToken   = flag.BoolP("generate-token", "g", false, "生成 token 并输出")
-	tokenLength     = flag.IntP("token-length", "l", 48, "指定生成 token 的长度")
-	token           = flag.StringP("token", "t", "", "指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)")
-	message         = flag.StringP("message", "m", "undefined", "备注 token 信息")
 	uninstallOption = flag.BoolP("uninstall", "U", false, "卸载服务并退出")
 	version         = flag.BoolP("version", "v", false, "查看当前版本并检查更新后退出")
-	confPath        = flag.StringP("conf", "c", "", "指定配置文件目录 (目录有空格请放在双引号中间)")
 	initOption      = flag.StringP("init", "i", "", "有选择地初始化配置文件并退出，可以组合使用 (例 01)\n"+
 		"0 -> "+server.ConfFileName+"\n"+
 		"1 -> "+server.WhitelistFileName+"\n"+
 		"2 -> "+server.ServiceConfFileName)
-	insecure = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
+	insecure       = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
+	addToWhitelist = flag.BoolP("add-to-whitelist", "a", false, "添加 token 到白名单")
+	generateToken  = flag.BoolP("generate-token", "g", false, "生成 token 并输出")
+	tokenLength    = flag.IntP("token-length", "l", 48, "指定生成 token 的长度")
+	token          = flag.StringP("token", "t", "", "指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)")
+	message        = flag.StringP("message", "m", "", "备注 token 信息")
+	service        = flag.StringP("service", "s", "", "指定需要采用的服务供应商")
+	domain         = flag.StringP("domain", "D", "", "指定需要操作的域名")
+	a              = flag.StringP("A", "A", "", "指定需要修改的 A 记录")
+	aaaa           = flag.StringP("AAAA", "", "", "指定需要修改的 AAAA 记录 (默认同 A 记录，除非单独指定)")
 )
 
 func main() {
@@ -42,7 +46,7 @@ func main() {
 
 	// 加载白名单
 	if server.Srv.CenterService {
-		err = server.Service.LoadConf()
+		err = server.Services.LoadConf()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -104,22 +108,37 @@ func processFlag() (exit bool, err error) {
 			return
 		}
 		currentToken = server.GenerateToken(length)
-		fmt.Printf("Token: %v\nMessage: %v\n", currentToken, *message)
+		fmt.Println("Token: " + currentToken)
 		exit = true
 	}
 
 	// 添加 token 到白名单
-	if *addToken {
-		if currentToken == "" || len(currentToken) < 16 || len(currentToken) > 127 {
-			err = errors.New("token 不符合要求")
-		} else {
-			err = server.AddTokenToWhitelist(currentToken, *message)
-		}
-		if err != nil {
+	if *addToWhitelist {
+		status := ""
+		m := *message
+		if len(m) > 32 {
+			err = errors.New("token message 备注信息过长")
 			return
 		}
+		if currentToken == "" || len(currentToken) < 16 || len(currentToken) > 127 {
+			err = errors.New("token 不符合要求")
+			return
+		} else {
+			if m == "" {
+				m = "undefined"
+			}
+			status, err = server.AddToWhitelist(currentToken, *message, *service, *domain, *a, *aaaa)
+			if err != nil {
+				return
+			}
+		}
 		exit = true
-		fmt.Printf("Added %v(%v) to whitelist.\n", currentToken, *message)
+		switch status {
+		case server.InsertSign:
+			fmt.Printf("Added %v(%v) to whitelist.\n", currentToken, m)
+		case server.UpdateSign:
+			fmt.Printf("Updated %v(%v) in whitelist.\n", currentToken, m)
+		}
 	}
 
 	// 若无必要，不加载配置
@@ -172,7 +191,7 @@ func initConf(event string) (err error) {
 	case "1":
 		msg, err = server.InitWhitelist()
 	case "2":
-		msg, err = server.Service.InitConf()
+		msg, err = server.Services.InitConf()
 	default:
 		err = errors.New("你初始化了一个寂寞")
 	}

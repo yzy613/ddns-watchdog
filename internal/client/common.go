@@ -10,11 +10,6 @@ var (
 	HttpsInsecure = false
 )
 
-type subdomain struct {
-	A    string `json:"a"`
-	AAAA string `json:"aaaa"`
-}
-
 func getGeneralHttpClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{

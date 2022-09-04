@@ -20,7 +20,7 @@ var (
 	InstallPath       = "/etc/systemd/system/" + RunningName + ".service"
 	ConfDirectoryName = "conf"
 	Srv               = server{}
-	Service           = service{}
+	Services          = service{}
 )
 
 func GenerateToken(length int) (token string) {
@@ -38,12 +38,83 @@ func GenerateToken(length int) (token string) {
 	return
 }
 
-func AddTokenToWhitelist(token, message string) (err error) {
+func AddToWhitelist(token, message, service, domain, a, aaaa string) (status string, err error) {
+	if service != "" {
+		// 规范输入
+		switch strings.ToLower(service) {
+		case common.DNSPod:
+			service = common.DNSPod
+		case common.AliDNS:
+			service = common.AliDNS
+		case common.Cloudflare:
+			service = common.Cloudflare
+		default:
+			err = errors.New("不存在的服务供应商")
+			return
+		}
+	}
+	if a == "" && aaaa == "" {
+		err = errors.New("没有指定解析记录")
+		return
+	}
+
+	// 加载白名单
 	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+WhitelistFileName, &whitelist)
 	if err != nil {
 		return
 	}
-	whitelist[token] = message
+
+	// 是否已经存在记录
+	if v, ok := whitelist[token]; ok {
+		if a != "" {
+			v.DomainRecord.Subdomain.A = a
+		}
+		if aaaa != "" {
+			v.DomainRecord.Subdomain.AAAA = aaaa
+		}
+		if service != "" {
+			v.Service = service
+		}
+		if message != "" && message != v.Description {
+			v.Description = message
+		}
+		whitelist[token] = v
+		status = UpdateSign
+	} else {
+		if message == "" {
+			message = "undefined"
+		}
+		if aaaa == "" {
+			aaaa = a
+		}
+		if domain == "" {
+			err = errors.New("没有指定需要操作的域名")
+		}
+		if service == "" {
+			err = errors.New("没有指定需要采用的服务供应商")
+		}
+
+		if err != nil {
+			return
+		}
+
+		// 写入白名单
+		whitelist[token] = whitelistStruct{
+			Enable:      true,
+			Description: message,
+			Service:     service,
+			DomainRecord: domainRecord{
+				Domain: domain,
+				Subdomain: common.Subdomain{
+					A:    a,
+					AAAA: aaaa,
+				},
+			},
+		}
+		status = InsertSign
+	}
+
+	// 保存白名单
 	err = common.MarshalAndSave(whitelist, ConfDirectoryName+"/"+WhitelistFileName)
 	if err != nil {
 		return
@@ -52,7 +123,7 @@ func AddTokenToWhitelist(token, message string) (err error) {
 }
 
 func InitWhitelist() (msg string, err error) {
-	whitelist = make(map[string]string)
+	whitelist = make(map[string]whitelistStruct)
 	err = common.MarshalAndSave(whitelist, ConfDirectoryName+"/"+WhitelistFileName)
 	if err != nil {
 		return

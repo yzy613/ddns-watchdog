@@ -10,18 +10,23 @@ import (
 )
 
 const (
-	LocalVersion      = "1.5.0"
+	LocalVersion      = "1.5.1"
 	DefaultAPIUrl     = "https://yzyweb.cn/ddns-watchdog"
 	DefaultIPv6APIUrl = "https://yzyweb.cn/ddns-watchdog6"
 	ProjectUrl        = "https://github.com/yzy613/ddns-watchdog"
-	DNSPod            = "DNSPod"
-	AliDNS            = "AliDNS"
-	Cloudflare        = "Cloudflare"
+	DNSPod            = "dnspod"
+	AliDNS            = "alidns"
+	Cloudflare        = "cloudflare"
 )
 
 type Enable struct {
 	IPv4 bool `json:"ipv4"`
 	IPv6 bool `json:"ipv6"`
+}
+
+type Subdomain struct {
+	A    string `json:"a"`
+	AAAA string `json:"aaaa"`
 }
 
 type GeneralClient interface {
@@ -34,11 +39,9 @@ type GetIPResp struct {
 }
 
 type CenterReq struct {
-	Token   string `json:"token"`
-	Service string `json:"service"`
-	Enable  Enable `json:"enable"`
-	IP      IPs    `json:"ip"`
-	Data    []byte `json:"data"`
+	Token  string `json:"token"`
+	Enable Enable `json:"enable"`
+	IP     IPs    `json:"ip"`
 }
 
 type IPs struct {
