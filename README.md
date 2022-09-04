@@ -234,7 +234,7 @@ Usage:
   -k, --insecure           使用 https 链接时不检查 TLS 证书合法性
   -I, --install            安装服务并退出
   -m, --message string     备注 token 信息
-  -s, --service string     指定需要采用的服务供应商
+  -s, --service string     指定需要采用的域名解析服务提供商
   -t, --token string       指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)
   -l, --token-length int   指定生成 token 的长度 (default 48)
   -U, --uninstall          卸载服务并退出

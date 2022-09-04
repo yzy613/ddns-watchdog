@@ -28,7 +28,7 @@ var (
 	tokenLength    = flag.IntP("token-length", "l", 48, "指定生成 token 的长度")
 	token          = flag.StringP("token", "t", "", "指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)")
 	message        = flag.StringP("message", "m", "", "备注 token 信息")
-	service        = flag.StringP("service", "s", "", "指定需要采用的服务供应商")
+	service        = flag.StringP("service", "s", "", "指定需要采用的域名解析服务提供商")
 	domain         = flag.StringP("domain", "D", "", "指定需要操作的域名")
 	a              = flag.StringP("A", "A", "", "指定需要修改的 A 记录")
 	aaaa           = flag.StringP("AAAA", "", "", "指定需要修改的 AAAA 记录 (默认同 A 记录，除非单独指定)")
