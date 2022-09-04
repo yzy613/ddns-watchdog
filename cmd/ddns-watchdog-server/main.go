@@ -23,7 +23,7 @@ var (
 		"1 -> "+server.WhitelistFileName+"\n"+
 		"2 -> "+server.ServiceConfFileName)
 	insecure       = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
-	addToWhitelist = flag.BoolP("add-to-whitelist", "a", false, "添加 token 到白名单")
+	addToWhitelist = flag.BoolP("add-to-whitelist", "a", false, "添加或更新 token 信息到白名单")
 	generateToken  = flag.BoolP("generate-token", "g", false, "生成 token 并输出")
 	tokenLength    = flag.IntP("token-length", "l", 48, "指定生成 token 的长度")
 	token          = flag.StringP("token", "t", "", "指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)")

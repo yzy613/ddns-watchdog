@@ -70,6 +70,8 @@ pflag: help requested
 - `./ddns-watchdog-client -U` 卸载服务并退出 (仅限有 systemd 的 Linux 使用)
 - `./ddns-watchdog-client -f` 强制检查解析记录值
 - `./ddns-watchdog-client -v` 查看当前版本并检查更新后退出
+- `systemctl start ddns-watchdog-client` 启动服务
+- `systemctl enable ddns-watchdog-client` 开机自启服务
 
 ### 初始客户端配置文件
 
@@ -213,14 +215,17 @@ pflag: help requested
 
 ## 服务端
 
-返回 Json 格式的客户端 IP 地址 (支持 IPv4 IPv6 双栈)
+返回 Json 格式的客户端 IP 地址 (支持 IPv4 IPv6 双栈)，可选中心节点的功能。
 
 ### 服务端 用法
 
 ```bash
 Usage:
-  -a, --add-token          添加 token 到白名单
+  -A, --A string           指定需要修改的 A 记录
+      --AAAA string        指定需要修改的 AAAA 记录 (默认同 A 记录，除非单独指定)
+  -a, --add-to-whitelist   添加或更新 token 信息到白名单
   -c, --conf string        指定配置文件目录 (目录有空格请放在双引号中间)
+  -D, --domain string      指定需要操作的域名
   -g, --generate-token     生成 token 并输出
   -i, --init string        有选择地初始化配置文件并退出，可以组合使用 (例 01)
                            0 -> server.json
@@ -228,7 +233,8 @@ Usage:
                            2 -> services.json
   -k, --insecure           使用 https 链接时不检查 TLS 证书合法性
   -I, --install            安装服务并退出
-  -m, --message string     备注 token 信息 (default "undefined")
+  -m, --message string     备注 token 信息
+  -s, --service string     指定需要采用的服务供应商
   -t, --token string       指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)
   -l, --token-length int   指定生成 token 的长度 (default 48)
   -U, --uninstall          卸载服务并退出
@@ -236,12 +242,12 @@ Usage:
 pflag: help requested
 ```
 
-- `./ddns-watchdog-server -a -g -m string` 生成 token 并备注信息再加入白名单
-- `./ddns-watchdog-server -a -t string -m string` 指定 token 并备注信息再加入白名单
+- `./ddns-watchdog-server -a -g -s service -D example.com -A v4 --AAAA v6 -m description` 添加完整的信息并生成 token 再加入白名单
 - `./ddns-watchdog-server -I` 安装服务并退出
 - `./ddns-watchdog-server -c conf` 指定配置文件目录为 conf (目录有空格请放在双引号中间)
 - `./ddns-watchdog-server -i 012` 初始化所有配置文件并退出
 - `systemctl start ddns-watchdog-server` 启动服务
+- `systemctl enable ddns-watchdog-server` 开机自启服务
 - `./ddns-watchdog-server -U` 卸载服务并退出
 - `./ddns-watchdog-server -v` 查看当前版本并检查更新后退出
 
