@@ -44,7 +44,6 @@ Usage:
   -n, --network-card   输出网卡信息并退出
   -U, --uninstall      卸载服务并退出
   -v, --version        查看当前版本并检查更新后退出
-pflag: help requested
 ```
 
 - `./ddns-watchdog-client -i 0123` 初始化所有配置文件并退出
@@ -239,7 +238,6 @@ Usage:
   -l, --token-length int   指定生成 token 的长度 (default 48)
   -U, --uninstall          卸载服务并退出
   -v, --version            查看当前版本并检查更新后退出
-pflag: help requested
 ```
 
 - `./ddns-watchdog-server -a -g -s service -D example.com -A v4 --AAAA v6 -m description` 添加完整的信息并生成 token 再加入白名单
