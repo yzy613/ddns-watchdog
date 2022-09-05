@@ -112,7 +112,7 @@ Usage:
 4. 使用 `./ddns-watchdog-client -i 0123` 初始化配置文件 (在 Windows 上使用 [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-startup-script.bat) 一气呵成)
 5. 根据使用环境确定启用 (`enable`) IPv4 还是 IPv6 或是两者都启用
 6. 若未启用网卡，默认使用 API 获取对应 IP 地址
-7. 若需使用网卡的 IP 地址，请在 `./conf/client.json` 修改 `enable`->`network_card` 为 `true` 并运行一次程序自动获取网卡信息，从 `./conf/network_card.json` 里面选择网卡填入 `./conf/client.json` 的 `network_card`
+7. 若需使用网卡的 IP 地址，请在 `./conf/client.json` 修改 `network_card`->`enable` 为 `true` 并运行一次程序自动获取网卡信息，从 `./conf/network_card.json` 里面选择网卡填入 `./conf/client.json` 的 `network_card`
 8. 若 `./conf/client.json` 的 `network_card`->`ipv4` 或 `ipv6` 为空，对应 IP 地址将从 API 获取
 
     此示例展示 IPv4 从 API 获取，IPv6 从 example 网卡获取
