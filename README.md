@@ -109,7 +109,7 @@ pflag: help requested
 
 1. 前往 [releases](https://github.com/yzy613/ddns-watchdog/releases) 下载符合自己系统的压缩包，解压得到二进制文件
 2. 注意：Windows 的记事本保存的文件编码为 UTF-8 with BOM，需要使用第三方编辑器手动重新编码为 UTF-8，否则将会出现乱码导致无法读取正确的配置
-3. 在 Linux 上不要忘记程序需要执行权限 `chmod 755 ddns-watchdog-client`
+3. 在 Linux 上不要忘记程序需要执行权限 `chmod 700 ddns-watchdog-client`
 4. 使用 `./ddns-watchdog-client -i 0123` 初始化配置文件 (在 Windows 上使用 [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-startup-script.bat) 一气呵成)
 5. 根据使用环境确定启用 (`enable`) IPv4 还是 IPv6 或是两者都启用
 6. 若未启用网卡，默认使用 API 获取对应 IP 地址
