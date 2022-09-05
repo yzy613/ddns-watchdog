@@ -67,11 +67,11 @@ pflag: help requested
 - `./ddns-watchdog-client -n` 输出网卡信息并退出
 - `./ddns-watchdog-client -c conf` 指定配置文件目录为 conf (目录有空格请放在双引号中间)
 - `./ddns-watchdog-client -I` 安装服务并退出 (仅限有 systemd 的 Linux 使用)
+- `systemctl start ddns-watchdog-client` 启动服务
+- `systemctl enable ddns-watchdog-client` 开机自启服务
 - `./ddns-watchdog-client -U` 卸载服务并退出 (仅限有 systemd 的 Linux 使用)
 - `./ddns-watchdog-client -f` 强制检查解析记录值
 - `./ddns-watchdog-client -v` 查看当前版本并检查更新后退出
-- `systemctl start ddns-watchdog-client` 启动服务
-- `systemctl enable ddns-watchdog-client` 开机自启服务
 
 ### 初始客户端配置文件
 
