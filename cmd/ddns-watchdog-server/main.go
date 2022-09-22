@@ -20,8 +20,8 @@ var (
 	version         = flag.BoolP("version", "v", false, "查看当前版本并检查更新后退出")
 	initOption      = flag.StringP("init", "i", "", "有选择地初始化配置文件并退出，可以组合使用 (例 01)\n"+
 		"0 -> "+server.ConfFileName+"\n"+
-		"1 -> "+server.WhitelistFileName+"\n"+
-		"2 -> "+server.ServiceConfFileName)
+		"1 -> "+server.ServiceConfFileName+"\n"+
+		"2 -> "+server.WhitelistFileName)
 	insecure      = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
 	add           = flag.BoolP("add", "a", false, "添加或更新 token 信息到白名单")
 	deleteB       = flag.BoolP("delete", "d", false, "删除白名单中的 token")
@@ -212,9 +212,9 @@ func initConf(event string) (err error) {
 	case "0":
 		msg, err = server.Srv.InitConf()
 	case "1":
-		msg, err = server.InitWhitelist()
-	case "2":
 		msg, err = server.Services.InitConf()
+	case "2":
+		msg, err = server.InitWhitelist()
 	default:
 		err = errors.New("你初始化了一个寂寞")
 	}
