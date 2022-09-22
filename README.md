@@ -229,8 +229,8 @@ Usage:
   -g, --generate-token     生成 token 并输出
   -i, --init string        有选择地初始化配置文件并退出，可以组合使用 (例 01)
                            0 -> server.json
-                           1 -> whitelist.json
-                           2 -> services.json
+                           1 -> services.json
+                           2 -> whitelist.json
   -k, --insecure           使用 https 链接时不检查 TLS 证书合法性
   -I, --install            安装服务并退出
   -m, --message string     备注 token 信息
