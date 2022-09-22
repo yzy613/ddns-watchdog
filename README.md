@@ -222,8 +222,9 @@ Usage:
 Usage:
   -A, --A string           指定需要修改的 A 记录
       --AAAA string        指定需要修改的 AAAA 记录 (默认同 A 记录，除非单独指定)
-  -a, --add-to-whitelist   添加或更新 token 信息到白名单
+  -a, --add                添加或更新 token 信息到白名单
   -c, --conf string        指定配置文件目录 (目录有空格请放在双引号中间)
+  -d, --delete             删除白名单中的 token
   -D, --domain string      指定需要操作的域名
   -g, --generate-token     生成 token 并输出
   -i, --init string        有选择地初始化配置文件并退出，可以组合使用 (例 01)
@@ -233,7 +234,10 @@ Usage:
   -k, --insecure           使用 https 链接时不检查 TLS 证书合法性
   -I, --install            安装服务并退出
   -m, --message string     备注 token 信息
-  -s, --service string     指定需要采用的域名解析服务提供商
+  -s, --service string     指定需要采用的域名解析服务提供商，以下是可指定的提供商
+                           dnspod
+                           alidns
+                           cloudflare
   -t, --token string       指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)
   -l, --token-length int   指定生成 token 的长度 (default 48)
   -U, --uninstall          卸载服务并退出

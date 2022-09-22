@@ -98,4 +98,7 @@ func RespCenterReq(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	// 访问成功日志
+	log.Printf("%v(%v) access success.\n", whitelist[body.Token].Description, GetClientIP(req))
 }

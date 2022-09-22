@@ -22,16 +22,20 @@ var (
 		"0 -> "+server.ConfFileName+"\n"+
 		"1 -> "+server.WhitelistFileName+"\n"+
 		"2 -> "+server.ServiceConfFileName)
-	insecure       = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
-	addToWhitelist = flag.BoolP("add-to-whitelist", "a", false, "添加或更新 token 信息到白名单")
-	generateToken  = flag.BoolP("generate-token", "g", false, "生成 token 并输出")
-	tokenLength    = flag.IntP("token-length", "l", 48, "指定生成 token 的长度")
-	token          = flag.StringP("token", "t", "", "指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)")
-	message        = flag.StringP("message", "m", "", "备注 token 信息")
-	service        = flag.StringP("service", "s", "", "指定需要采用的域名解析服务提供商")
-	domain         = flag.StringP("domain", "D", "", "指定需要操作的域名")
-	a              = flag.StringP("A", "A", "", "指定需要修改的 A 记录")
-	aaaa           = flag.StringP("AAAA", "", "", "指定需要修改的 AAAA 记录 (默认同 A 记录，除非单独指定)")
+	insecure      = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
+	add           = flag.BoolP("add", "a", false, "添加或更新 token 信息到白名单")
+	deleteB       = flag.BoolP("delete", "d", false, "删除白名单中的 token")
+	generateToken = flag.BoolP("generate-token", "g", false, "生成 token 并输出")
+	tokenLength   = flag.IntP("token-length", "l", 48, "指定生成 token 的长度")
+	token         = flag.StringP("token", "t", "", "指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)")
+	message       = flag.StringP("message", "m", "", "备注 token 信息")
+	service       = flag.StringP("service", "s", "", "指定需要采用的域名解析服务提供商，以下是可指定的提供商\n"+
+		common.DNSPod+"\n"+
+		common.AliDNS+"\n"+
+		common.Cloudflare)
+	domain = flag.StringP("domain", "D", "", "指定需要操作的域名")
+	a      = flag.StringP("A", "A", "", "指定需要修改的 A 记录")
+	aaaa   = flag.StringP("AAAA", "", "", "指定需要修改的 AAAA 记录 (默认同 A 记录，除非单独指定)")
 )
 
 func main() {
@@ -100,6 +104,21 @@ func processFlag() (exit bool, err error) {
 		return
 	}
 
+	if *deleteB {
+		msg := ""
+		if *token != "" {
+			msg, err = server.DelFromWhitelist(*token)
+		} else {
+			err = errors.New("未指定 token")
+		}
+		if err != nil {
+			return
+		}
+		fmt.Print(msg)
+		exit = true
+		return
+	}
+
 	currentToken := ""
 	// 获取 token
 	switch {
@@ -117,7 +136,7 @@ func processFlag() (exit bool, err error) {
 	}
 
 	// 添加 token 到白名单
-	if *addToWhitelist {
+	if *add {
 		status := ""
 		m := *message
 		if len(m) > 32 {
@@ -139,9 +158,9 @@ func processFlag() (exit bool, err error) {
 		exit = true
 		switch status {
 		case server.InsertSign:
-			fmt.Printf("Added %v(%v) to whitelist.\n", currentToken, m)
+			fmt.Printf("Added %v(%v) to whitelist.\n", m, currentToken)
 		case server.UpdateSign:
-			fmt.Printf("Updated %v(%v) in whitelist.\n", currentToken, m)
+			fmt.Printf("Updated %v(%v) in whitelist.\n", m, currentToken)
 		}
 	}
 

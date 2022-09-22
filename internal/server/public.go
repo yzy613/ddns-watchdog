@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"ddns-watchdog/internal/common"
 	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"net/http"
@@ -38,6 +39,24 @@ func GenerateToken(length int) (token string) {
 	return
 }
 
+func DelFromWhitelist(token string) (msg string, err error) {
+	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+WhitelistFileName, &whitelist)
+	if err != nil {
+		return
+	}
+	if _, ok := whitelist[token]; ok {
+		msg = fmt.Sprintf("%v has been deleted.\n", whitelist[token].Description)
+		delete(whitelist, token)
+		err = common.MarshalAndSave(whitelist, ConfDirectoryName+"/"+WhitelistFileName)
+	} else {
+		msg = fmt.Sprintf("%v does not exist.\n", token)
+	}
+	if err != nil {
+		return
+	}
+	return
+}
+
 func AddToWhitelist(token, message, service, domain, a, aaaa string) (status string, err error) {
 	if service != "" {
 		// 规范输入
@@ -49,7 +68,7 @@ func AddToWhitelist(token, message, service, domain, a, aaaa string) (status str
 		case common.Cloudflare:
 			service = common.Cloudflare
 		default:
-			err = errors.New("不存在的服务供应商")
+			err = errors.New("不支持的服务供应商")
 			return
 		}
 	}
