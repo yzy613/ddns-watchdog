@@ -60,6 +60,9 @@ func (conf *client) InitConf() (msg string, err error) {
 
 func (conf *client) LoadConf() (err error) {
 	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+ConfFileName, &conf)
+	if err != nil {
+		return
+	}
 	// 检查启用 IP 类型
 	if !conf.Enable.IPv4 && !conf.Enable.IPv6 {
 		err = errors.New("请打开客户端配置文件 " + ConfDirectoryName + "/" + ConfFileName + " 启用需要使用的 IP 类型并重新启动")
