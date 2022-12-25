@@ -71,7 +71,7 @@ func (conf *server) GetLatestVersion() (str string) {
 		if err != nil {
 			return "N/A (数据包错误)"
 		}
-		recv := common.GetIPResp{}
+		var recv = common.GetIPResp{}
 		err = json.Unmarshal(recvJson, &recv)
 		if err != nil {
 			return "N/A (数据包错误)"

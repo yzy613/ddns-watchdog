@@ -208,7 +208,7 @@ func check() {
 		if ipv6 != client.Client.LatestIPv6 {
 			client.Client.LatestIPv6 = ipv6
 		}
-		wg := sync.WaitGroup{}
+		var wg = sync.WaitGroup{}
 		if client.Client.Center.Enable {
 			accessCenter(ipv4, ipv6)
 		} else {
@@ -271,7 +271,11 @@ func accessCenter(ipv4, ipv6 string) {
 	}
 
 	// 发送请求
-	req, err := http.NewRequest("POST", client.Client.Center.APIUrl, bytes.NewReader(reqJson))
+	req, err := http.NewRequest(http.MethodPost, client.Client.Center.APIUrl, bytes.NewReader(reqJson))
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	resp, err := hc.Do(req)
 	if err != nil {
 		log.Println(err)
@@ -294,7 +298,7 @@ func accessCenter(ipv4, ipv6 string) {
 		return
 	}
 	if len(respBodyJson) > 0 {
-		respBody := common.GeneralResp{}
+		var respBody = common.GeneralResp{}
 		err = json.Unmarshal(respBodyJson, &respBody)
 		if err != nil {
 			log.Println(err)
