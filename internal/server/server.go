@@ -55,7 +55,7 @@ func (conf *server) LoadConf() (err error) {
 	return
 }
 
-func (conf server) GetLatestVersion() (str string) {
+func (conf *server) GetLatestVersion() (str string) {
 	if !conf.IsRootServer {
 		resp, err := http.Get(conf.RootServerUrl)
 		if err != nil {
@@ -84,7 +84,7 @@ func (conf server) GetLatestVersion() (str string) {
 	return common.LocalVersion
 }
 
-func (conf server) CheckLatestVersion() {
+func (conf *server) CheckLatestVersion() {
 	if !conf.IsRootServer {
 		LatestVersion := conf.GetLatestVersion()
 		common.VersionTips(LatestVersion)

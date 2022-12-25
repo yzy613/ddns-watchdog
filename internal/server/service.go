@@ -9,9 +9,10 @@ const (
 )
 
 type service struct {
-	DNSPod     dnspod     `json:"dnspod"`
-	AliDNS     alidns     `json:"alidns"`
-	Cloudflare cloudflare `json:"cloudflare"`
+	DNSPod      dnspod      `json:"dnspod"`
+	AliDNS      alidns      `json:"alidns"`
+	Cloudflare  cloudflare  `json:"cloudflare"`
+	HuaweiCloud huaweiCloud `json:"huawei_cloud"`
 }
 
 type dnspod struct {
@@ -22,14 +23,20 @@ type dnspod struct {
 
 type alidns struct {
 	Enable          bool   `json:"enable"`
-	AccessKeyId     string `json:"accesskey_id"`
-	AccessKeySecret string `json:"accesskey_secret"`
+	AccessKeyId     string `json:"access_key_id"`
+	AccessKeySecret string `json:"access_key_secret"`
 }
 
 type cloudflare struct {
 	Enable   bool   `json:"enable"`
 	ZoneID   string `json:"zone_id"`
 	APIToken string `json:"api_token"`
+}
+
+type huaweiCloud struct {
+	Enable          bool   `json:"enable"`
+	AccessKeyId     string `json:"access_key_id"`
+	SecretAccessKey string `json:"secret_access_key"`
 }
 
 func (conf *service) InitConf() (msg string, err error) {

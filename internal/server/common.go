@@ -81,8 +81,26 @@ func doVirtualClient(body common.CenterReq, instance whitelistStruct) (httpStatu
 		}
 
 		msg, errs = cf.Run(body.Enable, body.IP.IPv4, body.IP.IPv6)
+	case common.HuaweiCloud:
+		if !Services.HuaweiCloud.Enable {
+			httpStatus = http.StatusForbidden
+			return
+		}
+
+		// 初始化虚拟客户端
+		hc := client.HuaweiCloud{
+			AccessKeyId:     Services.HuaweiCloud.AccessKeyId,
+			SecretAccessKey: Services.HuaweiCloud.SecretAccessKey,
+			ZoneName:        instance.DomainRecord.Domain,
+			Domain: common.Subdomain{
+				A:    instance.DomainRecord.Subdomain.A,
+				AAAA: instance.DomainRecord.Subdomain.AAAA,
+			},
+		}
+
+		msg, errs = hc.Run(body.Enable, body.IP.IPv4, body.IP.IPv6)
 	default:
-		httpStatus = http.StatusInternalServerError
+		httpStatus = http.StatusBadRequest
 		return
 	}
 

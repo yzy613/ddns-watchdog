@@ -24,6 +24,7 @@ var (
 	DP                = DNSPod{}
 	AD                = AliDNS{}
 	Cf                = Cloudflare{}
+	HC                = HuaweiCloud{}
 )
 
 // AsyncServiceCallback 异步服务回调函数类型

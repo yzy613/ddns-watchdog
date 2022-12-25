@@ -67,6 +67,8 @@ func AddToWhitelist(token, message, service, domain, a, aaaa string) (status str
 			service = common.AliDNS
 		case common.Cloudflare:
 			service = common.Cloudflare
+		case common.HuaweiCloud:
+			service = common.HuaweiCloud
 		default:
 			err = errors.New("不支持的服务供应商")
 			return

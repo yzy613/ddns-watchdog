@@ -42,9 +42,10 @@ type networkCard struct {
 }
 
 type service struct {
-	DNSPod     bool `json:"dnspod"`
-	AliDNS     bool `json:"alidns"`
-	Cloudflare bool `json:"cloudflare"`
+	DNSPod      bool `json:"dnspod"`
+	AliDNS      bool `json:"alidns"`
+	Cloudflare  bool `json:"cloudflare"`
+	HuaweiCloud bool `json:"huawei_cloud"`
 }
 
 func (conf *client) InitConf() (msg string, err error) {
@@ -69,14 +70,18 @@ func (conf *client) LoadConf() (err error) {
 		return
 	}
 	// 检查启用服务
-	if !conf.Center.Enable && !conf.Services.DNSPod && !conf.Services.AliDNS && !conf.Services.Cloudflare {
+	if !conf.Center.Enable &&
+		!conf.Services.DNSPod &&
+		!conf.Services.AliDNS &&
+		!conf.Services.Cloudflare &&
+		!conf.Services.HuaweiCloud {
 		err = errors.New("请打开客户端配置文件 " + ConfDirectoryName + "/" + ConfFileName + " 启用需要使用的服务并重新启动")
 		return
 	}
 	return
 }
 
-func (conf client) GetLatestVersion() (str string) {
+func (conf *client) GetLatestVersion() (str string) {
 	resp, err := http.Get(conf.APIUrl.Version)
 	if err != nil {
 		return "N/A (请检查网络连接)"

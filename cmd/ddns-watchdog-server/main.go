@@ -32,7 +32,8 @@ var (
 	service       = flag.StringP("service", "s", "", "指定需要采用的域名解析服务提供商，以下是可指定的提供商\n"+
 		common.DNSPod+"\n"+
 		common.AliDNS+"\n"+
-		common.Cloudflare)
+		common.Cloudflare+"\n"+
+		common.HuaweiCloud)
 	domain = flag.StringP("domain", "D", "", "指定需要操作的域名")
 	a      = flag.StringP("A", "A", "", "指定需要修改的 A 记录")
 	aaaa   = flag.StringP("AAAA", "", "", "指定需要修改的 AAAA 记录 (默认同 A 记录，除非单独指定)")

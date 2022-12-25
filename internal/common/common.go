@@ -10,13 +10,18 @@ import (
 )
 
 const (
-	LocalVersion      = "1.5.2"
+	LocalVersion      = "1.5.3"
 	DefaultAPIUrl     = "https://yzyweb.cn/ddns-watchdog"
 	DefaultIPv6APIUrl = "https://yzyweb.cn/ddns-watchdog6"
 	ProjectUrl        = "https://github.com/yzy613/ddns-watchdog"
-	DNSPod            = "dnspod"
-	AliDNS            = "alidns"
-	Cloudflare        = "cloudflare"
+)
+
+// 内容应全小写
+const (
+	DNSPod      = "dnspod"
+	AliDNS      = "alidns"
+	Cloudflare  = "cloudflare"
+	HuaweiCloud = "huaweicloud"
 )
 
 type Enable struct {

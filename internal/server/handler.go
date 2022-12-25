@@ -12,7 +12,7 @@ func RespGetIPReq(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 
 	// 判断请求方法
-	if req.Method != "GET" {
+	if req.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -39,7 +39,7 @@ func RespCenterReq(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 
 	// 判断请求方法
-	if req.Method != "POST" {
+	if req.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}

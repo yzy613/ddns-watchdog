@@ -18,7 +18,7 @@
 [![Downloads](https://img.shields.io/github/downloads/yzy613/ddns-watchdog/total)](https://github.com/yzy613/ddns-watchdog/releases)
 [![ClickDownload](https://img.shields.io/badge/%E7%82%B9%E5%87%BB-%E4%B8%8B%E8%BD%BD-brightgreen)](https://github.com/yzy613/ddns-watchdog/releases)
 
-现已支持 DNSPod AliDNS(阿里云 DNS) Cloudflare，支持 IPv4 IPv6 双栈，支持使用网卡 IP 地址。支持自建中心节点代理客户端修改域名解析记录。
+现已支持 DNSPod AliDNS(阿里云 DNS) Cloudflare HuaweiCloud(华为云)，支持 IPv4 IPv6 双栈，支持使用网卡 IP 地址。支持自建中心节点代理客户端修改域名解析记录。
 
 ## 准备工作
 
@@ -39,6 +39,7 @@ Usage:
                        1 -> dnspod.json
                        2 -> alidns.json
                        3 -> cloudflare.json
+                       4 -> huaweicloud.json
   -k, --insecure       使用 https 链接时不检查 TLS 证书合法性
   -I, --install        安装服务并退出
   -n, --network-card   输出网卡信息并退出
@@ -46,7 +47,7 @@ Usage:
   -v, --version        查看当前版本并检查更新后退出
 ```
 
-- `./ddns-watchdog-client -i 0123` 初始化所有配置文件并退出
+- `./ddns-watchdog-client -i 01234` 初始化所有配置文件并退出
 
   此示例展示仅初始化客户端和 DNSPod 的配置文件
 
@@ -61,6 +62,7 @@ Usage:
   1 -> dnspod.json
   2 -> alidns.json
   3 -> cloudflare.json
+  4 -> huaweicloud.json
   ```
 - `./ddns-watchdog-client` 使用默认配置文件目录 `conf` 运行
 - `./ddns-watchdog-client -n` 输出网卡信息并退出
@@ -98,7 +100,8 @@ Usage:
   "services": {
     "dnspod": false,
     "alidns": false,
-    "cloudflare": false
+    "cloudflare": false,
+    "huawei_cloud": false
   },
   "check_cycle_minutes": 0
 }
@@ -109,7 +112,7 @@ Usage:
 1. 前往 [releases](https://github.com/yzy613/ddns-watchdog/releases) 下载符合自己系统的压缩包，解压得到二进制文件
 2. 注意：Windows 的记事本保存的文件编码为 UTF-8 with BOM，需要使用第三方编辑器手动重新编码为 UTF-8，否则将会出现乱码导致无法读取正确的配置
 3. 在 Linux 上不要忘记程序需要执行权限 `chmod 700 ddns-watchdog-client`
-4. 使用 `./ddns-watchdog-client -i 0123` 初始化配置文件 (在 Windows 上使用 [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-startup-script.bat) 一气呵成)
+4. 使用 `./ddns-watchdog-client -i 01234` 初始化配置文件 (在 Windows 上使用 [ddns-watchdog-client-startup-script.bat](https://github.com/yzy613/ddns-watchdog/blob/master/ddns-watchdog-client-startup-script.bat) 一气呵成)
 5. 根据使用环境确定启用 (`enable`) IPv4 还是 IPv6 或是两者都启用
 6. 若未启用网卡，默认使用 API 获取对应 IP 地址
 7. 若需使用网卡的 IP 地址，请在 `./conf/client.json` 修改 `network_card`->`enable` 为 `true` 并运行一次程序自动获取网卡信息，从 `./conf/network_card.json` 里面选择网卡填入 `./conf/client.json` 的 `network_card`
@@ -172,15 +175,15 @@ Usage:
 #### AliDNS (阿里云 DNS)
 
 - 请在 `./conf/client.json` 修改 `alidns` 为 `true`
-- 打开配置文件 `./conf/alidns.json` 填入你的 `accesskey_id, accesskey_secret, domain, sub_domain` 并重新启动
+- 打开配置文件 `./conf/alidns.json` 填入你的 `access_key_id, access_key_secret, domain, sub_domain` 并重新启动
 - 支持同一个域名的 A 和 AAAA 记录的子域名同时更新记录值
 
   初始 AliDNS 配置文件
 
   ```json
   {
-    "accesskey_id": "在 https://ram.console.aliyun.com/users 获取",
-    "accesskey_secret": "在 https://ram.console.aliyun.com/users 获取",
+    "access_key_id": "在 https://ram.console.aliyun.com/users 获取",
+    "access_key_secret": "在 https://ram.console.aliyun.com/users 获取",
     "domain": "example.com",
     "sub_domain": {
       "a": "A记录子域名",
@@ -204,6 +207,26 @@ Usage:
     "domain": {
       "a": "A记录子域名.example.com",
       "aaaa": "AAAA记录子域名.example.com"
+    }
+  }
+  ```
+
+#### HuaweiCloud
+
+- 请在 `./conf/client.json` 修改 `huawei_cloud` 为 `true`
+- 打开配置文件 `./conf/huaweicloud.json` 填入你的 `access_key_id, secret_access_key, zone_name, domain` 并重新启动
+- 支持同一个域名的 A 和 AAAA 记录的子域名同时更新内容
+
+  初始 HuaweiCloud 配置文件
+
+  ```json
+  {
+    "access_key_id": "在 https://console.huaweicloud.com/iam/ 获取",
+    "secret_access_key": "在 https://console.huaweicloud.com/iam/ 获取",
+    "zone_name": "example.com.",
+    "domain": {
+      "a": "A记录子域名.example.com.",
+      "aaaa": "AAAA记录子域名.example.com."
     }
   }
   ```
@@ -238,6 +261,7 @@ Usage:
                            dnspod
                            alidns
                            cloudflare
+                           huaweicloud
   -t, --token string       指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)
   -l, --token-length int   指定生成 token 的长度 (default 48)
   -U, --uninstall          卸载服务并退出
@@ -284,13 +308,18 @@ Usage:
   },
   "alidns": {
     "enable": false,
-    "accesskey_id": "",
-    "accesskey_secret": ""
+    "access_key_id": "",
+    "access_key_secret": ""
   },
   "cloudflare": {
     "enable": false,
     "zone_id": "",
     "api_token": ""
+  },
+  "huawei_cloud": {
+    "enable": false,
+    "access_key_id": "",
+    "secret_access_key": ""
   }
 }
 ```

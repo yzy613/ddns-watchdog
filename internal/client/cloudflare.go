@@ -16,7 +16,6 @@ type Cloudflare struct {
 	ZoneID   string           `json:"zone_id"`
 	APIToken string           `json:"api_token"`
 	Domain   common.Subdomain `json:"domain"`
-	DomainID string           `json:"-"`
 }
 
 type cloudflareUpdateRequest struct {
@@ -27,11 +26,15 @@ type cloudflareUpdateRequest struct {
 }
 
 func (cfc *Cloudflare) InitConf() (msg string, err error) {
-	*cfc = Cloudflare{}
-	cfc.APIToken = "在 https://dash.cloudflare.com/profile/api-tokens 获取"
-	cfc.ZoneID = "在你域名页面的右下角有个区域 ID"
-	cfc.Domain.A = "A记录子域名.example.com"
-	cfc.Domain.AAAA = "AAAA记录子域名.example.com"
+	*cfc = Cloudflare{
+		ZoneID:   "在你域名页面的右下角有个区域 ID",
+		APIToken: "在 https://dash.cloudflare.com/profile/api-tokens 获取",
+		Domain: common.Subdomain{
+			A:    "A记录子域名.example.com",
+			AAAA: "AAAA记录子域名.example.com",
+		},
+	}
+
 	err = common.MarshalAndSave(cfc, ConfDirectoryName+"/"+CloudflareConfFileName)
 	msg = "初始化 " + ConfDirectoryName + "/" + CloudflareConfFileName
 	return
@@ -48,15 +51,15 @@ func (cfc *Cloudflare) LoadConf() (err error) {
 	return
 }
 
-func (cfc Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
+func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
 	if enabled.IPv4 && cfc.Domain.A != "" {
 		// 获取解析记录
-		recordIP, err := cfc.getParseRecord(cfc.Domain.A, "A")
+		domainId, recordIP, err := cfc.getParseRecord(cfc.Domain.A, "A")
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv4 {
 			// 更新解析记录
-			err = cfc.updateParseRecord(ipv4, "A", cfc.Domain.A)
+			err = cfc.updateParseRecord(ipv4, domainId, "A", cfc.Domain.A)
 			if err != nil {
 				errs = append(errs, err)
 			} else {
@@ -66,12 +69,12 @@ func (cfc Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []strin
 	}
 	if enabled.IPv6 && cfc.Domain.AAAA != "" {
 		// 获取解析记录
-		recordIP, err := cfc.getParseRecord(cfc.Domain.AAAA, "AAAA")
+		domainId, recordIP, err := cfc.getParseRecord(cfc.Domain.AAAA, "AAAA")
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv6 {
 			// 更新解析记录
-			err = cfc.updateParseRecord(ipv6, "AAAA", cfc.Domain.AAAA)
+			err = cfc.updateParseRecord(ipv6, domainId, "AAAA", cfc.Domain.AAAA)
 			if err != nil {
 				errs = append(errs, err)
 			} else {
@@ -82,7 +85,7 @@ func (cfc Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []strin
 	return
 }
 
-func (cfc *Cloudflare) getParseRecord(domain, recordType string) (recordIP string, err error) {
+func (cfc *Cloudflare) getParseRecord(domain, recordType string) (domainId, recordIP string, err error) {
 	httpClient := getGeneralHttpClient()
 	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records?name=" + domain
 	req, err := http.NewRequest("GET", url, nil)
@@ -123,22 +126,23 @@ func (cfc *Cloudflare) getParseRecord(domain, recordType string) (recordIP strin
 		err = errors.New("Cloudflare: " + domain + " 解析记录不存在")
 		return
 	}
-	for _, value := range records {
-		element := value.(map[string]any)
-		if element["name"].(string) == domain {
-			cfc.DomainID = element["id"].(string)
+	for _, v := range records {
+		element := v.(map[string]any)
+		if element["name"].(string) == domain && element["type"].(string) == recordType {
+			domainId = element["id"].(string)
 			recordIP = element["content"].(string)
-			if element["type"].(string) == recordType {
-				break
-			}
+			break
 		}
+	}
+	if domainId == "" || recordIP == "" {
+		err = errors.New("Cloudflare: " + domain + " 的 " + recordType + " 解析记录不存在")
 	}
 	return
 }
 
-func (cfc Cloudflare) updateParseRecord(ipAddr, recordType, domain string) (err error) {
+func (cfc *Cloudflare) updateParseRecord(ipAddr, domainId, recordType, domain string) (err error) {
 	httpClient := getGeneralHttpClient()
-	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records/" + cfc.DomainID
+	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records/" + domainId
 	reqData := cloudflareUpdateRequest{
 		Type:    recordType,
 		Name:    domain,

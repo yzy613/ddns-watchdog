@@ -28,7 +28,8 @@ var (
 		"0 -> "+client.ConfFileName+"\n"+
 		"1 -> "+client.DNSPodConfFileName+"\n"+
 		"2 -> "+client.AliDNSConfFileName+"\n"+
-		"3 -> "+client.CloudflareConfFileName)
+		"3 -> "+client.CloudflareConfFileName+"\n"+
+		"4 -> "+client.HuaweiCloudConfFileName)
 	confPath             = flag.StringP("conf", "c", "", "指定配置文件目录 (目录有空格请放在双引号中间)")
 	printNetworkCardInfo = flag.BoolP("network-card", "n", false, "输出网卡信息并退出")
 	insecure             = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
@@ -149,6 +150,8 @@ func initConf(event string) (err error) {
 		msg, err = client.AD.InitConf()
 	case "3":
 		msg, err = client.Cf.InitConf()
+	case "4":
+		msg, err = client.HC.InitConf()
 	default:
 		err = errors.New("你初始化了一个寂寞")
 	}
@@ -175,6 +178,12 @@ func loadConf() (err error) {
 		}
 		if client.Client.Services.Cloudflare {
 			err = client.Cf.LoadConf()
+			if err != nil {
+				return
+			}
+		}
+		if client.Client.Services.HuaweiCloud {
+			err = client.HC.LoadConf()
 			if err != nil {
 				return
 			}
@@ -214,6 +223,10 @@ func check() {
 			if client.Client.Services.Cloudflare {
 				wg.Add(1)
 				go asyncServiceInterface(ipv4, ipv6, client.Cf.Run, &wg)
+			}
+			if client.Client.Services.HuaweiCloud {
+				wg.Add(1)
+				go asyncServiceInterface(ipv4, ipv6, client.HC.Run, &wg)
 			}
 		}
 		wg.Wait()
