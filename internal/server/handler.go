@@ -78,6 +78,9 @@ func RespCenterReq(w http.ResponseWriter, req *http.Request) {
 
 	// 模拟客户端
 	httpStatus, respBody, err := doVirtualClient(body, whitelist[body.Token])
+	if err != nil {
+		return
+	}
 	if httpStatus != http.StatusOK {
 		if httpStatus == http.StatusInternalServerError {
 			log.Println(err)
