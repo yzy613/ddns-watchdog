@@ -88,7 +88,7 @@ func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 func (cfc *Cloudflare) getParseRecord(domain, recordType string) (domainId, recordIP string, err error) {
 	httpClient := getGeneralHttpClient()
 	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records?name=" + domain
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		return
 	}
