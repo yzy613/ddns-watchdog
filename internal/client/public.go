@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	RunningName         = "ddns-watchdog-client"
+	ProjName            = "ddns-watchdog-client"
 	NetworkCardFileName = "network_card.json"
 )
 
@@ -33,52 +33,52 @@ type AsyncServiceCallback func(enabledServices common.Enable, ipv4, ipv6 string)
 func Install() (err error) {
 	if common.IsWindows() {
 		err = errors.New("windows 暂不支持安装到系统")
-	} else {
-		// 注册系统服务
-		if Client.CheckCycleMinutes == 0 {
-			err = errors.New("设置一下 " + ConfDirectoryName + "/" + ConfFileName + " 的 check_cycle_minutes 吧")
-			return
-		}
-		wd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		serviceContent := []byte(
-			"[Unit]\n" +
-				"Description=" + RunningName + " Service\n" +
-				"After=network.target\n\n" +
-				"[Service]\n" +
-				"Type=simple\n" +
-				"WorkingDirectory=" + wd +
-				"\nExecStart=" + wd + "/" + RunningName + " -c " + ConfDirectoryName +
-				"\nRestart=on-failure\n" +
-				"RestartSec=2\n\n" +
-				"[Install]\n" +
-				"WantedBy=multi-user.target\n")
-		err = os.WriteFile(installPath, serviceContent, 0600)
-		if err != nil {
-			return err
-		}
-		log.Println("可以使用 systemctl 控制 " + RunningName + " 服务了")
+		return
 	}
+	// 注册系统服务
+	if Client.CheckCycleMinutes == 0 {
+		err = errors.New("设置一下 " + ConfDirectoryName + "/" + ConfFileName + " 的 check_cycle_minutes 吧")
+		return
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	serviceContent := []byte(
+		"[Unit]\n" +
+			"Description=" + ProjName + " Service\n" +
+			"After=network.target\n\n" +
+			"[Service]\n" +
+			"Type=simple\n" +
+			"WorkingDirectory=" + wd +
+			"\nExecStart=" + wd + "/" + ProjName + " -c " + ConfDirectoryName +
+			"\nRestart=on-failure\n" +
+			"RestartSec=2\n\n" +
+			"[Install]\n" +
+			"WantedBy=multi-user.target\n")
+	err = os.WriteFile(installPath, serviceContent, 0600)
+	if err != nil {
+		return err
+	}
+	log.Println("可以使用 systemctl 管理 " + ProjName + " 服务了")
 	return
 }
 
 func Uninstall() (err error) {
 	if common.IsWindows() {
 		err = errors.New("windows 暂不支持安装到系统")
-	} else {
-		wd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		err = os.Remove(installPath)
-		if err != nil {
-			return err
-		}
-		log.Println("卸载服务成功")
-		log.Println("若要完全删除，请移步到 " + wd + " 和 " + ConfDirectoryName + " 完全删除")
+		return
 	}
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	err = os.Remove(installPath)
+	if err != nil {
+		return err
+	}
+	log.Println("卸载服务成功")
+	log.Println("若要完全删除，请移步到 " + wd + " 和 " + ConfDirectoryName + " 完全删除")
 	return
 }
 

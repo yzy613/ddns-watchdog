@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	installPath   = "/etc/systemd/system/" + RunningName + ".service"
+	installPath   = "/etc/systemd/system/" + ProjName + ".service"
 	HttpsInsecure = false
 )
 

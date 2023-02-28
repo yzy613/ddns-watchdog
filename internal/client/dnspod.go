@@ -180,7 +180,7 @@ func postman(url, src string) (dst []byte, err error) {
 		}
 	}(req.Body)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("User-Agent", RunningName+"/"+common.LocalVersion+" ()")
+	req.Header.Set("User-Agent", ProjName+"/"+common.LocalVersion+" ()")
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err

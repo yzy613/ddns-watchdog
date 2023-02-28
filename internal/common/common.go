@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LocalVersion      = "1.5.4-rc1"
+	LocalVersion      = "1.5.4"
 	DefaultAPIUrl     = "https://yzyweb.cn/ddns-watchdog"
 	DefaultIPv6APIUrl = "https://yzyweb.cn/ddns-watchdog6"
 	ProjectUrl        = "https://github.com/yzy613/ddns-watchdog"
@@ -68,11 +68,7 @@ func FormatDirectoryPath(srcPath string) (dstPath string) {
 }
 
 func IsWindows() bool {
-	if runtime.GOOS == "windows" {
-		return true
-	} else {
-		return false
-	}
+	return runtime.GOOS == "windows"
 }
 
 func IsDirExistAndCreate(dirPath string) (err error) {
