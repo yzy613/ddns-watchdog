@@ -3,10 +3,12 @@ package client
 import (
 	"ddns-watchdog/internal/common"
 	"errors"
-	"github.com/bitly/go-simplejson"
 	"io"
 	"net/http"
 	"strings"
+	"sync"
+
+	"github.com/bitly/go-simplejson"
 )
 
 const DNSPodConfFileName = "dnspod.json"
@@ -23,8 +25,8 @@ func (dpc *DNSPod) InitConf() (msg string, err error) {
 		ID:     "在 https://console.dnspod.cn/account/token/token 获取",
 		Domain: "example.com",
 		SubDomain: common.Subdomain{
-			A:    "A记录子域名",
-			AAAA: "AAAA记录子域名",
+			A:    "A记录子域名1,A记录子域名2,……",
+			AAAA: "AAAA记录子域名1,AAAA记录子域名2,……",
 		},
 	}
 	dpc.Token = dpc.ID
@@ -45,37 +47,58 @@ func (dpc *DNSPod) LoadConf() (err error) {
 	return
 }
 
-func (dpc *DNSPod) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
-	if enabled.IPv4 && dpc.SubDomain.A != "" {
-		// 获取解析记录
-		recordId, recordLineId, recordIP, err := dpc.getParseRecord(dpc.SubDomain.A, "A")
-		if err != nil {
-			errs = append(errs, err)
-		} else if recordIP != ipv4 {
-			// 更新解析记录
-			err = dpc.updateParseRecord(ipv4, recordId, recordLineId, "A", dpc.SubDomain.A)
+func (dpc *DNSPod) processRecords(records []string, recordType string, ip string, msgChan chan<- string, errChan chan<- error, wg *sync.WaitGroup) {
+	for _, record := range records {
+		wg.Add(1)
+		go func(item string) {
+			defer wg.Done()
+			// 获取解析记录
+			recordId, recordLineId, recordIP, err := dpc.getParseRecord(item, recordType)
 			if err != nil {
-				errs = append(errs, err)
-			} else {
-				msg = append(msg, "DNSPod: "+dpc.SubDomain.A+"."+dpc.Domain+" 已更新解析记录 "+ipv4)
+				errChan <- err
+			} else if recordIP != ip {
+				// 更新解析记录
+				err = dpc.updateParseRecord(ip, recordId, recordLineId, recordType, item)
+				if err != nil {
+					errChan <- err
+				} else {
+					msgChan <- "DNSPod: " + item + "." + dpc.Domain + " 已更新解析记录 " + ip
+				}
 			}
-		}
+		}(record)
 	}
-	if enabled.IPv6 && dpc.SubDomain.AAAA != "" {
-		// 获取解析记录
-		recordId, recordLineId, recordIP, err := dpc.getParseRecord(dpc.SubDomain.AAAA, "AAAA")
-		if err != nil {
-			errs = append(errs, err)
-		} else if recordIP != ipv6 {
-			// 更新解析记录
-			err = dpc.updateParseRecord(ipv6, recordId, recordLineId, "AAAA", dpc.SubDomain.AAAA)
-			if err != nil {
-				errs = append(errs, err)
-			} else {
-				msg = append(msg, "DNSPod: "+dpc.SubDomain.AAAA+"."+dpc.Domain+" 已更新解析记录 "+ipv6)
-			}
-		}
+}
+
+func (dpc *DNSPod) Run(enabled common.Enable, ipv4, ipv6 string) (msgs []string, errs []error) {
+	AArr := common.DomainStr2Arr(dpc.SubDomain.A)
+	AAAAArr := common.DomainStr2Arr(dpc.SubDomain.AAAA)
+
+	var wg sync.WaitGroup
+	msgChan := make(chan string)
+	errChan := make(chan error)
+
+	if enabled.IPv4 {
+		dpc.processRecords(AArr, "A", ipv4, msgChan, errChan, &wg)
 	}
+
+	if enabled.IPv6 {
+		dpc.processRecords(AAAAArr, "AAAA", ipv6, msgChan, errChan, &wg)
+	}
+
+	go func() {
+		wg.Wait()
+		close(msgChan)
+		close(errChan)
+	}()
+
+	for msg := range msgChan {
+		msgs = append(msgs, msg)
+	}
+
+	for err := range errChan {
+		errs = append(errs, err)
+	}
+
 	return
 }
 

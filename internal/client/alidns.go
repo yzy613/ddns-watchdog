@@ -3,6 +3,8 @@ package client
 import (
 	"ddns-watchdog/internal/common"
 	"errors"
+	"sync"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 )
 
@@ -20,8 +22,8 @@ func (ad *AliDNS) InitConf() (msg string, err error) {
 		AccessKeyId: "在 https://ram.console.aliyun.com/users 获取",
 		Domain:      "example.com",
 		SubDomain: common.Subdomain{
-			A:    "A记录子域名",
-			AAAA: "AAAA记录子域名",
+			A:    "A记录子域名1,A记录子域名2,……",
+			AAAA: "AAAA记录子域名1,AAAA记录子域名2,……",
 		},
 	}
 	ad.AccessKeySecret = ad.AccessKeyId
@@ -42,37 +44,58 @@ func (ad *AliDNS) LoadConf() (err error) {
 	return
 }
 
-func (ad *AliDNS) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
-	if enabled.IPv4 && ad.SubDomain.A != "" {
-		// 获取解析记录
-		recordId, recordIP, err := ad.getParseRecord(ad.SubDomain.A, "A")
-		if err != nil {
-			errs = append(errs, err)
-		} else if recordIP != ipv4 {
-			// 更新解析记录
-			err = ad.updateParseRecord(ipv4, recordId, "A", ad.SubDomain.A)
+func (ad *AliDNS) processRecords(records []string, recordType string, ip string, msgChan chan<- string, errChan chan<- error, wg *sync.WaitGroup) {
+	for _, record := range records {
+		wg.Add(1)
+		go func(item string) {
+			defer wg.Done()
+			// 获取解析记录
+			recordId, recordIP, err := ad.getParseRecord(item, recordType)
 			if err != nil {
-				errs = append(errs, err)
-			} else {
-				msg = append(msg, "AliDNS: "+ad.SubDomain.A+"."+ad.Domain+" 已更新解析记录 "+ipv4)
+				errChan <- err
+			} else if recordIP != ip {
+				// 更新解析记录
+				err = ad.updateParseRecord(ip, recordId, recordType, item)
+				if err != nil {
+					errChan <- err
+				} else {
+					msgChan <- "AliDNS: " + item + "." + ad.Domain + " 已更新解析记录 " + ip
+				}
 			}
-		}
+		}(record)
 	}
-	if enabled.IPv6 && ad.SubDomain.AAAA != "" {
-		// 获取解析记录
-		recordId, recordIP, err := ad.getParseRecord(ad.SubDomain.AAAA, "AAAA")
-		if err != nil {
-			errs = append(errs, err)
-		} else if recordIP != ipv6 {
-			// 更新解析记录
-			err = ad.updateParseRecord(ipv6, recordId, "AAAA", ad.SubDomain.AAAA)
-			if err != nil {
-				errs = append(errs, err)
-			} else {
-				msg = append(msg, "AliDNS: "+ad.SubDomain.AAAA+"."+ad.Domain+" 已更新解析记录 "+ipv6)
-			}
-		}
+}
+
+func (ad *AliDNS) Run(enabled common.Enable, ipv4, ipv6 string) (msgs []string, errs []error) {
+	AArr := common.DomainStr2Arr(ad.SubDomain.A)
+	AAAAArr := common.DomainStr2Arr(ad.SubDomain.AAAA)
+
+	var wg sync.WaitGroup
+	msgChan := make(chan string)
+	errChan := make(chan error)
+
+	if enabled.IPv4 {
+		ad.processRecords(AArr, "A", ipv4, msgChan, errChan, &wg)
 	}
+
+	if enabled.IPv6 {
+		ad.processRecords(AAAAArr, "AAAA", ipv6, msgChan, errChan, &wg)
+	}
+
+	go func() {
+		wg.Wait()
+		close(msgChan)
+		close(errChan)
+	}()
+
+	for msg := range msgChan {
+		msgs = append(msgs, msg)
+	}
+
+	for err := range errChan {
+		errs = append(errs, err)
+	}
+
 	return
 }
 

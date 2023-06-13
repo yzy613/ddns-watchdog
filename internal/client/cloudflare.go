@@ -4,10 +4,12 @@ import (
 	"ddns-watchdog/internal/common"
 	"encoding/json"
 	"errors"
-	"github.com/bitly/go-simplejson"
 	"io"
 	"net/http"
 	"strings"
+	"sync"
+
+	"github.com/bitly/go-simplejson"
 )
 
 const CloudflareConfFileName = "cloudflare.json"
@@ -30,8 +32,8 @@ func (cfc *Cloudflare) InitConf() (msg string, err error) {
 		ZoneID:   "在你域名页面的右下角有个区域 ID",
 		APIToken: "在 https://dash.cloudflare.com/profile/api-tokens 获取",
 		Domain: common.Subdomain{
-			A:    "A记录子域名.example.com",
-			AAAA: "AAAA记录子域名.example.com",
+			A:    "A记录子域名1.example.com,A记录子域名2.example.com,……",
+			AAAA: "AAAA记录子域名1.example.com,AAAA记录子域名2.example.com,……",
 		},
 	}
 
@@ -51,37 +53,58 @@ func (cfc *Cloudflare) LoadConf() (err error) {
 	return
 }
 
-func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
-	if enabled.IPv4 && cfc.Domain.A != "" {
-		// 获取解析记录
-		domainId, recordIP, err := cfc.getParseRecord(cfc.Domain.A, "A")
-		if err != nil {
-			errs = append(errs, err)
-		} else if recordIP != ipv4 {
-			// 更新解析记录
-			err = cfc.updateParseRecord(ipv4, domainId, "A", cfc.Domain.A)
+func (cfc *Cloudflare) processRecords(records []string, recordType string, ip string, msgChan chan<- string, errChan chan<- error, wg *sync.WaitGroup) {
+	for _, record := range records {
+		wg.Add(1)
+		go func(item string) {
+			defer wg.Done()
+			// 获取解析记录
+			domainId, recordIP, err := cfc.getParseRecord(item, recordType)
 			if err != nil {
-				errs = append(errs, err)
-			} else {
-				msg = append(msg, "Cloudflare: "+cfc.Domain.A+" 已更新解析记录 "+ipv4)
+				errChan <- err
+			} else if recordIP != ip {
+				// 更新解析记录
+				err = cfc.updateParseRecord(ip, domainId, recordType, item)
+				if err != nil {
+					errChan <- err
+				} else {
+					msgChan <- "Cloudflare: " + item + " 已更新解析记录 " + ip
+				}
 			}
-		}
+		}(record)
 	}
-	if enabled.IPv6 && cfc.Domain.AAAA != "" {
-		// 获取解析记录
-		domainId, recordIP, err := cfc.getParseRecord(cfc.Domain.AAAA, "AAAA")
-		if err != nil {
-			errs = append(errs, err)
-		} else if recordIP != ipv6 {
-			// 更新解析记录
-			err = cfc.updateParseRecord(ipv6, domainId, "AAAA", cfc.Domain.AAAA)
-			if err != nil {
-				errs = append(errs, err)
-			} else {
-				msg = append(msg, "Cloudflare: "+cfc.Domain.AAAA+" 已更新解析记录 "+ipv6)
-			}
-		}
+}
+
+func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msgs []string, errs []error) {
+	AArr := common.DomainStr2Arr(cfc.Domain.A)
+	AAAAArr := common.DomainStr2Arr(cfc.Domain.AAAA)
+
+	var wg sync.WaitGroup
+	msgChan := make(chan string)
+	errChan := make(chan error)
+
+	if enabled.IPv4 {
+		cfc.processRecords(AArr, "A", ipv4, msgChan, errChan, &wg)
 	}
+
+	if enabled.IPv6 {
+		cfc.processRecords(AAAAArr, "AAAA", ipv6, msgChan, errChan, &wg)
+	}
+
+	go func() {
+		wg.Wait()
+		close(msgChan)
+		close(errChan)
+	}()
+
+	for msg := range msgChan {
+		msgs = append(msgs, msg)
+	}
+
+	for err := range errChan {
+		errs = append(errs, err)
+	}
+
 	return
 }
 

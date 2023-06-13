@@ -157,6 +157,7 @@ Usage:
 - 请在 `./conf/client.json` 修改 `dnspod` 为 `true`
 - 打开配置文件 `./conf/dnspod.json` 填入你的 `id, token, domain, sub_domain` 并重新启动
 - 支持同一个域名的 A 和 AAAA 记录的子域名同时更新记录值
+- 支持同一个域名的 A 和 AAAA 记录的多个主机记录同时更新记录值
 
   初始 DNSPod 配置文件
 
@@ -166,8 +167,8 @@ Usage:
     "token": "在 https://console.dnspod.cn/account/token/token 获取",
     "domain": "example.com",
     "sub_domain": {
-      "a": "A记录子域名",
-      "aaaa": "AAAA记录子域名"
+      "a": "A记录子域名1,A记录子域名2,………",
+      "aaaa": "AAAA记录子域名1,AAAA记录子域名2,………"
     }
   }
   ```
@@ -186,8 +187,8 @@ Usage:
     "access_key_secret": "在 https://ram.console.aliyun.com/users 获取",
     "domain": "example.com",
     "sub_domain": {
-      "a": "A记录子域名",
-      "aaaa": "AAAA记录子域名"
+      "a": "A记录子域名1,A记录子域名2,………",
+      "aaaa": "AAAA记录子域名1,AAAA记录子域名2,………"
     }
   }
   ```
@@ -205,8 +206,8 @@ Usage:
     "zone_id": "在你域名页面的右下角有个区域 ID",
     "api_token": "在 https://dash.cloudflare.com/profile/api-tokens 获取",
     "domain": {
-      "a": "A记录子域名.example.com",
-      "aaaa": "AAAA记录子域名.example.com"
+      "a": "A记录子域名1.example.com,A记录子域名2.example.com,………",
+      "aaaa": "AAAA记录子域名1.example.com,AAAA记录子域名2.example.com,………"
     }
   }
   ```
@@ -225,8 +226,8 @@ Usage:
     "secret_access_key": "在 https://console.huaweicloud.com/iam/ 获取",
     "zone_name": "example.com.",
     "domain": {
-      "a": "A记录子域名.example.com.",
-      "aaaa": "AAAA记录子域名.example.com."
+      "a": "A记录子域名1.example.com,A记录子域名2.example.com,………",
+      "aaaa": "AAAA记录子域名1.example.com,AAAA记录子域名2.example.com,………"
     }
   }
   ```

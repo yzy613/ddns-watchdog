@@ -172,3 +172,20 @@ func VersionTips(LatestVersion string) {
 		fmt.Println("\n发现新版本，请前往 项目地址 下载")
 	}
 }
+
+func DomainStr2Arr(tagetStr string) []string {
+	splitChar := ","
+	str := strings.TrimSpace(strings.ReplaceAll(tagetStr, "，", splitChar))
+	if len(str) == 0 {
+		return []string{}
+	}
+	if strings.Contains(str, splitChar) {
+		arr := strings.Split(str, splitChar)
+		for i := range arr {
+			arr[i] = strings.TrimSpace(arr[i])
+		}
+		return arr
+	}
+
+	return []string{str}
+}

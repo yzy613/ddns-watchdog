@@ -3,6 +3,8 @@ package client
 import (
 	"ddns-watchdog/internal/common"
 	"errors"
+	"sync"
+
 	"github.com/huaweicloud/huaweicloud-sdk-go-v3/core/auth/basic"
 	dns "github.com/huaweicloud/huaweicloud-sdk-go-v3/services/dns/v2"
 	"github.com/huaweicloud/huaweicloud-sdk-go-v3/services/dns/v2/model"
@@ -24,8 +26,8 @@ func (hc *HuaweiCloud) InitConf() (msg string, err error) {
 		AccessKeyId: "在 https://console.huaweicloud.com/iam/ 获取",
 		ZoneName:    "example.com.",
 		Domain: common.Subdomain{
-			A:    "A记录子域名.example.com.",
-			AAAA: "AAAA记录子域名.example.com.",
+			A:    "A记录子域名1.example.com,A记录子域名2.example.com,……",
+			AAAA: "AAAA记录子域名1.example.com,AAAA记录子域名2.example.com,……",
 		},
 	}
 	hc.SecretAccessKey = hc.AccessKeyId
@@ -46,7 +48,32 @@ func (hc *HuaweiCloud) LoadConf() (err error) {
 	return
 }
 
-func (hc *HuaweiCloud) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
+func (hc *HuaweiCloud) processRecords(records []string, recordType string, ip string, msgChan chan<- string, errChan chan<- error, wg *sync.WaitGroup) {
+	for _, record := range records {
+		wg.Add(1)
+		go func(item string) {
+			defer wg.Done()
+			// 获取解析记录
+			recordSetId, recordIP, err := hc.getParseRecord(item, recordType)
+			if err != nil {
+				errChan <- err
+			} else if recordIP != ip {
+				// 更新解析记录
+				err = hc.updateParseRecord(ip, recordSetId, recordType, item)
+				if err != nil {
+					errChan <- err
+				} else {
+					msgChan <- "HuaweiCloud: " + item + " 已更新解析记录 " + ip
+				}
+			}
+		}(record)
+	}
+}
+
+func (hc *HuaweiCloud) Run(enabled common.Enable, ipv4, ipv6 string) (msgs []string, errs []error) {
+	AArr := common.DomainStr2Arr(hc.Domain.A)
+	AAAAArr := common.DomainStr2Arr(hc.Domain.AAAA)
+
 	if hc.ZoneId == "" && (enabled.IPv4 || enabled.IPv6) {
 		err := hc.getZoneId()
 		if err != nil {
@@ -54,32 +81,33 @@ func (hc *HuaweiCloud) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 			return
 		}
 	}
-	if enabled.IPv4 && hc.Domain.A != "" {
-		recordSetId, recordIP, err := hc.getParseRecord(hc.Domain.A, "A")
-		if err != nil {
-			errs = append(errs, err)
-		} else if recordIP != ipv4 {
-			err = hc.updateParseRecord(ipv4, recordSetId, "A", hc.Domain.A)
-			if err != nil {
-				errs = append(errs, err)
-			} else {
-				msg = append(msg, "HuaweiCloud: "+hc.Domain.A+" 已更新解析记录 "+ipv4)
-			}
-		}
+
+	var wg sync.WaitGroup
+	msgChan := make(chan string)
+	errChan := make(chan error)
+
+	if enabled.IPv4 {
+		hc.processRecords(AArr, "A", ipv4, msgChan, errChan, &wg)
 	}
-	if enabled.IPv6 && hc.Domain.AAAA != "" {
-		recordSetId, recordIP, err := hc.getParseRecord(hc.Domain.AAAA, "AAAA")
-		if err != nil {
-			errs = append(errs, err)
-		} else if recordIP != ipv6 {
-			err = hc.updateParseRecord(ipv6, recordSetId, "AAAA", hc.Domain.AAAA)
-			if err != nil {
-				errs = append(errs, err)
-			} else {
-				msg = append(msg, "HuaweiCloud: "+hc.Domain.AAAA+" 已更新解析记录 "+ipv6)
-			}
-		}
+
+	if enabled.IPv6 {
+		hc.processRecords(AAAAArr, "AAAA", ipv6, msgChan, errChan, &wg)
 	}
+
+	go func() {
+		wg.Wait()
+		close(msgChan)
+		close(errChan)
+	}()
+
+	for msg := range msgChan {
+		msgs = append(msgs, msg)
+	}
+
+	for err := range errChan {
+		errs = append(errs, err)
+	}
+
 	return
 }
 
