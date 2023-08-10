@@ -16,12 +16,14 @@ type Cloudflare struct {
 	ZoneID   string           `json:"zone_id"`
 	APIToken string           `json:"api_token"`
 	Domain   common.Subdomain `json:"domain"`
+	Proxied  bool             `json:"proxied"`
 }
 
 type cloudflareUpdateRequest struct {
 	Type    string `json:"type"`
 	Name    string `json:"name"`
 	Content string `json:"content"`
+	Proxied bool   `json:"proxied"`
 	Ttl     int    `json:"ttl"`
 }
 
@@ -147,6 +149,7 @@ func (cfc *Cloudflare) updateParseRecord(ipAddr, domainId, recordType, domain st
 		Type:    recordType,
 		Name:    domain,
 		Content: ipAddr,
+		Proxied: cfc.Proxied,
 		Ttl:     1,
 	}
 	reqJson, err := json.Marshal(reqData)
