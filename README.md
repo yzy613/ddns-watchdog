@@ -197,6 +197,7 @@ Usage:
 - 请在 `./conf/client.json` 修改 `cloudflare` 为 `true`
 - 打开配置文件 `./conf/cloudflare.json` 填入你的 `zone_id, api_token, domain` 并重新启动
 - 支持同一个域名的 A 和 AAAA 记录的子域名同时更新内容
+- 支持开启 Cloudflare 的 CDN 功能
 
   初始 Cloudflare 配置文件
 
@@ -207,7 +208,8 @@ Usage:
     "domain": {
       "a": "A记录子域名.example.com",
       "aaaa": "AAAA记录子域名.example.com"
-    }
+    },
+    "proxied": false
   }
   ```
 
@@ -343,4 +345,4 @@ pikaur -S ddns-watchdog       // pikaur
 
 > Cloudflare API [https://api.cloudflare.com/#dns-records-for-a-zone-properties](https://api.cloudflare.com/#dns-records-for-a-zone-properties)
 
-> HuaweiCloud API [https://github.com/huaweicloud/huaweicloud-sdk-go-v3](https://github.com/huaweicloud/huaweicloud-sdk-go-v3)
+> HuaweiCloud SDK [https://github.com/huaweicloud/huaweicloud-sdk-go-v3](https://github.com/huaweicloud/huaweicloud-sdk-go-v3)
