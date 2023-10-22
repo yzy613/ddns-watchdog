@@ -25,7 +25,7 @@ var (
 )
 
 func GenerateToken(length int) (token string) {
-	const letter = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	const letter = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	bigInt := new(big.Int).SetInt64(int64(len(letter)))
 	b := make([]byte, length)
 	for i := range b {

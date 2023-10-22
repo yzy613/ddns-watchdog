@@ -345,4 +345,4 @@ pikaur -S ddns-watchdog       // pikaur
 
 > Cloudflare API [https://api.cloudflare.com/#dns-records-for-a-zone-properties](https://api.cloudflare.com/#dns-records-for-a-zone-properties)
 
-> HuaweiCloud SDK [https://github.com/huaweicloud/huaweicloud-sdk-go-v3](https://github.com/huaweicloud/huaweicloud-sdk-go-v3)
+> HuaweiCloud SDK [GitHub](https://github.com/huaweicloud/huaweicloud-sdk-go-v3)
