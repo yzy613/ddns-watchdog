@@ -91,15 +91,16 @@ func NetworkCardRespond() (map[string]string, error) {
 	}
 
 	for _, i := range interfaces {
-		ipAddr, err2 := i.Addrs()
-		if err2 != nil {
-			return nil, err2
+		var ipAddr []net.Addr
+		ipAddr, err = i.Addrs()
+		if err != nil {
+			return nil, err
 		}
 		for j, addrAndMask := range ipAddr {
 			// 分离 IP 和子网掩码
 			addr := strings.Split(addrAndMask.String(), "/")[0]
 			if strings.Contains(addr, ":") {
-				addr = common.DecodeIPv6(addr)
+				addr = common.ExpandIPv6Zero(addr)
 			}
 			networkCardInfo[i.Name+" "+strconv.Itoa(j)] = addr
 		}
@@ -108,7 +109,7 @@ func NetworkCardRespond() (map[string]string, error) {
 }
 
 func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 string, err error) {
-	ncr := make(map[string]string)
+	var ncr map[string]string
 	// 若需网卡信息，则获取网卡信息并提供给用户
 	if nc.Enable && nc.IPv4 == "" && nc.IPv6 == "" {
 		ncr, err = NetworkCardRespond()
@@ -136,8 +137,9 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 	if enabled.IPv4 {
 		// 启用网卡 IPv4
 		if nc.Enable && nc.IPv4 != "" {
-			ipv4 = ncr[nc.IPv4]
-			if ipv4 == "" {
+			if v, ok := ncr[nc.IPv4]; ok {
+				ipv4 = v
+			} else {
 				err = errors.New("IPv4 选择了不存在的网卡")
 				return
 			}
@@ -146,9 +148,9 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 			if apiUrl.IPv4 == "" {
 				apiUrl.IPv4 = common.DefaultAPIUrl
 			}
-			resp, err2 := http.Get(apiUrl.IPv4)
-			if err2 != nil {
-				err = err2
+			var resp *http.Response
+			resp, err = http.Get(apiUrl.IPv4)
+			if err != nil {
 				return
 			}
 			defer func(Body io.ReadCloser) {
@@ -157,9 +159,9 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 					err = t
 				}
 			}(resp.Body)
-			recvJson, err2 := io.ReadAll(resp.Body)
-			if err2 != nil {
-				err = err2
+			var recvJson []byte
+			recvJson, err = io.ReadAll(resp.Body)
+			if err != nil {
 				return
 			}
 			var ipInfo common.GetIPResp
@@ -179,8 +181,9 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 	if enabled.IPv6 {
 		// 启用网卡 IPv6
 		if nc.Enable && nc.IPv6 != "" {
-			ipv6 = ncr[nc.IPv6]
-			if ipv6 == "" {
+			if v, ok := ncr[nc.IPv6]; ok {
+				ipv6 = v
+			} else {
 				err = errors.New("IPv6 选择了不存在的网卡")
 				return
 			}
@@ -189,9 +192,9 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 			if apiUrl.IPv6 == "" {
 				apiUrl.IPv6 = common.DefaultIPv6APIUrl
 			}
-			resp, err2 := http.Get(apiUrl.IPv6)
-			if err2 != nil {
-				err = err2
+			var resp *http.Response
+			resp, err = http.Get(apiUrl.IPv6)
+			if err != nil {
 				return
 			}
 			defer func(Body io.ReadCloser) {
@@ -200,9 +203,9 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 					err = t
 				}
 			}(resp.Body)
-			recvJson, err2 := io.ReadAll(resp.Body)
-			if err2 != nil {
-				err = err2
+			var recvJson []byte
+			recvJson, err = io.ReadAll(resp.Body)
+			if err != nil {
 				return
 			}
 			var ipInfo common.GetIPResp
@@ -213,7 +216,7 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 			ipv6 = ipInfo.IP
 		}
 		if strings.Contains(ipv6, ":") {
-			ipv6 = common.DecodeIPv6(ipv6)
+			ipv6 = common.ExpandIPv6Zero(ipv6)
 		} else {
 			err = errors.New("获取到的 IPv6 格式错误，意外获取到了 " + ipv6)
 			return

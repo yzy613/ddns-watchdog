@@ -115,8 +115,8 @@ func (cfc *Cloudflare) getParseRecord(domain, recordType string) (domainId, reco
 	if err != nil {
 		return
 	}
-	if err2 := jsonObj.Get("error").MustString(); err2 != "" {
-		err = errors.New("Cloudflare: " + err2)
+	if errMsg := jsonObj.Get("error").MustString(); errMsg != "" {
+		err = errors.New("Cloudflare: " + errMsg)
 		return
 	}
 	if !jsonObj.Get("success").MustBool() {

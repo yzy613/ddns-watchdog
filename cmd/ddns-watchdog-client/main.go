@@ -67,9 +67,9 @@ func processFlag() (exit bool, err error) {
 	flag.Parse()
 	// 打印网卡信息
 	if *printNetworkCardInfo {
-		ncr, err2 := client.NetworkCardRespond()
-		if err2 != nil {
-			err = err2
+		var ncr map[string]string
+		ncr, err = client.NetworkCardRespond()
+		if err != nil {
 			return
 		}
 		var arr []string

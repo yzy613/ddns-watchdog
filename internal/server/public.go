@@ -181,7 +181,7 @@ func GetClientIP(req *http.Request) (ipAddr string) {
 
 	// IPv6 转格式 和 :: 解压
 	if strings.Contains(ipAddr, ":") {
-		ipAddr = common.DecodeIPv6(ipAddr)
+		ipAddr = common.ExpandIPv6Zero(ipAddr)
 	}
 	return
 }

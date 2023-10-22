@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -73,11 +74,11 @@ func IsWindows() bool {
 
 func IsDirExistAndCreate(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)
-	if err != nil || os.IsNotExist(err) {
-		err = os.MkdirAll(dirPath, 0750)
-		if err != nil {
-			return err
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(dirPath, 0750)
 		}
+		return
 	}
 	return
 }
@@ -131,34 +132,36 @@ func CompareVersionString(remoteVersion, localVersion string) bool {
 	return false
 }
 
-func DecodeIPv6(srcIP string) (dstIP string) {
-	if strings.Contains(srcIP, "::") {
-		splitArr := strings.Split(srcIP, "::")
-		decode := ""
-		switch {
-		case srcIP == "::":
-			dstIP = "0:0:0:0:0:0:0:0"
-		case splitArr[0] == "" && splitArr[1] != "":
-			for i := 0; i < 8-len(strings.Split(splitArr[1], ":")); i++ {
-				decode = "0:" + decode
-			}
-			dstIP = decode + splitArr[1]
-		case splitArr[0] != "" && splitArr[1] == "":
-			for i := 0; i < 8-len(strings.Split(splitArr[0], ":")); i++ {
-				decode = decode + ":0"
-			}
-			dstIP = splitArr[0] + decode
-		default:
-			for i := 0; i < 8-len(strings.Split(splitArr[0], ":"))-len(strings.Split(splitArr[1], ":")); i++ {
-				decode = decode + ":0"
-			}
-			decode = decode + ":"
-			dstIP = splitArr[0] + decode + splitArr[1]
-		}
-	} else {
-		dstIP = srcIP
+func ExpandIPv6Zero(ip string) string {
+	p := net.ParseIP(ip)
+	if p == nil || p.To4() != nil || len(p) != net.IPv6len {
+		return ip
 	}
-	return
+
+	const maxLen = len("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")
+	b := make([]byte, 0, maxLen)
+
+	const hexDigit = "0123456789abcdef"
+	appendHex := func(dst []byte, i uint) []byte {
+		if i == 0 {
+			return append(dst, '0')
+		}
+		for j := 7; j >= 0; j-- {
+			v := i >> uint(j*4)
+			if v > 0 {
+				dst = append(dst, hexDigit[v&0xf])
+			}
+		}
+		return dst
+	}
+
+	for i := 0; i < net.IPv6len; i += 2 {
+		if i > 0 {
+			b = append(b, ':')
+		}
+		b = appendHex(b, (uint(p[i])<<8)|uint(p[i+1]))
+	}
+	return string(b)
 }
 
 func VersionTips(LatestVersion string) {

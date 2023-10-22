@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if:
+#    if:
     steps:
       - name: Load repo
         uses: actions/checkout@v3
@@ -21,6 +21,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: "1.21"
+
+      - name: Test
+        run: go test ./...
 
       - name: Build client
         run: make -f Makefile.client

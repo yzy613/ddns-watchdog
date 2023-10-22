@@ -103,5 +103,5 @@ func RespCenterReq(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// 访问成功日志
-	log.Printf("%v(%v) access success.\n", whitelist[body.Token].Description, GetClientIP(req))
+	log.Printf("%v(%v) access successful.\n", whitelist[body.Token].Description, GetClientIP(req))
 }
