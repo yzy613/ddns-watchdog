@@ -56,7 +56,7 @@ func (cfc *Cloudflare) LoadConf() (err error) {
 func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
 	if enabled.IPv4 && cfc.Domain.A != "" {
 		// 获取解析记录
-		domainId, recordIP, err := cfc.getParseRecord(cfc.Domain.A, "A")
+		domainId, recordIP, err := cfc.getParseRecord(cfc.Domain.A, "A", msg)
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv4 {
@@ -71,7 +71,7 @@ func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 	}
 	if enabled.IPv6 && cfc.Domain.AAAA != "" {
 		// 获取解析记录
-		domainId, recordIP, err := cfc.getParseRecord(cfc.Domain.AAAA, "AAAA")
+		domainId, recordIP, err := cfc.getParseRecord(cfc.Domain.AAAA, "AAAA", msg)
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv6 {
@@ -87,7 +87,7 @@ func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 	return
 }
 
-func (cfc *Cloudflare) getParseRecord(domain, recordType string) (domainId, recordIP string, err error) {
+func (cfc *Cloudflare) getParseRecord(domain, recordType string) (domainId, recordIP string, msg []string, err error) {
 	httpClient := getGeneralHttpClient()
 	url := "https://api.cloudflare.com/client/v4/zones/" + cfc.ZoneID + "/dns_records?name=" + domain
 	req, err := http.NewRequest("GET", url, http.NoBody)
@@ -125,8 +125,7 @@ func (cfc *Cloudflare) getParseRecord(domain, recordType string) (domainId, reco
 	}
 	records, err := jsonObj.Get("result").Array()
 	if len(records) == 0 {
-		err = errors.New("Cloudflare: " + domain + " 解析记录不存在")
-		return
+		msg = append(msg, "Cloudflare: " + domain + " 解析记录不存在")
 	}
 	for _, v := range records {
 		element := v.(map[string]any)
@@ -137,7 +136,7 @@ func (cfc *Cloudflare) getParseRecord(domain, recordType string) (domainId, reco
 		}
 	}
 	if domainId == "" || recordIP == "" {
-		err = errors.New("Cloudflare: " + domain + " 的 " + recordType + " 解析记录不存在")
+		msg = append(msg, "Cloudflare: " + domain + " 的 " + recordType + " 解析记录不存在")
 	}
 	return
 }

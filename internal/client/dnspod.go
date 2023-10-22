@@ -48,7 +48,7 @@ func (dpc *DNSPod) LoadConf() (err error) {
 func (dpc *DNSPod) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
 	if enabled.IPv4 && dpc.SubDomain.A != "" {
 		// 获取解析记录
-		recordId, recordLineId, recordIP, err := dpc.getParseRecord(dpc.SubDomain.A, "A")
+		recordId, recordLineId, recordIP, err := dpc.getParseRecord(dpc.SubDomain.A, "A", msg)
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv4 {
@@ -63,7 +63,7 @@ func (dpc *DNSPod) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, 
 	}
 	if enabled.IPv6 && dpc.SubDomain.AAAA != "" {
 		// 获取解析记录
-		recordId, recordLineId, recordIP, err := dpc.getParseRecord(dpc.SubDomain.AAAA, "AAAA")
+		recordId, recordLineId, recordIP, err := dpc.getParseRecord(dpc.SubDomain.AAAA, "AAAA", msg)
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv6 {
@@ -88,7 +88,7 @@ func checkRespondStatus(jsonObj *simplejson.Json) (err error) {
 	return
 }
 
-func (dpc *DNSPod) getParseRecord(subDomain, recordType string) (recordId, recordLineId, recordIP string, err error) {
+func (dpc *DNSPod) getParseRecord(subDomain, recordType string) (recordId, recordLineId, recordIP string, msg []string, err error) {
 	postContent := dpc.publicRequestInit()
 	postContent = postContent + "&" + dpc.recordRequestInit(subDomain)
 	recvJson, err := postman("https://dnsapi.cn/Record.List", postContent)
@@ -106,8 +106,7 @@ func (dpc *DNSPod) getParseRecord(subDomain, recordType string) (recordId, recor
 	}
 	records, err := jsonObj.Get("records").Array()
 	if len(records) == 0 {
-		err = errors.New("DNSPod: " + subDomain + "." + dpc.Domain + " 解析记录不存在")
-		return
+		msg = append(msg, "DNSPod: " + subDomain + "." + dpc.Domain + " 解析记录不存在")
 	}
 	for _, value := range records {
 		element := value.(map[string]any)
@@ -119,7 +118,7 @@ func (dpc *DNSPod) getParseRecord(subDomain, recordType string) (recordId, recor
 		}
 	}
 	if recordId == "" || recordIP == "" || recordLineId == "" {
-		err = errors.New("DNSPod: " + subDomain + "." + dpc.Domain + " 的 " + recordType + " 解析记录不存在")
+		msg = append(msg, "DNSPod: " + subDomain + "." + dpc.Domain + " 的 " + recordType + " 解析记录不存在")
 	}
 	return
 }

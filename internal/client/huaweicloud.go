@@ -55,7 +55,7 @@ func (hc *HuaweiCloud) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 		}
 	}
 	if enabled.IPv4 && hc.Domain.A != "" {
-		recordSetId, recordIP, err := hc.getParseRecord(hc.Domain.A, "A")
+		recordSetId, recordIP, err := hc.getParseRecord(hc.Domain.A, "A", msg)
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv4 {
@@ -68,7 +68,7 @@ func (hc *HuaweiCloud) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 		}
 	}
 	if enabled.IPv6 && hc.Domain.AAAA != "" {
-		recordSetId, recordIP, err := hc.getParseRecord(hc.Domain.AAAA, "AAAA")
+		recordSetId, recordIP, err := hc.getParseRecord(hc.Domain.AAAA, "AAAA", msg)
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv6 {
@@ -111,7 +111,7 @@ func (hc *HuaweiCloud) getZoneId() (err error) {
 	return
 }
 
-func (hc *HuaweiCloud) getParseRecord(domain, recordType string) (recordSetId, recordIP string, err error) {
+func (hc *HuaweiCloud) getParseRecord(domain, recordType string) (recordSetId, recordIP string, msg []string, err error) {
 	auth := basic.NewCredentialsBuilder().
 		WithAk(hc.AccessKeyId).
 		WithSk(hc.SecretAccessKey).
@@ -139,7 +139,7 @@ func (hc *HuaweiCloud) getParseRecord(domain, recordType string) (recordSetId, r
 		}
 	}
 	if recordSetId == "" || recordIP == "" {
-		err = errors.New("HuaweiCloud: " + domain + " 的 " + recordType + " 解析记录不存在")
+		msg = append(msg, "HuaweiCloud: " + domain + " 的 " + recordType + " 解析记录不存在")
 	}
 	return
 }

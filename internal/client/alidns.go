@@ -45,7 +45,7 @@ func (ad *AliDNS) LoadConf() (err error) {
 func (ad *AliDNS) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
 	if enabled.IPv4 && ad.SubDomain.A != "" {
 		// 获取解析记录
-		recordId, recordIP, err := ad.getParseRecord(ad.SubDomain.A, "A")
+		recordId, recordIP, err := ad.getParseRecord(ad.SubDomain.A, "A", msg)
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv4 {
@@ -60,7 +60,7 @@ func (ad *AliDNS) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, e
 	}
 	if enabled.IPv6 && ad.SubDomain.AAAA != "" {
 		// 获取解析记录
-		recordId, recordIP, err := ad.getParseRecord(ad.SubDomain.AAAA, "AAAA")
+		recordId, recordIP, err := ad.getParseRecord(ad.SubDomain.AAAA, "AAAA", msg)
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv6 {
@@ -76,7 +76,7 @@ func (ad *AliDNS) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, e
 	return
 }
 
-func (ad *AliDNS) getParseRecord(subDomain, recordType string) (recordId, recordIP string, err error) {
+func (ad *AliDNS) getParseRecord(subDomain, recordType string) (recordId, recordIP string, msg []string, err error) {
 	dnsClient, err := alidns.NewClientWithAccessKey("cn-hangzhou", ad.AccessKeyId, ad.AccessKeySecret)
 	if err != nil {
 		return
@@ -101,7 +101,7 @@ func (ad *AliDNS) getParseRecord(subDomain, recordType string) (recordId, record
 		}
 	}
 	if recordId == "" || recordIP == "" {
-		err = errors.New("AliDNS: " + subDomain + "." + ad.Domain + " 的 " + recordType + " 解析记录不存在")
+		msg = append(msg, "AliDNS: " + subDomain + "." + ad.Domain + " 的 " + recordType + " 解析记录不存在")
 	}
 	return
 }
