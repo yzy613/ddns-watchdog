@@ -3,9 +3,9 @@ module ddns-watchdog
 go 1.21
 
 require (
-	github.com/aliyun/alibaba-cloud-sdk-go v1.62.587
+	github.com/aliyun/alibaba-cloud-sdk-go v1.62.600
 	github.com/bitly/go-simplejson v0.5.1
-	github.com/huaweicloud/huaweicloud-sdk-go-v3 v0.1.62
+	github.com/huaweicloud/huaweicloud-sdk-go-v3 v0.1.64
 	github.com/spf13/pflag v1.0.5
 )
 

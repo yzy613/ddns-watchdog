@@ -142,12 +142,12 @@ func ExpandIPv6Zero(ip string) string {
 	b := make([]byte, 0, maxLen)
 
 	const hexDigit = "0123456789abcdef"
-	appendHex := func(dst []byte, i uint) []byte {
+	appendHex := func(dst []byte, i uint16) []byte {
 		if i == 0 {
 			return append(dst, '0')
 		}
-		for j := 7; j >= 0; j-- {
-			v := i >> uint(j*4)
+		for j := 3; j >= 0; j-- {
+			v := i >> (j * 4)
 			if v > 0 {
 				dst = append(dst, hexDigit[v&0xf])
 			}
@@ -159,7 +159,7 @@ func ExpandIPv6Zero(ip string) string {
 		if i > 0 {
 			b = append(b, ':')
 		}
-		b = appendHex(b, (uint(p[i])<<8)|uint(p[i+1]))
+		b = appendHex(b, (uint16(p[i])<<8)|uint16(p[i+1]))
 	}
 	return string(b)
 }

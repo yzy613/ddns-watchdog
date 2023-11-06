@@ -4,8 +4,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/HdrHistogram/hdrhistogram-go v1.1.2/go.mod h1:yDgFjdqOqDEKOvasDdhWNXYg9BVp4O+o5f6V/ehm6Oo=
 github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af/go.mod h1:K08gAheRH3/J6wwsYMMT4xOr94bZjxIelGM0+d/wbFw=
-github.com/aliyun/alibaba-cloud-sdk-go v1.62.587 h1:R7QQjLc0y4eI2fqHrW2bsjhYzAQqpI1yxi11gZiETYU=
-github.com/aliyun/alibaba-cloud-sdk-go v1.62.587/go.mod h1:CJJYa1ZMxjlN/NbXEwmejEnBkhi0DV+Yb3B2lxf+74o=
+github.com/aliyun/alibaba-cloud-sdk-go v1.62.600 h1:MFkvRajk5tsEPTkNyEVhMmYGOGOhiApTAcFkEIRf37w=
+github.com/aliyun/alibaba-cloud-sdk-go v1.62.600/go.mod h1:CJJYa1ZMxjlN/NbXEwmejEnBkhi0DV+Yb3B2lxf+74o=
 github.com/bitly/go-simplejson v0.5.1 h1:xgwPbetQScXt1gh9BmoJ6j9JMr3TElvuIyjR8pgdoow=
 github.com/bitly/go-simplejson v0.5.1/go.mod h1:YOPVLzCfwK14b4Sff3oP1AmGhI9T9Vsg84etUnlyp+Q=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
@@ -42,8 +42,8 @@ github.com/google/go-cmp v0.5.2/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-cmp v0.5.4 h1:L8R9j+yAqZuZjsqh/z+F1NCffTKKLShY6zXTItVIZ8M=
 github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
-github.com/huaweicloud/huaweicloud-sdk-go-v3 v0.1.62 h1:KIdJHehTBMAe9rWllPWZsQ4ERMP89zVcu2JyNwHgrEI=
-github.com/huaweicloud/huaweicloud-sdk-go-v3 v0.1.62/go.mod h1:AZT3IyeViMA1qIoo6lM2eDobcTXORpqIQzSqdodah7E=
+github.com/huaweicloud/huaweicloud-sdk-go-v3 v0.1.64 h1:ESkUy969zejtfYMWUj5exYKM/bqYbQZZNhcO2WBBTKA=
+github.com/huaweicloud/huaweicloud-sdk-go-v3 v0.1.64/go.mod h1:AZT3IyeViMA1qIoo6lM2eDobcTXORpqIQzSqdodah7E=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
