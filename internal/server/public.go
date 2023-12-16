@@ -198,7 +198,7 @@ func Install() (err error) {
 		serviceContent := []byte(
 			"[Unit]\n" +
 				"Description=" + RunningName + " Service\n" +
-				"After=network.target\n\n" +
+				"After=network-online.target\n\n" +
 				"[Service]\n" +
 				"Type=simple\n" +
 				"WorkingDirectory=" + wd +
