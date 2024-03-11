@@ -84,16 +84,26 @@ func (hc *HuaweiCloud) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 }
 
 func (hc *HuaweiCloud) getZoneId() (err error) {
-	auth := basic.NewCredentialsBuilder().
+	auth, err := basic.NewCredentialsBuilder().
 		WithAk(hc.AccessKeyId).
 		WithSk(hc.SecretAccessKey).
-		Build()
+		SafeBuild()
+	if err != nil {
+		return
+	}
 
-	dnsClient := dns.NewDnsClient(
-		dns.DnsClientBuilder().
-			WithRegion(region.ValueOf("cn-east-3")).
-			WithCredential(auth).
-			Build())
+	hr, err := region.SafeValueOf("cn-east-3")
+	if err != nil {
+		return
+	}
+	hhc, err := dns.DnsClientBuilder().
+		WithRegion(hr).
+		WithCredential(auth).
+		SafeBuild()
+	if err != nil {
+		return
+	}
+	dnsClient := dns.NewDnsClient(hhc)
 
 	request := &model.ListPublicZonesRequest{}
 	response, err := dnsClient.ListPublicZones(request)
@@ -112,16 +122,26 @@ func (hc *HuaweiCloud) getZoneId() (err error) {
 }
 
 func (hc *HuaweiCloud) getParseRecord(domain, recordType string) (recordSetId, recordIP string, err error) {
-	auth := basic.NewCredentialsBuilder().
+	auth, err := basic.NewCredentialsBuilder().
 		WithAk(hc.AccessKeyId).
 		WithSk(hc.SecretAccessKey).
-		Build()
+		SafeBuild()
+	if err != nil {
+		return
+	}
 
-	dnsClient := dns.NewDnsClient(
-		dns.DnsClientBuilder().
-			WithRegion(region.ValueOf("cn-east-3")).
-			WithCredential(auth).
-			Build())
+	hr, err := region.SafeValueOf("cn-east-3")
+	if err != nil {
+		return
+	}
+	hhc, err := dns.DnsClientBuilder().
+		WithRegion(hr).
+		WithCredential(auth).
+		SafeBuild()
+	if err != nil {
+		return
+	}
+	dnsClient := dns.NewDnsClient(hhc)
 
 	request := &model.ListRecordSetsByZoneRequest{}
 	request.ZoneId = hc.ZoneId
@@ -145,25 +165,35 @@ func (hc *HuaweiCloud) getParseRecord(domain, recordType string) (recordSetId, r
 }
 
 func (hc *HuaweiCloud) updateParseRecord(ipAddr, recordSetId, recordType, domain string) (err error) {
-	auth := basic.NewCredentialsBuilder().
+	auth, err := basic.NewCredentialsBuilder().
 		WithAk(hc.AccessKeyId).
 		WithSk(hc.SecretAccessKey).
-		Build()
+		SafeBuild()
+	if err != nil {
+		return
+	}
 
-	dnsClient := dns.NewDnsClient(
-		dns.DnsClientBuilder().
-			WithRegion(region.ValueOf("cn-east-3")).
-			WithCredential(auth).
-			Build())
+	hr, err := region.SafeValueOf("cn-east-3")
+	if err != nil {
+		return
+	}
+	hhc, err := dns.DnsClientBuilder().
+		WithRegion(hr).
+		WithCredential(auth).
+		SafeBuild()
+	if err != nil {
+		return
+	}
+	dnsClient := dns.NewDnsClient(hhc)
 
 	request := &model.UpdateRecordSetRequest{}
 	request.ZoneId = hc.ZoneId
 	request.RecordsetId = recordSetId
-	var listRecordsbody = []string{
+	var listRecordsBody = []string{
 		ipAddr,
 	}
 	request.Body = &model.UpdateRecordSetReq{
-		Records: &listRecordsbody,
+		Records: &listRecordsBody,
 		Type:    recordType,
 		Name:    domain,
 	}
