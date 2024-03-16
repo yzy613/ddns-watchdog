@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/tls"
-	"ddns-watchdog/internal/client"
 	"ddns-watchdog/internal/common"
 	"ddns-watchdog/internal/server"
 	"errors"
@@ -22,7 +21,6 @@ var (
 		"0 -> "+server.ConfFileName+"\n"+
 		"1 -> "+server.ServiceConfFileName+"\n"+
 		"2 -> "+server.WhitelistFileName)
-	insecure      = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
 	add           = flag.BoolP("add", "a", false, "添加或更新 token 信息到白名单")
 	deleteB       = flag.BoolP("delete", "d", false, "删除白名单中的 token")
 	generateToken = flag.BoolP("generate-token", "g", false, "生成 token 并输出")
@@ -199,10 +197,6 @@ func processFlag() (exit bool, err error) {
 		}
 		exit = true
 		return
-	}
-
-	if *insecure {
-		client.HttpsInsecure = *insecure
 	}
 	return
 }

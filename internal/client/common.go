@@ -6,8 +6,7 @@ import (
 )
 
 var (
-	installPath   = "/etc/systemd/system/" + ProjName + ".service"
-	HttpsInsecure = false
+	installPath = "/etc/systemd/system/" + ProjName + ".service"
 )
 
 func getGeneralHttpClient() *http.Client {
@@ -15,8 +14,7 @@ func getGeneralHttpClient() *http.Client {
 		Transport: &http.Transport{
 			DisableKeepAlives: true,
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: HttpsInsecure,
-				MinVersion:         tls.VersionTLS12,
+				MinVersion: tls.VersionTLS12,
 			},
 		},
 	}

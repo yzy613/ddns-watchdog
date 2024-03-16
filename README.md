@@ -40,7 +40,6 @@ Usage:
                        2 -> alidns.json
                        3 -> cloudflare.json
                        4 -> huaweicloud.json
-  -k, --insecure       使用 https 链接时不检查 TLS 证书合法性
   -I, --install        安装服务并退出
   -n, --network-card   输出网卡信息并退出
   -U, --uninstall      卸载服务并退出
@@ -256,7 +255,6 @@ Usage:
                            0 -> server.json
                            1 -> services.json
                            2 -> whitelist.json
-  -k, --insecure           使用 https 链接时不检查 TLS 证书合法性
   -I, --install            安装服务并退出
   -m, --message string     备注 token 信息
   -s, --service string     指定需要采用的域名解析服务提供商，以下是可指定的提供商

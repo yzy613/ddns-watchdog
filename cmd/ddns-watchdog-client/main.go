@@ -32,7 +32,6 @@ var (
 		"4 -> "+client.HuaweiCloudConfFileName)
 	confPath             = flag.StringP("conf", "c", "", "指定配置文件目录 (目录有空格请放在双引号中间)")
 	printNetworkCardInfo = flag.BoolP("network-card", "n", false, "输出网卡信息并退出")
-	insecure             = flag.BoolP("insecure", "k", false, "使用 https 链接时不检查 TLS 证书合法性")
 )
 
 func main() {
@@ -131,10 +130,6 @@ func processFlag() (exit bool, err error) {
 		}
 		exit = true
 		return
-	}
-
-	if *insecure {
-		client.HttpsInsecure = *insecure
 	}
 	return
 }
@@ -249,8 +244,7 @@ func accessCenter(ipv4, ipv6 string) {
 	hc := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: client.HttpsInsecure,
-				MinVersion:         tls.VersionTLS12,
+				MinVersion: tls.VersionTLS12,
 			},
 		},
 	}
