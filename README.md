@@ -268,7 +268,7 @@ Usage:
   -v, --version            查看当前版本并检查更新后退出
 ```
 
-- `./ddns-watchdog-server -a -g -s service -D example.com -A v4 --AAAA v6 -m description` 添加完整的信息并生成 token 再加入白名单
+- `./ddns-watchdog-server -a -g -s <service> -D <example.com> -A <v4> --AAAA <v6> -m <description>` 添加完整的信息并生成 token 再加入白名单
 - `./ddns-watchdog-server -I` 安装服务并退出
 - `./ddns-watchdog-server -c conf` 指定配置文件目录为 conf (目录有空格请放在双引号中间)
 - `./ddns-watchdog-server -i 012` 初始化所有配置文件并退出
