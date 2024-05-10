@@ -6,7 +6,7 @@ import (
 	"github.com/huaweicloud/huaweicloud-sdk-go-v3/core/auth/basic"
 	dns "github.com/huaweicloud/huaweicloud-sdk-go-v3/services/dns/v2"
 	"github.com/huaweicloud/huaweicloud-sdk-go-v3/services/dns/v2/model"
-	region "github.com/huaweicloud/huaweicloud-sdk-go-v3/services/dns/v2/region"
+	"github.com/huaweicloud/huaweicloud-sdk-go-v3/services/dns/v2/region"
 )
 
 const HuaweiCloudConfFileName = "huaweicloud.json"
