@@ -43,7 +43,7 @@ Usage:
   -I, --install        安装服务并退出
   -n, --network-card   输出网卡信息并退出
   -U, --uninstall      卸载服务并退出
-  -v, --version        查看当前版本并检查更新后退出
+  -V, --version        查看当前版本并检查更新后退出
 ```
 
 - `./ddns-watchdog-client -i 01234` 初始化所有配置文件并退出
@@ -71,7 +71,7 @@ Usage:
 - `systemctl enable ddns-watchdog-client` 开机自启服务
 - `./ddns-watchdog-client -U` 卸载服务并退出 (仅限有 systemd 的 Linux 使用)
 - `./ddns-watchdog-client -f` 强制检查解析记录值
-- `./ddns-watchdog-client -v` 查看当前版本并检查更新后退出
+- `./ddns-watchdog-client -V` 查看当前版本并检查更新后退出
 
 ### 初始客户端配置文件
 
@@ -265,7 +265,7 @@ Usage:
   -t, --token string       指定 token (长度在 [16,127] 之间，支持 UTF-8 字符)
   -l, --token-length int   指定生成 token 的长度 (default 48)
   -U, --uninstall          卸载服务并退出
-  -v, --version            查看当前版本并检查更新后退出
+  -V, --version            查看当前版本并检查更新后退出
 ```
 
 - `./ddns-watchdog-server -a -g -s <service> -D <example.com> -A <v4> --AAAA <v6> -m <description>` 添加完整的信息并生成 token 再加入白名单
@@ -275,7 +275,7 @@ Usage:
 - `systemctl start ddns-watchdog-server` 启动服务
 - `systemctl enable ddns-watchdog-server` 开机自启服务
 - `./ddns-watchdog-server -U` 卸载服务并退出
-- `./ddns-watchdog-server -v` 查看当前版本并检查更新后退出
+- `./ddns-watchdog-server -V` 查看当前版本并检查更新后退出
 
 ### 初始服务端配置文件
 

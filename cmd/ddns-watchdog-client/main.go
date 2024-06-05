@@ -23,7 +23,7 @@ var (
 	installOption   = flag.BoolP("install", "I", false, "安装服务并退出")
 	uninstallOption = flag.BoolP("uninstall", "U", false, "卸载服务并退出")
 	enforcement     = flag.BoolP("force", "f", false, "强制检查 DNS 解析记录")
-	version         = flag.BoolP("version", "v", false, "查看当前版本并检查更新后退出")
+	version         = flag.BoolP("version", "V", false, "查看当前版本并检查更新后退出")
 	initOption      = flag.StringP("init", "i", "", "有选择地初始化配置文件并退出，可以组合使用 (例 01)\n"+
 		"0 -> "+client.ConfFileName+"\n"+
 		"1 -> "+client.DNSPodConfFileName+"\n"+
