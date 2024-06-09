@@ -46,7 +46,7 @@ func (dpc *DNSPod) LoadConf() (err error) {
 }
 
 func (dpc *DNSPod) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
-	if enabled.IPv4 && dpc.SubDomain.A != "" {
+	if ipv4 != "" && enabled.IPv4 && dpc.SubDomain.A != "" {
 		// 获取解析记录
 		recordId, recordLineId, recordIP, err := dpc.getParseRecord(dpc.SubDomain.A, "A")
 		if err != nil {
@@ -61,7 +61,7 @@ func (dpc *DNSPod) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, 
 			}
 		}
 	}
-	if enabled.IPv6 && dpc.SubDomain.AAAA != "" {
+	if ipv6 != "" && enabled.IPv6 && dpc.SubDomain.AAAA != "" {
 		// 获取解析记录
 		recordId, recordLineId, recordIP, err := dpc.getParseRecord(dpc.SubDomain.AAAA, "AAAA")
 		if err != nil {

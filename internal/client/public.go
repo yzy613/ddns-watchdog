@@ -141,7 +141,6 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 				ipv4 = v
 			} else {
 				err = errors.New("IPv4 选择了不存在的网卡")
-				return
 			}
 		} else {
 			// 使用 API 获取 IPv4
@@ -173,7 +172,7 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 		}
 		if strings.Contains(ipv4, ":") {
 			err = errors.New("获取到的 IPv4 格式错误，意外获取到了 " + ipv4)
-			return
+			ipv4 = ""
 		}
 	}
 
@@ -185,7 +184,6 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 				ipv6 = v
 			} else {
 				err = errors.New("IPv6 选择了不存在的网卡")
-				return
 			}
 		} else {
 			// 使用 API 获取 IPv4
@@ -219,7 +217,7 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 			ipv6 = common.ExpandIPv6Zero(ipv6)
 		} else {
 			err = errors.New("获取到的 IPv6 格式错误，意外获取到了 " + ipv6)
-			return
+			ipv6 = ""
 		}
 	}
 	return

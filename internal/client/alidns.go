@@ -43,7 +43,7 @@ func (ad *AliDNS) LoadConf() (err error) {
 }
 
 func (ad *AliDNS) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
-	if enabled.IPv4 && ad.SubDomain.A != "" {
+	if ipv4 != "" && enabled.IPv4 && ad.SubDomain.A != "" {
 		// 获取解析记录
 		recordId, recordIP, err := ad.getParseRecord(ad.SubDomain.A, "A")
 		if err != nil {
@@ -58,7 +58,7 @@ func (ad *AliDNS) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, e
 			}
 		}
 	}
-	if enabled.IPv6 && ad.SubDomain.AAAA != "" {
+	if ipv6 != "" && enabled.IPv6 && ad.SubDomain.AAAA != "" {
 		// 获取解析记录
 		recordId, recordIP, err := ad.getParseRecord(ad.SubDomain.AAAA, "AAAA")
 		if err != nil {

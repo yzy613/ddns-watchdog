@@ -192,7 +192,9 @@ func check() {
 	ipv4, ipv6, err := client.GetOwnIP(client.Client.Enable, client.Client.APIUrl, client.Client.NetworkCard)
 	if err != nil {
 		log.Println(err)
-		return
+		if ipv4 == "" && ipv6 == "" {
+			return
+		}
 	}
 
 	// 进入更新流程

@@ -54,7 +54,7 @@ func (hc *HuaweiCloud) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 			return
 		}
 	}
-	if enabled.IPv4 && hc.Domain.A != "" {
+	if ipv4 != "" && enabled.IPv4 && hc.Domain.A != "" {
 		recordSetId, recordIP, err := hc.getParseRecord(hc.Domain.A, "A")
 		if err != nil {
 			errs = append(errs, err)
@@ -67,7 +67,7 @@ func (hc *HuaweiCloud) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 			}
 		}
 	}
-	if enabled.IPv6 && hc.Domain.AAAA != "" {
+	if ipv6 != "" && enabled.IPv6 && hc.Domain.AAAA != "" {
 		recordSetId, recordIP, err := hc.getParseRecord(hc.Domain.AAAA, "AAAA")
 		if err != nil {
 			errs = append(errs, err)

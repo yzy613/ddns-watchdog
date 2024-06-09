@@ -54,7 +54,7 @@ func (cfc *Cloudflare) LoadConf() (err error) {
 }
 
 func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, errs []error) {
-	if enabled.IPv4 && cfc.Domain.A != "" {
+	if ipv4 != "" && enabled.IPv4 && cfc.Domain.A != "" {
 		// 获取解析记录
 		domainId, recordIP, err := cfc.getParseRecord(cfc.Domain.A, "A")
 		if err != nil {
@@ -69,7 +69,7 @@ func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 			}
 		}
 	}
-	if enabled.IPv6 && cfc.Domain.AAAA != "" {
+	if ipv6 != "" && enabled.IPv6 && cfc.Domain.AAAA != "" {
 		// 获取解析记录
 		domainId, recordIP, err := cfc.getParseRecord(cfc.Domain.AAAA, "AAAA")
 		if err != nil {
