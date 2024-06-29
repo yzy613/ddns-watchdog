@@ -32,8 +32,7 @@ type AsyncServiceCallback func(enabledServices common.Enable, ipv4, ipv6 string)
 
 func Install() (err error) {
 	if common.IsWindows() {
-		err = errors.New("windows 暂不支持安装到系统")
-		return
+		return errors.New("windows 暂不支持安装到系统")
 	}
 	// 注册系统服务
 	if Client.CheckCycleMinutes == 0 {
@@ -42,7 +41,7 @@ func Install() (err error) {
 	}
 	wd, err := os.Getwd()
 	if err != nil {
-		return err
+		return
 	}
 	serviceContent := []byte(
 		"[Unit]\n" +
@@ -58,7 +57,7 @@ func Install() (err error) {
 			"WantedBy=multi-user.target\n")
 	err = os.WriteFile(installPath, serviceContent, 0600)
 	if err != nil {
-		return err
+		return
 	}
 	log.Println("可以使用 systemctl 管理 " + ProjName + " 服务了")
 	return
@@ -66,16 +65,15 @@ func Install() (err error) {
 
 func Uninstall() (err error) {
 	if common.IsWindows() {
-		err = errors.New("windows 暂不支持安装到系统")
-		return
+		return errors.New("windows 暂不支持安装到系统")
 	}
 	wd, err := os.Getwd()
 	if err != nil {
-		return err
+		return
 	}
 	err = os.Remove(installPath)
 	if err != nil {
-		return err
+		return
 	}
 	log.Println("卸载服务成功")
 	log.Println("若要完全删除，请移步到 " + wd + " 和 " + ConfDirectoryName + " 完全删除")
