@@ -30,18 +30,16 @@ func (hc *HuaweiCloud) InitConf() (msg string, err error) {
 	}
 	hc.SecretAccessKey = hc.AccessKeyId
 
-	err = common.MarshalAndSave(hc, ConfDirectoryName+"/"+HuaweiCloudConfFileName)
-	msg = "初始化 " + ConfDirectoryName + "/" + HuaweiCloudConfFileName
-	return
+	return "初始化 " + ConfDirectoryName + "/" + HuaweiCloudConfFileName,
+		common.MarshalAndSave(hc, ConfDirectoryName+"/"+HuaweiCloudConfFileName)
 }
 
 func (hc *HuaweiCloud) LoadConf() (err error) {
-	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+HuaweiCloudConfFileName, &hc)
-	if err != nil {
+	if err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+HuaweiCloudConfFileName, &hc); err != nil {
 		return
 	}
 	if hc.AccessKeyId == "" || hc.SecretAccessKey == "" || hc.ZoneName == "" || (hc.Domain.A == "" && hc.Domain.AAAA == "") {
-		err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + HuaweiCloudConfFileName + " 检查你的 access_key_id, secret_access_key, domain 并重新启动")
+		return errors.New("请打开配置文件 " + ConfDirectoryName + "/" + HuaweiCloudConfFileName + " 检查你的 access_key_id, secret_access_key, domain 并重新启动")
 	}
 	return
 }
@@ -59,8 +57,7 @@ func (hc *HuaweiCloud) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv4 {
-			err = hc.updateParseRecord(ipv4, recordSetId, "A", hc.Domain.A)
-			if err != nil {
+			if err = hc.updateParseRecord(ipv4, recordSetId, "A", hc.Domain.A); err != nil {
 				errs = append(errs, err)
 			} else {
 				msg = append(msg, "HuaweiCloud: "+hc.Domain.A+" 已更新解析记录 "+ipv4)
@@ -72,8 +69,7 @@ func (hc *HuaweiCloud) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 		if err != nil {
 			errs = append(errs, err)
 		} else if recordIP != ipv6 {
-			err = hc.updateParseRecord(ipv6, recordSetId, "AAAA", hc.Domain.AAAA)
-			if err != nil {
+			if err = hc.updateParseRecord(ipv6, recordSetId, "AAAA", hc.Domain.AAAA); err != nil {
 				errs = append(errs, err)
 			} else {
 				msg = append(msg, "HuaweiCloud: "+hc.Domain.AAAA+" 已更新解析记录 "+ipv6)
@@ -194,8 +190,8 @@ func (hc *HuaweiCloud) updateParseRecord(ipAddr, recordSetId, recordType, domain
 	}
 	request.Body = &model.UpdateRecordSetReq{
 		Records: &listRecordsBody,
-		Type:    recordType,
-		Name:    domain,
+		Type:    &recordType,
+		Name:    &domain,
 	}
 	_, err = dnsClient.UpdateRecordSet(request)
 	return

@@ -52,8 +52,7 @@ func RespCenterReq(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	var body common.CenterReq
-	err = json.Unmarshal(bodyJson, &body)
-	if err != nil {
+	if err = json.Unmarshal(bodyJson, &body); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return

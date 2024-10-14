@@ -50,8 +50,7 @@ func main() {
 
 	// 加载白名单
 	if server.Srv.CenterService {
-		err = server.Services.LoadConf()
-		if err != nil {
+		if err = server.Services.LoadConf(); err != nil {
 			log.Fatal(err)
 		}
 		// 路由绑定函数
@@ -94,13 +93,11 @@ func processFlag() (exit bool, err error) {
 	// 初始化配置
 	if *initOption != "" {
 		for _, event := range *initOption {
-			err = initConf(string(event))
-			if err != nil {
+			if err = initConf(string(event)); err != nil {
 				return
 			}
 		}
-		exit = true
-		return
+		return true, nil
 	}
 
 	if *deleteB {
@@ -114,8 +111,7 @@ func processFlag() (exit bool, err error) {
 			return
 		}
 		fmt.Print(msg)
-		exit = true
-		return
+		return true, nil
 	}
 
 	currentToken := ""
@@ -155,6 +151,7 @@ func processFlag() (exit bool, err error) {
 			}
 		}
 		exit = true
+
 		switch status {
 		case server.InsertSign:
 			fmt.Printf("Added %v(%v) to whitelist.\n", m, currentToken)
@@ -169,34 +166,22 @@ func processFlag() (exit bool, err error) {
 	}
 
 	// 加载配置
-	err = server.Srv.LoadConf()
-	if err != nil {
+	if err = server.Srv.LoadConf(); err != nil {
 		return
 	}
 
 	// 版本信息
 	if *version {
 		server.Srv.CheckLatestVersion()
-		exit = true
-		return
+		return true, nil
 	}
 
 	// 安装 / 卸载服务
 	switch {
 	case *installOption:
-		err = server.Install()
-		if err != nil {
-			return
-		}
-		exit = true
-		return
+		return true, server.Install()
 	case *uninstallOption:
-		err = server.Uninstall()
-		if err != nil {
-			return
-		}
-		exit = true
-		return
+		return true, server.Uninstall()
 	}
 	return
 }
@@ -214,7 +199,7 @@ func initConf(event string) (err error) {
 		err = errors.New("你初始化了一个寂寞")
 	}
 	if err != nil {
-		return err
+		return
 	}
 	log.Println(msg)
 	return

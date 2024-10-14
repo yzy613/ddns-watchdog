@@ -7,11 +7,12 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
 const (
-	LocalVersion      = "1.5.9"
+	LocalVersion      = "1.5.10"
 	DefaultAPIUrl     = "https://yzyweb.cn/ddns-watchdog"
 	DefaultIPv6APIUrl = "https://yzyweb.cn/ddns-watchdog6"
 	ProjectUrl        = "https://github.com/yzy613/ddns-watchdog"
@@ -93,24 +94,21 @@ func LoadAndUnmarshal(filePath string, dst any) (err error) {
 	if err != nil {
 		return
 	}
-	err = json.Unmarshal(jsonContent, &dst)
-	if err != nil {
+	if err = json.Unmarshal(jsonContent, &dst); err != nil {
 		return
 	}
 	return
 }
 
 func MarshalAndSave(content any, filePath string) (err error) {
-	err = IsDirExistAndCreate(filepath.Dir(filePath))
-	if err != nil {
+	if err = IsDirExistAndCreate(filepath.Dir(filePath)); err != nil {
 		return
 	}
 	jsonContent, err := json.MarshalIndent(content, "", "\t")
 	if err != nil {
 		return
 	}
-	err = os.WriteFile(filePath, jsonContent, 0600)
-	if err != nil {
+	if err = os.WriteFile(filePath, jsonContent, 0600); err != nil {
 		return
 	}
 	return nil
@@ -119,16 +117,21 @@ func MarshalAndSave(content any, filePath string) (err error) {
 func CompareVersionString(remoteVersion, localVersion string) bool {
 	rv := strings.Split(remoteVersion, ".")
 	lv := strings.Split(localVersion, ".")
-	if len(rv) <= len(lv) {
-		for key, value := range rv {
-			switch {
-			case value > lv[key]:
-				return true
-			case value < lv[key]:
-				return false
-			}
+
+	for i := 0; i < max(len(rv), len(lv)); i++ {
+		var r, l int
+		if i < len(rv) {
+			r, _ = strconv.Atoi(rv[i])
+		}
+		if i < len(lv) {
+			l, _ = strconv.Atoi(lv[i])
+		}
+
+		if r > l {
+			return true
 		}
 	}
+
 	return false
 }
 

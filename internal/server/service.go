@@ -54,8 +54,7 @@ func (conf *service) InitConf() (msg string, err error) {
 			APIToken: "",
 		},
 	}
-	err = common.MarshalAndSave(conf, ConfDirectoryName+"/"+ServiceConfFileName)
-	if err != nil {
+	if err = common.MarshalAndSave(conf, ConfDirectoryName+"/"+ServiceConfFileName); err != nil {
 		return
 	}
 	msg = "初始化 " + ConfDirectoryName + "/" + ServiceConfFileName
@@ -63,8 +62,7 @@ func (conf *service) InitConf() (msg string, err error) {
 }
 
 func (conf *service) LoadConf() (err error) {
-	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+ServiceConfFileName, &conf)
-	if err != nil {
+	if err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+ServiceConfFileName, &conf); err != nil {
 		return
 	}
 	err = LoadWhitelist()

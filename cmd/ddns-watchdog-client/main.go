@@ -45,8 +45,7 @@ func main() {
 	}
 
 	// 加载服务配置
-	err = loadConf()
-	if err != nil {
+	if err = loadConf(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -79,8 +78,7 @@ func processFlag() (exit bool, err error) {
 		for _, key := range arr {
 			fmt.Printf("%v\n\t%v\n", key, ncr[key])
 		}
-		exit = true
-		return
+		return true, nil
 	}
 
 	// 加载自定义配置文件目录
@@ -91,45 +89,31 @@ func processFlag() (exit bool, err error) {
 	// 有选择地初始化配置文件
 	if *initOption != "" {
 		for _, event := range *initOption {
-			err = initConf(string(event))
-			if err != nil {
+			if err = initConf(string(event)); err != nil {
 				return
 			}
 		}
-		exit = true
-		return
+		return true, nil
 	}
 
 	// 加载客户端配置
 	// 不得不放在这个地方，因为有下面的检查版本和安装 / 卸载服务
-	err = client.Client.LoadConf()
-	if err != nil {
+	if err = client.Client.LoadConf(); err != nil {
 		return
 	}
 
 	// 检查版本
 	if *version {
 		client.Client.CheckLatestVersion()
-		exit = true
-		return
+		return true, nil
 	}
 
 	// 安装 / 卸载服务
 	switch {
 	case *installOption:
-		err = client.Install()
-		if err != nil {
-			return
-		}
-		exit = true
-		return
+		return true, client.Install()
 	case *uninstallOption:
-		err = client.Uninstall()
-		if err != nil {
-			return
-		}
-		exit = true
-		return
+		return true, client.Uninstall()
 	}
 	return
 }
@@ -151,7 +135,7 @@ func initConf(event string) (err error) {
 		err = errors.New("你初始化了一个寂寞")
 	}
 	if err != nil {
-		return err
+		return
 	}
 	log.Println(msg)
 	return
@@ -160,26 +144,22 @@ func initConf(event string) (err error) {
 func loadConf() (err error) {
 	if !client.Client.Center.Enable {
 		if client.Client.Services.DNSPod {
-			err = client.DP.LoadConf()
-			if err != nil {
+			if err = client.DP.LoadConf(); err != nil {
 				return
 			}
 		}
 		if client.Client.Services.AliDNS {
-			err = client.AD.LoadConf()
-			if err != nil {
+			if err = client.AD.LoadConf(); err != nil {
 				return
 			}
 		}
 		if client.Client.Services.Cloudflare {
-			err = client.Cf.LoadConf()
-			if err != nil {
+			if err = client.Cf.LoadConf(); err != nil {
 				return
 			}
 		}
 		if client.Client.Services.HuaweiCloud {
-			err = client.HC.LoadConf()
-			if err != nil {
+			if err = client.HC.LoadConf(); err != nil {
 				return
 			}
 		}
@@ -278,8 +258,7 @@ func accessCenter(ipv4, ipv6 string) {
 		return
 	}
 	defer func(Body io.ReadCloser) {
-		t := Body.Close()
-		if t != nil {
+		if t := Body.Close(); t != nil {
 			err = t
 		}
 	}(resp.Body)
@@ -295,8 +274,7 @@ func accessCenter(ipv4, ipv6 string) {
 	}
 	if len(respBodyJson) > 0 {
 		var respBody = common.GeneralResp{}
-		err = json.Unmarshal(respBodyJson, &respBody)
-		if err != nil {
+		if err = json.Unmarshal(respBodyJson, &respBody); err != nil {
 			log.Println(err)
 			return
 		}

@@ -37,18 +37,16 @@ func (cfc *Cloudflare) InitConf() (msg string, err error) {
 		},
 	}
 
-	err = common.MarshalAndSave(cfc, ConfDirectoryName+"/"+CloudflareConfFileName)
-	msg = "初始化 " + ConfDirectoryName + "/" + CloudflareConfFileName
-	return
+	return "初始化 " + ConfDirectoryName + "/" + CloudflareConfFileName,
+		common.MarshalAndSave(cfc, ConfDirectoryName+"/"+CloudflareConfFileName)
 }
 
 func (cfc *Cloudflare) LoadConf() (err error) {
-	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+CloudflareConfFileName, &cfc)
-	if err != nil {
+	if err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+CloudflareConfFileName, &cfc); err != nil {
 		return
 	}
 	if cfc.ZoneID == "" || cfc.APIToken == "" || (cfc.Domain.A == "" && cfc.Domain.AAAA == "") {
-		err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + CloudflareConfFileName + " 检查你的 zone_id, api_token, domain 并重新启动")
+		return errors.New("请打开配置文件 " + ConfDirectoryName + "/" + CloudflareConfFileName + " 检查你的 zone_id, api_token, domain 并重新启动")
 	}
 	return
 }
@@ -61,8 +59,7 @@ func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 			errs = append(errs, err)
 		} else if recordIP != ipv4 {
 			// 更新解析记录
-			err = cfc.updateParseRecord(ipv4, domainId, "A", cfc.Domain.A)
-			if err != nil {
+			if err = cfc.updateParseRecord(ipv4, domainId, "A", cfc.Domain.A); err != nil {
 				errs = append(errs, err)
 			} else {
 				msg = append(msg, "Cloudflare: "+cfc.Domain.A+" 已更新解析记录 "+ipv4)
@@ -76,8 +73,7 @@ func (cfc *Cloudflare) Run(enabled common.Enable, ipv4, ipv6 string) (msg []stri
 			errs = append(errs, err)
 		} else if recordIP != ipv6 {
 			// 更新解析记录
-			err = cfc.updateParseRecord(ipv6, domainId, "AAAA", cfc.Domain.AAAA)
-			if err != nil {
+			if err = cfc.updateParseRecord(ipv6, domainId, "AAAA", cfc.Domain.AAAA); err != nil {
 				errs = append(errs, err)
 			} else {
 				msg = append(msg, "Cloudflare: "+cfc.Domain.AAAA+" 已更新解析记录 "+ipv6)
@@ -101,8 +97,7 @@ func (cfc *Cloudflare) getParseRecord(domain, recordType string) (domainId, reco
 		return
 	}
 	defer func(Body io.ReadCloser) {
-		t := Body.Close()
-		if t != nil {
+		if t := Body.Close(); t != nil {
 			err = t
 		}
 	}(resp.Body)
@@ -158,8 +153,7 @@ func (cfc *Cloudflare) updateParseRecord(ipAddr, domainId, recordType, domain st
 		return
 	}
 	defer func(Body io.ReadCloser) {
-		t := Body.Close()
-		if t != nil {
+		if t := Body.Close(); t != nil {
 			err = t
 		}
 	}(req.Body)
@@ -170,8 +164,7 @@ func (cfc *Cloudflare) updateParseRecord(ipAddr, domainId, recordType, domain st
 		return
 	}
 	defer func(Body io.ReadCloser) {
-		t := Body.Close()
-		if t != nil {
+		if t := Body.Close(); t != nil {
 			err = t
 		}
 	}(resp.Body)

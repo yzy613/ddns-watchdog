@@ -40,8 +40,7 @@ func GenerateToken(length int) (token string) {
 }
 
 func DelFromWhitelist(token string) (msg string, err error) {
-	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+WhitelistFileName, &whitelist)
-	if err != nil {
+	if err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+WhitelistFileName, &whitelist); err != nil {
 		return
 	}
 	if _, ok := whitelist[token]; ok {
@@ -80,8 +79,7 @@ func AddToWhitelist(token, message, service, domain, a, aaaa string) (status str
 	}
 
 	// 加载白名单
-	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+WhitelistFileName, &whitelist)
-	if err != nil {
+	if err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+WhitelistFileName, &whitelist); err != nil {
 		return
 	}
 
@@ -136,8 +134,7 @@ func AddToWhitelist(token, message, service, domain, a, aaaa string) (status str
 	}
 
 	// 保存白名单
-	err = common.MarshalAndSave(whitelist, ConfDirectoryName+"/"+WhitelistFileName)
-	if err != nil {
+	if err = common.MarshalAndSave(whitelist, ConfDirectoryName+"/"+WhitelistFileName); err != nil {
 		return
 	}
 	return
@@ -145,8 +142,7 @@ func AddToWhitelist(token, message, service, domain, a, aaaa string) (status str
 
 func InitWhitelist() (msg string, err error) {
 	whitelist = make(map[string]whitelistStruct)
-	err = common.MarshalAndSave(whitelist, ConfDirectoryName+"/"+WhitelistFileName)
-	if err != nil {
+	if err = common.MarshalAndSave(whitelist, ConfDirectoryName+"/"+WhitelistFileName); err != nil {
 		return
 	}
 	msg = "初始化 " + ConfDirectoryName + "/" + WhitelistFileName
@@ -154,8 +150,7 @@ func InitWhitelist() (msg string, err error) {
 }
 
 func LoadWhitelist() (err error) {
-	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+WhitelistFileName, &whitelist)
-	return
+	return common.LoadAndUnmarshal(ConfDirectoryName+"/"+WhitelistFileName, &whitelist)
 }
 
 func GetClientIP(req *http.Request) (ipAddr string) {
@@ -207,8 +202,7 @@ func Install() (err error) {
 			"RestartSec=2\n\n" +
 			"[Install]\n" +
 			"WantedBy=multi-user.target\n")
-	err = os.WriteFile(InstallPath, serviceContent, 0600)
-	if err != nil {
+	if err = os.WriteFile(InstallPath, serviceContent, 0600); err != nil {
 		return
 	}
 	log.Println("可以使用 systemctl 控制 " + RunningName + " 服务了")
@@ -223,8 +217,7 @@ func Uninstall() (err error) {
 	if err != nil {
 		return
 	}
-	err = os.Remove(InstallPath)
-	if err != nil {
+	if err = os.Remove(InstallPath); err != nil {
 		return
 	}
 	log.Println("卸载服务成功")

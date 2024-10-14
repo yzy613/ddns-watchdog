@@ -26,18 +26,16 @@ func (ad *AliDNS) InitConf() (msg string, err error) {
 	}
 	ad.AccessKeySecret = ad.AccessKeyId
 
-	err = common.MarshalAndSave(ad, ConfDirectoryName+"/"+AliDNSConfFileName)
-	msg = "初始化 " + ConfDirectoryName + "/" + AliDNSConfFileName
-	return
+	return "初始化 " + ConfDirectoryName + "/" + AliDNSConfFileName,
+		common.MarshalAndSave(ad, ConfDirectoryName+"/"+AliDNSConfFileName)
 }
 
 func (ad *AliDNS) LoadConf() (err error) {
-	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+AliDNSConfFileName, &ad)
-	if err != nil {
+	if err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+AliDNSConfFileName, &ad); err != nil {
 		return
 	}
 	if ad.AccessKeyId == "" || ad.AccessKeySecret == "" || ad.Domain == "" || (ad.SubDomain.A == "" && ad.SubDomain.AAAA == "") {
-		err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + AliDNSConfFileName + " 检查你的 access_key_id, access_key_secret, domain, sub_domain 并重新启动")
+		return errors.New("请打开配置文件 " + ConfDirectoryName + "/" + AliDNSConfFileName + " 检查你的 access_key_id, access_key_secret, domain, sub_domain 并重新启动")
 	}
 	return
 }
@@ -50,8 +48,7 @@ func (ad *AliDNS) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, e
 			errs = append(errs, err)
 		} else if recordIP != ipv4 {
 			// 更新解析记录
-			err = ad.updateParseRecord(ipv4, recordId, "A", ad.SubDomain.A)
-			if err != nil {
+			if err = ad.updateParseRecord(ipv4, recordId, "A", ad.SubDomain.A); err != nil {
 				errs = append(errs, err)
 			} else {
 				msg = append(msg, "AliDNS: "+ad.SubDomain.A+"."+ad.Domain+" 已更新解析记录 "+ipv4)
@@ -65,8 +62,7 @@ func (ad *AliDNS) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, e
 			errs = append(errs, err)
 		} else if recordIP != ipv6 {
 			// 更新解析记录
-			err = ad.updateParseRecord(ipv6, recordId, "AAAA", ad.SubDomain.AAAA)
-			if err != nil {
+			if err = ad.updateParseRecord(ipv6, recordId, "AAAA", ad.SubDomain.AAAA); err != nil {
 				errs = append(errs, err)
 			} else {
 				msg = append(msg, "AliDNS: "+ad.SubDomain.AAAA+"."+ad.Domain+" 已更新解析记录 "+ipv6)

@@ -55,8 +55,7 @@ func Install() (err error) {
 			"RestartSec=2\n\n" +
 			"[Install]\n" +
 			"WantedBy=multi-user.target\n")
-	err = os.WriteFile(installPath, serviceContent, 0600)
-	if err != nil {
+	if err = os.WriteFile(installPath, serviceContent, 0600); err != nil {
 		return
 	}
 	log.Println("可以使用 systemctl 管理 " + ProjName + " 服务了")
@@ -71,8 +70,7 @@ func Uninstall() (err error) {
 	if err != nil {
 		return
 	}
-	err = os.Remove(installPath)
-	if err != nil {
+	if err = os.Remove(installPath); err != nil {
 		return
 	}
 	log.Println("卸载服务成功")
@@ -114,8 +112,7 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 		if err != nil {
 			return
 		}
-		err = common.MarshalAndSave(ncr, ConfDirectoryName+"/"+NetworkCardFileName)
-		if err != nil {
+		if err = common.MarshalAndSave(ncr, ConfDirectoryName+"/"+NetworkCardFileName); err != nil {
 			return
 		}
 		err = errors.New("请打开 " + ConfDirectoryName + "/" + NetworkCardFileName + " 选择网卡填入 " +
@@ -151,8 +148,7 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 				return
 			}
 			defer func(Body io.ReadCloser) {
-				t := Body.Close()
-				if t != nil {
+				if t := Body.Close(); t != nil {
 					err = t
 				}
 			}(resp.Body)
@@ -162,8 +158,7 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 				return
 			}
 			var ipInfo common.GetIPResp
-			err = json.Unmarshal(recvJson, &ipInfo)
-			if err != nil {
+			if err = json.Unmarshal(recvJson, &ipInfo); err != nil {
 				return
 			}
 			ipv4 = ipInfo.IP
@@ -194,8 +189,7 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 				return
 			}
 			defer func(Body io.ReadCloser) {
-				t := Body.Close()
-				if t != nil {
+				if t := Body.Close(); t != nil {
 					err = t
 				}
 			}(resp.Body)
@@ -205,8 +199,7 @@ func GetOwnIP(enabled common.Enable, apiUrl apiUrl, nc networkCard) (ipv4, ipv6 
 				return
 			}
 			var ipInfo common.GetIPResp
-			err = json.Unmarshal(recvJson, &ipInfo)
-			if err != nil {
+			if err = json.Unmarshal(recvJson, &ipInfo); err != nil {
 				return
 			}
 			ipv6 = ipInfo.IP

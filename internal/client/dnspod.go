@@ -29,18 +29,16 @@ func (dpc *DNSPod) InitConf() (msg string, err error) {
 	}
 	dpc.Token = dpc.ID
 
-	err = common.MarshalAndSave(dpc, ConfDirectoryName+"/"+DNSPodConfFileName)
-	msg = "初始化 " + ConfDirectoryName + "/" + DNSPodConfFileName
-	return
+	return "初始化 " + ConfDirectoryName + "/" + DNSPodConfFileName,
+		common.MarshalAndSave(dpc, ConfDirectoryName+"/"+DNSPodConfFileName)
 }
 
 func (dpc *DNSPod) LoadConf() (err error) {
-	err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+DNSPodConfFileName, &dpc)
-	if err != nil {
+	if err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+DNSPodConfFileName, &dpc); err != nil {
 		return
 	}
 	if dpc.ID == "" || dpc.Token == "" || dpc.Domain == "" || (dpc.SubDomain.A == "" && dpc.SubDomain.AAAA == "") {
-		err = errors.New("请打开配置文件 " + ConfDirectoryName + "/" + DNSPodConfFileName + " 检查你的 id, token, domain, sub_domain 并重新启动")
+		return errors.New("请打开配置文件 " + ConfDirectoryName + "/" + DNSPodConfFileName + " 检查你的 id, token, domain, sub_domain 并重新启动")
 	}
 	return
 }
@@ -53,8 +51,7 @@ func (dpc *DNSPod) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, 
 			errs = append(errs, err)
 		} else if recordIP != ipv4 {
 			// 更新解析记录
-			err = dpc.updateParseRecord(ipv4, recordId, recordLineId, "A", dpc.SubDomain.A)
-			if err != nil {
+			if err = dpc.updateParseRecord(ipv4, recordId, recordLineId, "A", dpc.SubDomain.A); err != nil {
 				errs = append(errs, err)
 			} else {
 				msg = append(msg, "DNSPod: "+dpc.SubDomain.A+"."+dpc.Domain+" 已更新解析记录 "+ipv4)
@@ -68,8 +65,7 @@ func (dpc *DNSPod) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, 
 			errs = append(errs, err)
 		} else if recordIP != ipv6 {
 			// 更新解析记录
-			err = dpc.updateParseRecord(ipv6, recordId, recordLineId, "AAAA", dpc.SubDomain.AAAA)
-			if err != nil {
+			if err = dpc.updateParseRecord(ipv6, recordId, recordLineId, "AAAA", dpc.SubDomain.AAAA); err != nil {
 				errs = append(errs, err)
 			} else {
 				msg = append(msg, "DNSPod: "+dpc.SubDomain.AAAA+"."+dpc.Domain+" 已更新解析记录 "+ipv6)
@@ -82,8 +78,7 @@ func (dpc *DNSPod) Run(enabled common.Enable, ipv4, ipv6 string) (msg []string, 
 func checkRespondStatus(jsonObj *simplejson.Json) (err error) {
 	statusCode := jsonObj.Get("status").Get("code").MustString()
 	if statusCode != "1" {
-		err = errors.New("DNSPod: " + statusCode + ": " + jsonObj.Get("status").Get("message").MustString())
-		return
+		return errors.New("DNSPod: " + statusCode + ": " + jsonObj.Get("status").Get("message").MustString())
 	}
 	return
 }
@@ -100,8 +95,7 @@ func (dpc *DNSPod) getParseRecord(subDomain, recordType string) (recordId, recor
 	if err != nil {
 		return
 	}
-	err = checkRespondStatus(jsonObj)
-	if err != nil {
+	if err = checkRespondStatus(jsonObj); err != nil {
 		return
 	}
 	records, err := jsonObj.Get("records").Array()
@@ -136,8 +130,7 @@ func (dpc *DNSPod) updateParseRecord(ipAddr, recordId, recordLineId, recordType,
 	if err != nil {
 		return
 	}
-	err = checkRespondStatus(jsonObj)
-	if err != nil {
+	if err = checkRespondStatus(jsonObj); err != nil {
 		return
 	}
 	return
@@ -174,8 +167,7 @@ func postman(url, src string) (dst []byte, err error) {
 		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
-		t := Body.Close()
-		if t != nil {
+		if t := Body.Close(); t != nil {
 			err = t
 		}
 	}(req.Body)
@@ -186,8 +178,7 @@ func postman(url, src string) (dst []byte, err error) {
 		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
-		t := Body.Close()
-		if t != nil {
+		if t := Body.Close(); t != nil {
 			err = t
 		}
 	}(resp.Body)
