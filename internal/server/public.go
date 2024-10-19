@@ -35,8 +35,7 @@ func GenerateToken(length int) (token string) {
 		}
 		b[i] = letter[bigNum.Int64()]
 	}
-	token = string(b)
-	return
+	return string(b)
 }
 
 func DelFromWhitelist(token string) (msg string, err error) {
@@ -145,8 +144,7 @@ func InitWhitelist() (msg string, err error) {
 	if err = common.MarshalAndSave(whitelist, ConfDirectoryName+"/"+WhitelistFileName); err != nil {
 		return
 	}
-	msg = "初始化 " + ConfDirectoryName + "/" + WhitelistFileName
-	return
+	return "初始化 " + ConfDirectoryName + "/" + WhitelistFileName, nil
 }
 
 func LoadWhitelist() (err error) {

@@ -1,3 +1,12 @@
-.idea
-build
-test
+.buildpath
+.hgignore.swp
+.project
+.orig
+.swp
+.idea/
+.settings/
+.vscode/
+bin/
+**/.DS_Store
+build/
+test/

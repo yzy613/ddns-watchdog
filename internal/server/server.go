@@ -45,8 +45,7 @@ func (conf *server) InitConf() (msg string, err error) {
 	if err = common.MarshalAndSave(conf, ConfDirectoryName+"/"+ConfFileName); err != nil {
 		return
 	}
-	msg = "初始化 " + ConfDirectoryName + "/" + ConfFileName
-	return
+	return "初始化 " + ConfDirectoryName + "/" + ConfFileName, nil
 }
 
 func (conf *server) LoadConf() (err error) {

@@ -57,14 +57,12 @@ func (conf *service) InitConf() (msg string, err error) {
 	if err = common.MarshalAndSave(conf, ConfDirectoryName+"/"+ServiceConfFileName); err != nil {
 		return
 	}
-	msg = "初始化 " + ConfDirectoryName + "/" + ServiceConfFileName
-	return
+	return "初始化 " + ConfDirectoryName + "/" + ServiceConfFileName, nil
 }
 
 func (conf *service) LoadConf() (err error) {
 	if err = common.LoadAndUnmarshal(ConfDirectoryName+"/"+ServiceConfFileName, &conf); err != nil {
 		return
 	}
-	err = LoadWhitelist()
-	return
+	return LoadWhitelist()
 }
